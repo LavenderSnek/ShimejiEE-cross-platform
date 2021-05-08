@@ -1,0 +1,27 @@
+# IDE Generated Files
+.idea/
+build/
+out/
+target/
+*.iml
+*.ppf
+
+# Misc.
+*.class
+*.log
+*.out
+*.log.lck
+tmp/
+ShimejiEE/ShimejiEE.jar
+ShimejiEE/lib/custom-jre/
+releases/
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# mac
+.DS_Store
+._*

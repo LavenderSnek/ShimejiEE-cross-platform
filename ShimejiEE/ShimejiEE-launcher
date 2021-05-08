@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# goes to parent directory of script
+# https://stackoverflow.com/questions/6393551
+cd "${0%/*}" || exit
+
+# disconnecting: https://unix.stackexchange.com/questions/3886
+
+# uses custom jre if mac https://stackoverflow.com/questions/3466166/
+if [ "$(uname)" == "Darwin" ]; then
+    nohup lib/custom-jre/bin/java -jar -Xdock:name="Shimeji EE" ShimejiEE.jar > nohup.out &
+else 
+    nohup java -jar ShimejiEE.jar > nohup.out &
+fi
+
+exit
