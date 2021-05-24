@@ -14,6 +14,8 @@ import java.util.Map;
 /**
  * Provides information regarding the desktop environment such as screen size,
  * cursor info, and window interaction related things.
+ *
+ * Subclasses provide platform specific info that it difficult to obtain using pure java
  * */
 public abstract class Environment {
 

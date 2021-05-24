@@ -1,7 +1,6 @@
 package com.group_finity.mascot.generic;
 
-import java.awt.Component;
-import java.awt.Graphics;
+import java.awt.*;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -11,22 +10,10 @@ import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 import com.sun.jna.examples.WindowUtils;
 
-/**
- * Original Author: Yuki Yamada of Group Finity (http://www.group-finity.com/Shimeji/)
- * Currently developed by Shimeji-ee Group.
- */
-
 class GenericTranslucentWindow extends JWindow implements TranslucentWindow {
-    
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * To view images.
-	 */
 	private GenericNativeImage image;
 	
 	private JPanel panel;

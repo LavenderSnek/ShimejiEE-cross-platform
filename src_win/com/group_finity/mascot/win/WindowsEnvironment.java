@@ -13,12 +13,12 @@ import com.group_finity.mascot.win.jna.RECT;
 import com.group_finity.mascot.win.jna.User32;
 import com.sun.jna.Pointer;
 
-/**
- * Original Author: Yuki Yamada of Group Finity (http://www.group-finity.com/Shimeji/)
- * Currently developed by Shimeji-ee Group.
- */
 class WindowsEnvironment extends Environment
 {
+
+    /**
+     * Get the work area. This area is the display area with the taskbar removed.
+     * */
     private static Rectangle getWorkAreaRect()
     {
         final RECT rect = new RECT();
@@ -46,12 +46,10 @@ class WindowsEnvironment extends Environment
         {
             windowTitles = Main.getInstance( ).getProperties( ).getProperty( "InteractiveWindows", "" ).split( "/" );
         }
-        
-        for( int index = 0; index < windowTitles.length; index++ )
-        {
-            if( !windowTitles[ index ].trim( ).isEmpty( ) && new String( title, 0, titleLength ).contains( windowTitles[ index ] ) )
-            {
-                ieCache.put( ie, true );
+
+        for (String windowTitle : windowTitles) {
+            if (!windowTitle.trim().isEmpty() && new String(title, 0, titleLength).contains(windowTitle)) {
+                ieCache.put(ie, true);
                 return true;
             }
         }
@@ -84,11 +82,13 @@ class WindowsEnvironment extends Environment
             {
                 if( ( User32.INSTANCE.GetWindowLongW( ie, User32.GWL_STYLE ) & User32.WS_MAXIMIZE ) != 0 )
                 {
+                    // Canceled because the window was maximized
                     return null;
                 }
 
                 if( isIE( ie ) && ( User32.INSTANCE.IsIconic( ie ) == 0 ) )
                 {
+                    // IE found
                     break;
                 }
             }
@@ -99,12 +99,16 @@ class WindowsEnvironment extends Environment
 
         if( User32.INSTANCE.IsWindow( ie ) == 0 )
         {
+            // Could not be found
             return null;
         }
 
         return ie;
     }
 
+    /**
+     * @return Active IE area. Null if active IE not found.
+     * */
     private static Rectangle getActiveIERect()
     {
 

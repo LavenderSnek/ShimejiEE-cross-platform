@@ -46,7 +46,7 @@ public class Mascot {
 
     private final int id;
 
-    private String imageSet = "";
+    private String imageSet;
 
     /** A window that displays the mascot. */
     private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();

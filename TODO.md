@@ -1,22 +1,17 @@
 # Todo
 
 ## Immediate
-- Non-rectangular window on mac
-- Scaling
-  - move hqx to image pair loader
-- Test actions and sounds
 - Start writing xml documentation
-- Linux
-  - Fails, but seems unrelated to the Shimeji code
-    - Missing `libawt_xawt.so`
-    - Error on `UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());`
-  - Try different jdk download
-  - Try more distros and DEs
+- Test actions and sounds
 - Keyboard shortcuts
-- The flickering
-  - The shimeji just go transparent sometimes
-  - No idea how to fix it, it doesn't happen consistently
 
 ## Distant
 - Possibly try JNI to replace some JNA code for performance
 - ChromeOS/Android
+- True Non-rectangular window on mac (pass-through clicks on transparent areas)
+  - Will need some JNI
+- Scaling
+  - I've gotten scaling to working on mac, but it's not really worth implementing as is.
+    - It breaks scaling on Windows, and I's rather not add more platform specific checks than necessary
+    - It's a pretty bad experience without the pass-through clicks.
+- Add testing

@@ -52,6 +52,12 @@ Vector: The only thing I could still find online.
   - Needs java 11
   - Download the no jre version
 
+- Linux
+  - Technically "ran" on a VM, but it crashed the VM pretty quickly
+    - I'm not sure how well it works on a real computer, so try it out I guess
+  - Needs a bit of fiddling with jna path
+  - You might need to install the jdk from a different place if you're missing `libawt_xawt.so`
+
 ## License
 
 Programmers may feel free to use the source. The Shimeji-ee source is under the New BSD license.  
