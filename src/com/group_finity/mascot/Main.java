@@ -566,13 +566,20 @@ public final class Main {
             chooseShimeji.setEnabled(true);//poor man's synchronization lol
         });
 
+        //interactive window chooser
+        MenuItem interactiveMenu = new MenuItem(languageBundle.getString("ChooseInteractiveWindows"));
+        interactiveMenu.addActionListener(e -> {
+            new WindowsInteractiveWindowForm(frame, true).display();
+            NativeFactory.getInstance().getEnvironment().refreshCache();
+        });
+
+        //reload button
+        final MenuItem reloadMascot = new MenuItem(languageBundle.getString("ReloadMascots"));
+        reloadMascot.addActionListener(e -> reloadMascots());
+
         // Quit Button
         final MenuItem dismissAll = new MenuItem(languageBundle.getString("DismissAll"));
         dismissAll.addActionListener(e -> exit());
-
-        // TODO: 2021-05-04 add to language bundle
-        final MenuItem reloadMascot = new MenuItem("Reload Mascots");
-        reloadMascot.addActionListener(e -> reloadMascots());
 
         //----Create pop-up menu-----//
         final PopupMenu trayPopup = new PopupMenu();
@@ -585,25 +592,19 @@ public final class Main {
         trayPopup.add(new MenuItem("-"));
 
         trayPopup.add(languageMenu);
-        trayPopup.add(scalingMenu);
+        if (com.sun.jna.Platform.isWindows()) {
+            trayPopup.add(scalingMenu);
+        }
         trayPopup.add(togglesMenu);
 
         trayPopup.add(new MenuItem("-"));
 
         trayPopup.add(chooseShimeji);
-
         trayPopup.add(reloadMascot);
-
         // selective window interaction is only available on windows for now
-        if (!com.sun.jna.Platform.isMac()) {
-            MenuItem interactiveMenu = new MenuItem(languageBundle.getString("ChooseInteractiveWindows"));
-            interactiveMenu.addActionListener(e -> {
-                new WindowsInteractiveWindowForm(frame, true).display();
-                NativeFactory.getInstance().getEnvironment().refreshCache();
-            });
+        if (com.sun.jna.Platform.isWindows()) {
             trayPopup.add(interactiveMenu);
         }
-
         trayPopup.add(dismissAll);
 
         try {
@@ -613,8 +614,8 @@ public final class Main {
                     "Shimeji", trayPopup
             );
 
-            // Flip the click required to create mascot on mac
-            if (com.sun.jna.Platform.isMac()) {
+            // Flip the click required to create mascot on non-windows
+            if (!com.sun.jna.Platform.isWindows()) {
                 icon.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(final MouseEvent e) {
