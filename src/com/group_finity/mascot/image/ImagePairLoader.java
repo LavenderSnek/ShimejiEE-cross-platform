@@ -8,16 +8,24 @@ import java.io.IOException;
 
 public class ImagePairLoader {
 
+    /**
+     * Loads an image into {@link ImagePairs#imagepairs} if it isn't already loaded
+     *
+     * @param name Path to the image
+     * @param rightName Path to the right facing version of the image
+     * @param center Anchor point of the image
+     * @param scaling amount of scaling applied to the image, also affects anchor paint
+     * */
     public static void load(final String name, final String rightName, final Point center, final int scaling) throws IOException {
-        if (ImagePairs.contains(name + (rightName == null ? "" : rightName)))
-            return;
+        if (ImagePairs.contains(name + (rightName == null ? "" : rightName))) return;
 
         final BufferedImage leftImage = premultiply(ImageIO.read(ImagePairLoader.class.getResource(name)));
         final BufferedImage rightImage;
-        if (rightName == null)
+        if (rightName == null) {
             rightImage = flip(leftImage);
-        else
+        } else {
             rightImage = premultiply(ImageIO.read(ImagePairLoader.class.getResource(rightName)));
+        }
 
         ImagePair ip = new ImagePair(new MascotImage(leftImage, new Point(center.x * scaling, center.y * scaling)),
                 new MascotImage(rightImage, new Point((rightImage.getWidth() - center.x) * scaling, center.y * scaling)));

@@ -12,8 +12,6 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -207,7 +205,7 @@ public class Mascot {
         submenu.setAutoscrolls(true);
         JMenuItem item;
         com.group_finity.mascot.config.Configuration config = Main.getInstance().getConfiguration(getImageSet());
-        Behavior behaviour = null;
+        Behavior behaviour;
         for (String behaviorName : config.getBehaviorNames()) {
 
             final String command = behaviorName;

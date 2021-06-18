@@ -25,11 +25,11 @@ public class AnimationBuilder {
     private static final Logger log = Logger.getLogger(AnimationBuilder.class.getName());
     private final String condition;
     private String imageSet = "";
-    private final List<Pose> poses = new ArrayList<Pose>();
+    private final List<Pose> poses = new ArrayList<>();
     private final ResourceBundle schema;
 
     public AnimationBuilder(final ResourceBundle schema, final Entry animationNode, final String imageSet) throws IOException {
-        if (!imageSet.equals("")) {
+        if (!imageSet.isEmpty()) {
             this.imageSet = "/" + imageSet;
         }
 
@@ -45,16 +45,20 @@ public class AnimationBuilder {
         log.log(Level.INFO, "Animations Finished Loading");
     }
 
+    //todo: xml doc note
     private Pose loadPose(final Entry frameNode) throws IOException {
 
         final String imageText = frameNode.getAttribute(schema.getString("Image")) != null ? imageSet + frameNode.getAttribute(schema.getString("Image")) : null;
         final String imageRightText = frameNode.getAttribute(schema.getString("ImageRight")) != null ? imageSet + frameNode.getAttribute(schema.getString("ImageRight")) : null;
-        final String anchorText = frameNode.getAttribute(schema.getString("ImageAnchor")) != null ? frameNode.getAttribute(schema.getString("ImageAnchor")) : null;
+
+        //very much not optional
+        final String anchorText = frameNode.getAttribute(schema.getString("ImageAnchor"));
         final String moveText = frameNode.getAttribute(schema.getString("Velocity"));
         final String durationText = frameNode.getAttribute(schema.getString("Duration"));
-        String soundText = frameNode.getAttribute(schema.getString("Sound")) != null ? frameNode.getAttribute(schema.getString("Sound")) : null;
-        final String volumeText = frameNode.getAttribute(schema.getString("Volume")) != null ? frameNode.getAttribute(schema.getString("Volume")) : "0";
 
+        //optional
+        String soundText = frameNode.getAttribute(schema.getString("Sound"));
+        final String volumeText = frameNode.getAttribute(schema.getString("Volume")) != null ? frameNode.getAttribute(schema.getString("Volume")) : "0";
         final int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
 
         if (imageText != null) { // if you don't have anchor text defined as well you're going to have a bad time
@@ -65,9 +69,12 @@ public class AnimationBuilder {
             try {
                 ImagePairLoader.load(imageText, imageRightText, anchor, scaling);
             } catch (Exception e) {
-                String error = imageText;
-                if (imageRightText != null)
-                    error += ", " + imageRightText;
+                String error;
+                if (imageRightText == null) {
+                    error = " [image: "+imageText+"]";
+                }else {
+                    error = " [image: "+imageText+", imageRight: "+imageRightText+"]";
+                }
                 log.log(Level.SEVERE, "Failed to load image: " + error);
                 throw new IOException(Main.getInstance().getLanguageBundle().getString("FailedLoadImageErrorMessage") + " " + error);
             }
@@ -75,7 +82,6 @@ public class AnimationBuilder {
 
         final String[] moveCoordinates = moveText.split(",");
         final Point move = new Point(Integer.parseInt(moveCoordinates[0]) * scaling, Integer.parseInt(moveCoordinates[1]) * scaling);
-
         final int duration = Integer.parseInt(durationText);
 
         if (soundText != null) {
@@ -96,7 +102,7 @@ public class AnimationBuilder {
             }
         }
 
-        final Pose pose = new Pose(imageText, imageRightText, move.x, move.y, duration, soundText != null ? soundText : null);
+        final Pose pose = new Pose(imageText, imageRightText, move.x, move.y, duration, soundText);
 
         log.log(Level.INFO, "ReadPosition({0})", pose);
 
