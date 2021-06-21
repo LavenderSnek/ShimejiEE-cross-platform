@@ -50,7 +50,6 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         //Set up the content pane.
         addContentToPane(getContentPane());
 
-        imageSetJlist.setPreferredSize(new Dimension(400,400));
         this.setResizable(false);
 
         pack();
@@ -113,6 +112,7 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         scPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         scPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scPane.setMaximumSize(new Dimension(1,100));
+        scPane.setPreferredSize(new Dimension(400,400));
 
         pane.add(scPane,constraints);
 
