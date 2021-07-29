@@ -1,24 +1,19 @@
 package com.group_finity.mascot.script;
 
 import com.group_finity.mascot.Main;
+import com.group_finity.mascot.exception.VariableException;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import com.group_finity.mascot.exception.VariableException;
-
-/**
- * Original Author: Yuki Yamada of Group Finity (http://www.group-finity.com/Shimeji/)
- * Currently developed by Shimeji-ee Group.
- */
 
 public class Script extends Variable {
 
-	private static final ScriptEngineManager manager = new ScriptEngineManager();
-
-	private static final ScriptEngine engine = manager.getEngineByMimeType("text/javascript");
+	@SuppressWarnings("removal")
+	private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine(className -> false);
 
 	private final String source;
 	
