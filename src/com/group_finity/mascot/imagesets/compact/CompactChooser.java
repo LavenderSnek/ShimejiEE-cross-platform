@@ -6,18 +6,19 @@ import com.group_finity.mascot.imagesets.ImageSetUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 
 public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
+
     private JList<CompactImageSetPreview> imageSetJlist;
 
     // set to true by the "cancel" button
     private boolean cancelSelection = false;
-
-    private static final int WIDTH = 300;
 
     public CompactChooser(JFrame parent) {
         super(parent,true);
@@ -111,7 +112,6 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
         scPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         scPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scPane.setMaximumSize(new Dimension(1,100));
         scPane.setPreferredSize(new Dimension(400,400));
 
         pane.add(scPane,constraints);
@@ -125,8 +125,8 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
         var buttonOK = new JButton(Main.getInstance().getLanguageBundle().getString("UseSelected"));
         buttonOK.addActionListener(e -> this.dispose());
-        // todo: make ok default + clickable w enter
 
+        this.getRootPane().setDefaultButton(buttonOK);
 
         constraints = new GridBagConstraints();//reset
         var btnsPanel = new JPanel(gbl);

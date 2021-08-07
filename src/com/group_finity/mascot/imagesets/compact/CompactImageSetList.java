@@ -10,7 +10,7 @@ public class CompactImageSetList extends JList<CompactImageSetPreview> {
         super(defaultListModel);
 
         this.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        this.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        this.setLayoutOrientation(JList.VERTICAL);
         this.setCellRenderer(new ImageSetRenderer());
     }
 
