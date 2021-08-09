@@ -10,7 +10,10 @@ import com.joconner.i18n.Utf8ResourceBundleControl;
 import org.w3c.dom.Document;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -48,7 +51,8 @@ public final class Main {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         // Dock icon on platforms that support it
         // https://stackoverflow.com/questions/6006173/
@@ -60,13 +64,16 @@ public final class Main {
 
                 final Taskbar taskbar = Taskbar.getTaskbar();
                 taskbar.setIconImage(image);
-            } catch (final UnsupportedOperationException | SecurityException ignored) {}
+            } catch (final UnsupportedOperationException | SecurityException ignored) {
+            }
         }
 
         //--------//
     }
 
-    /**32 or 64 bits stuff*/
+    /**
+     * 32 or 64 bits stuff
+     */
     private Platform platform;
 
     private ResourceBundle languageBundle;
@@ -75,14 +82,20 @@ public final class Main {
 
     private final Manager manager = new Manager();
 
-    /** Key: An imageSet name
-     * <p>Value: Configuration associated with the imageSet */
+    /**
+     * Key: An imageSet name
+     * <p>Value: Configuration associated with the imageSet
+     */
     private final Hashtable<String, Configuration> configurations = new Hashtable<>();
 
-    /** A list of the active imageSets*/
+    /**
+     * A list of the active imageSets
+     */
     private final ArrayList<String> imageSets = new ArrayList<>();
 
-    /** The global settings */
+    /**
+     * The global settings
+     */
     private Properties properties = new Properties();
 
     private static final Main instance = new Main();
@@ -118,11 +131,13 @@ public final class Main {
 
     //-----------------Initialization--------------------//
 
-    /**Program entry point*/
+    /**
+     * Program entry point
+     */
     public static void main(final String[] args) {
         try {
             getInstance().run();
-        }catch (OutOfMemoryError error) {
+        } catch (OutOfMemoryError error) {
             final String msg = "Out of Memory.  There are probably have too many \n"
                     + "Shimeji mascots for your computer to handle.\n"
                     + "Select fewer image sets or move some to the \n"
@@ -141,11 +156,12 @@ public final class Main {
         properties = new Properties();
         try (FileInputStream input = new FileInputStream("./conf/settings.properties")) {
             properties.load(input);
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         // load language bundle
         try {
-            ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl(false);
+            ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
             languageBundle = ResourceBundle.getBundle(
                     "language",
                     Locale.forLanguageTag(properties.getProperty("Language", "en-GB")),
@@ -183,7 +199,9 @@ public final class Main {
     }
 
 
-    /** @return true if the imageSet was successfully loaded */
+    /**
+     * @return true if the imageSet was successfully loaded
+     */
     private boolean loadConfiguration(final String imageSet) {
 
         try {
@@ -245,11 +263,13 @@ public final class Main {
 
     //--------imageSet management---------//
 
-    /** Replaces the current set of active imageSets without modifying
-     *  valid imageSets that are already active. does nothing if newImageSets are null
-     *  <p>Writes end result to settings. Invalid sets excluded.
+    /**
+     * Replaces the current set of active imageSets without modifying
+     * valid imageSets that are already active. does nothing if newImageSets are null
+     * <p>Writes end result to settings. Invalid sets excluded.
+     *
      * @param newImageSets All the imageSets that should now be active
-     * */
+     */
     private void setActiveImageSets(ArrayList<String> newImageSets) {
         if (newImageSets == null) return;
 
@@ -288,7 +308,7 @@ public final class Main {
     }
 
     private void addNewImageSet(String imageSet) {
-        if (loadConfiguration(imageSet)){
+        if (loadConfiguration(imageSet)) {
             imageSets.add(imageSet);
             createMascot(imageSet);
         }
@@ -296,7 +316,9 @@ public final class Main {
 
     //----------mascot creation-----------//
 
-    /** Randomly picks from {@link #imageSets} creates a mascot*/
+    /**
+     * Randomly picks from {@link #imageSets} creates a mascot
+     */
     public void createMascot() {
         int length = imageSets.size();
         int random = (int) (length * Math.random());
@@ -305,8 +327,8 @@ public final class Main {
 
     /**
      * Creates a mascot from the specified imageSet name.
-     *  <p>The imageSet's configuration has to be loaded first or it shows an error
-     *  */
+     * <p>The imageSet's configuration has to be loaded first or it shows an error
+     */
     public void createMascot(String imageSet) {
         log.log(Level.INFO, "create a mascot");
 
@@ -354,12 +376,12 @@ public final class Main {
         configurations.clear();
 
         // Load settings
-        for(String imageSet : imageSets) {
+        for (String imageSet : imageSets) {
             loadConfiguration(imageSet);
         }
 
         // Create the first mascot
-        for(String imageSet : imageSets) {
+        for (String imageSet : imageSets) {
             createMascot(imageSet);
         }
 
@@ -371,8 +393,10 @@ public final class Main {
     }
 
 
-    /** Serializes and writes current imageSets into
-     * the `ActiveShimeji` property in settings.properties*/
+    /**
+     * Serializes and writes current imageSets into
+     * the `ActiveShimeji` property in settings.properties
+     */
     private void writeImageSetSettings() {
         StringBuilder builder = new StringBuilder();
         HashSet<String> uniqueImgSets = new HashSet<>(imageSets); // makes sure its all unique
@@ -380,13 +404,15 @@ public final class Main {
             builder.append(imgSet).append('/');
         }
 
-        properties.setProperty( "ActiveShimeji", String.valueOf(builder));
+        properties.setProperty("ActiveShimeji", String.valueOf(builder));
         writeSettings();
     }
 
-    /** writes the current {@link #properties} to `./conf/settings.properties`
+    /**
+     * writes the current {@link #properties} to `./conf/settings.properties`
+     *
      * @see #writeImageSetSettings() for imageSetSettings
-     * */
+     */
     private void writeSettings() {
         try (FileOutputStream output = new FileOutputStream("./conf/settings.properties")) {
             properties.store(output, "Shimeji-ee Configuration Options");
@@ -397,16 +423,16 @@ public final class Main {
 
     //-----------other settings------------//
 
-    private void setLanguage(String newLangCode){
-        if(!properties.getProperty( "Language", "en-GB" ).equals(newLangCode)){
-            properties.setProperty( "Language", newLangCode);
+    private void setLanguage(String newLangCode) {
+        if (!properties.getProperty("Language", "en-GB").equals(newLangCode)) {
+            properties.setProperty("Language", newLangCode);
             refreshLanguage();
         }
         writeSettings();
     }
 
     private void refreshLanguage() {
-        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl(false);
+        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
         languageBundle = ResourceBundle.getBundle(
                 "language",
                 Locale.forLanguageTag(properties.getProperty("Language", "en-GB")),
@@ -421,8 +447,8 @@ public final class Main {
     }
 
 
-    private void setScaling(String scaling){
-        properties.setProperty( "Scaling", scaling);
+    private void setScaling(String scaling) {
+        properties.setProperty("Scaling", scaling);
 
         writeSettings();
 
@@ -431,11 +457,11 @@ public final class Main {
     }
 
     //--Toggling--//
-    private void toggleProperty(String propertyKey, boolean initiallyTrue){
-        if(initiallyTrue) {
-            properties.setProperty( propertyKey, "false" );
+    private void toggleProperty(String propertyKey, boolean initiallyTrue) {
+        if (initiallyTrue) {
+            properties.setProperty(propertyKey, "false");
         } else {
-            properties.setProperty( propertyKey, "true" );
+            properties.setProperty(propertyKey, "true");
         }
 
         writeSettings();
@@ -464,7 +490,7 @@ public final class Main {
 
         //{{langName, langCode}}
         final String[][] languageTable =
-                        {{"English", "en-GB"}, //English
+                {{"English", "en-GB"}, //English
                         {"Català", "ca-ES"},//Catalan
                         {"Deutsch", "de-DE"},//German
                         {"Español", "es-ES"},//Spanish
@@ -484,7 +510,7 @@ public final class Main {
                         {"繁體中文", "zh-TW"},//Chinese(traditional)
                         {"한국어", "ko-KR"}};//Korean
 
-        final String[] scalingOptions = {"1","2","3","6","8"};
+        final String[] scalingOptions = {"1", "2", "3", "6", "8"};
 
         //------------------------------------//
 
@@ -518,14 +544,14 @@ public final class Main {
 
         //--scaling submenu
         final Menu scalingMenu = new Menu(languageBundle.getString("Scaling"));
-        for (String opt : scalingOptions){
+        for (String opt : scalingOptions) {
             final var scaleBtn = new MenuItem(opt);
             scaleBtn.addActionListener(e -> setScaling(opt));
             scalingMenu.add(scaleBtn);
         }
 
         //--behaviour toggles submenu
-        final Menu togglesMenu = new Menu(languageBundle.getString("AllowedBehaviours"),true);
+        final Menu togglesMenu = new Menu(languageBundle.getString("AllowedBehaviours"), true);
 
         final var breedingToggle = getGenericToggleItem
                 ("BreedingCloning", "Breeding");
@@ -534,7 +560,7 @@ public final class Main {
                 ("Transformation", "Transformation");
 
         final var windowThrowToggle = getGenericToggleItem
-                ("ThrowingWindows","Throwing");
+                ("ThrowingWindows", "Throwing");
 
         final var multiscreenToggle = getGenericToggleItem
                 ("Multiscreen", "Multiscreen");
@@ -643,6 +669,5 @@ public final class Main {
             exit();
         }
     }
-
 
 }

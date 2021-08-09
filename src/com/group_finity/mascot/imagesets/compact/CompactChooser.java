@@ -6,12 +6,9 @@ import com.group_finity.mascot.imagesets.ImageSetUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 
 public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
@@ -21,7 +18,7 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
     private boolean cancelSelection = false;
 
     public CompactChooser(JFrame parent) {
-        super(parent,true);
+        super(parent, true);
         createGui();
     }
 
@@ -29,7 +26,7 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
     public ArrayList<String> getSelections() {
         setVisible(true);
 
-        if (cancelSelection){
+        if (cancelSelection) {
             return null;
         }
 
@@ -39,7 +36,9 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
     }
 
 
-    /** GUI entry point */
+    /**
+     * GUI entry point
+     */
     private void createGui() {
         if (this.isVisible()) {
             getOwner().toFront();
@@ -81,7 +80,7 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         //yes, i know this is horribly inefficient, im just hoping it wont be called enough to matter
         var selectedIndices = new ArrayList<Integer>();
 
-        if (selected != null){
+        if (selected != null) {
             for (String str : selected) {
                 for (int j = 0; j < allImageSets.length; j++) {
                     if (allImageSets[j].equals(str)) {
@@ -108,13 +107,13 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         constraints.weighty = 1;
         constraints.weightx = 2;
         constraints.gridy = 0;
-        constraints.insets = new Insets(9,9,9,9);
+        constraints.insets = new Insets(9, 9, 9, 9);
 
         scPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         scPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scPane.setPreferredSize(new Dimension(400,400));
+        scPane.setPreferredSize(new Dimension(400, 400));
 
-        pane.add(scPane,constraints);
+        pane.add(scPane, constraints);
 
         //--------buttons--------//
         var buttonCancel = new JButton(Main.getInstance().getLanguageBundle().getString("Cancel"));
@@ -133,13 +132,12 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
         constraints.anchor = GridBagConstraints.EAST;
         constraints.gridy = 1;
-        constraints.insets = new Insets(0,9,9,9);
+        constraints.insets = new Insets(0, 9, 9, 9);
         //constraints.gridx = 1;
         btnsPanel.add(buttonCancel);
         btnsPanel.add(buttonOK);
 
-        pane.add(btnsPanel,constraints);
+        pane.add(btnsPanel, constraints);
     }
-
 
 }

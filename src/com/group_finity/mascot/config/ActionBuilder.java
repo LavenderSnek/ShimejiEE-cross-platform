@@ -15,17 +15,20 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class ActionBuilder implements IActionBuilder {
 
     private static final Logger log = Logger.getLogger(ActionBuilder.class.getName());
-    private final String type;
+
+    private final ResourceBundle schema;
+
     private final String name;
+    private final String type;
     private final String className;
+
     private final Map<String, String> params = new LinkedHashMap<String, String>();
+
     private final List<AnimationBuilder> animationBuilders = new ArrayList<AnimationBuilder>();
     private final List<IActionBuilder> actionRefs = new ArrayList<IActionBuilder>();
-    private final ResourceBundle schema;
 
     public ActionBuilder(final Configuration configuration, final Entry actionNode, final String imageSet) throws IOException {
         schema = configuration.getSchema();
@@ -114,7 +117,6 @@ public class ActionBuilder implements IActionBuilder {
     }
 
     public void validate() throws ConfigurationException {
-
         for (final IActionBuilder ref : this.getActionRefs()) {
             ref.validate();
         }
@@ -170,6 +172,5 @@ public class ActionBuilder implements IActionBuilder {
     private List<IActionBuilder> getActionRefs() {
         return this.actionRefs;
     }
-
 
 }

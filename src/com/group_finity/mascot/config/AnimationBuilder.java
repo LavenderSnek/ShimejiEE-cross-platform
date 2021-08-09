@@ -19,14 +19,17 @@ import com.group_finity.mascot.image.ImagePairLoader;
 import com.group_finity.mascot.script.Variable;
 import com.group_finity.mascot.sound.SoundLoader;
 
-
 public class AnimationBuilder {
 
     private static final Logger log = Logger.getLogger(AnimationBuilder.class.getName());
-    private final String condition;
-    private String imageSet = "";
-    private final List<Pose> poses = new ArrayList<>();
+
     private final ResourceBundle schema;
+
+    private String imageSet = "";
+
+    private final String condition;
+
+    private final List<Pose> poses = new ArrayList<>();
 
     public AnimationBuilder(final ResourceBundle schema, final Entry animationNode, final String imageSet) throws IOException {
         if (!imageSet.isEmpty()) {
@@ -117,11 +120,12 @@ public class AnimationBuilder {
         }
     }
 
+    private String getCondition() {
+        return this.condition;
+    }
+
     private List<Pose> getPoses() {
         return this.poses;
     }
 
-    private String getCondition() {
-        return this.condition;
-    }
 }

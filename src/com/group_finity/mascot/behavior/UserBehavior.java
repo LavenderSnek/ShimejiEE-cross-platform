@@ -21,12 +21,11 @@ import java.util.logging.Logger;
  * Simple Sample Behavior.
  */
 public class UserBehavior implements Behavior {
+
     private static final Logger log = Logger.getLogger(UserBehavior.class.getName());
 
     public static final String BEHAVIOURNAME_FALL = "Fall";
-
     public static final String BEHAVIOURNAME_DRAGGED = "Dragged";
-
     public static final String BEHAVIOURNAME_THROWN = "Thrown";
 
     private final String name;
@@ -73,23 +72,9 @@ public class UserBehavior implements Behavior {
 
     }
 
-    private Configuration getConfiguration() {
-        return this.configuration;
-    }
-
-    private Action getAction() {
-        return this.action;
-    }
-
-    private String getName() {
-        return this.name;
-    }
 
     /**
-     * On Mouse Pressed.
-     * Start dragging.
-     *
-     * @ Throws CantBeAliveException
+     * On Mouse Pressed: Start dragging.
      */
     public synchronized void mousePressed(final MouseEvent event) throws CantBeAliveException {
 
@@ -116,10 +101,7 @@ public class UserBehavior implements Behavior {
     }
 
     /**
-     * On Mouse Release.
-     * End dragging.
-     *
-     * @ Throws CantBeAliveException
+     * On Mouse Release: End dragging.
      */
     public synchronized void mouseReleased(final MouseEvent event) throws CantBeAliveException {
         if (SwingUtilities.isLeftMouseButton(event)) {
@@ -196,20 +178,33 @@ public class UserBehavior implements Behavior {
 
     }
 
-    private void setMascot(final Mascot mascot) {
-        this.mascot = mascot;
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    private Configuration getConfiguration() {
+        return this.configuration;
+    }
+
+    private String getName() {
+        return this.name;
+    }
+
+    private Action getAction() {
+        return this.action;
     }
 
     private Mascot getMascot() {
         return this.mascot;
     }
 
+    private void setMascot(final Mascot mascot) {
+        this.mascot = mascot;
+    }
+
     protected MascotEnvironment getEnvironment() {
         return getMascot().getEnvironment();
     }
 
-    @Override
-    public boolean isHidden() {
-        return hidden;
-    }
 }

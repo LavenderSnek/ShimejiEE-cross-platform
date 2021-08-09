@@ -1,32 +1,22 @@
 package com.group_finity.mascot.mac;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.lang.management.ManagementFactory;
-
-import com.sun.jna.Pointer;
+import com.group_finity.mascot.environment.Area;
+import com.group_finity.mascot.environment.Environment;
+import com.group_finity.mascot.mac.jna.*;
 import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
-import com.group_finity.mascot.environment.Area;
-import com.group_finity.mascot.environment.Environment;
-import com.group_finity.mascot.mac.jna.Carbon;
-import com.group_finity.mascot.mac.jna.ProcessSerialNumber;
-import com.group_finity.mascot.mac.jna.AXValueRef;
-import com.group_finity.mascot.mac.jna.AXUIElementRef;
-import com.group_finity.mascot.mac.jna.CFTypeRef;
-import com.group_finity.mascot.mac.jna.CGPoint;
-import com.group_finity.mascot.mac.jna.CGSize;
-import com.group_finity.mascot.mac.jna.CFStringRef;
-import com.group_finity.mascot.mac.jna.CFArrayRef;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Uses the apple Accessibility API  thought JNA to get environment information
- * that is difficult to get in Java.
  *
  * @author nonowarn
  */
@@ -48,11 +38,15 @@ class MacEnvironment extends Environment {
     private static final int screenWidth = (int) Math.round(Toolkit.getDefaultToolkit().getScreenSize().getWidth());
     private static final int screenHeight = (int) Math.round(Toolkit.getDefaultToolkit().getScreenSize().getHeight());
 
-    /** the Shimeji program's PID */
+    /**
+     * the Shimeji program's PID
+     */
     private static final long myPID =
             Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
 
-    /** PID of the frontmost window's application */
+    /**
+     * PID of the frontmost window's application
+     */
     private static long currentPID = myPID;
 
     private static final HashSet<Long> touchedProcesses = new HashSet<>();
@@ -139,7 +133,7 @@ class MacEnvironment extends Environment {
                 application, kAXFocusedWindow, windowp) == carbon.kAXErrorSuccess) {
             AXUIElementRef window = new AXUIElementRef();
             window.setPointer(windowp.getValue());
-            moveWindow(window, (int) point.x, (int) point.y);
+            moveWindow(window, point.x, point.y);
         }
 
         carbon.CFRelease(application);
@@ -219,6 +213,7 @@ class MacEnvironment extends Environment {
 
     /**
      * On a Mac, trying to move a window completely off screen pushes it back into the screen. so...
+     *
      * @return A rectangle where the window will still be visible on screen
      */
     private static Rectangle getWindowVisibleArea() {
@@ -266,7 +261,6 @@ class MacEnvironment extends Environment {
         return ret;
     }
 
-    //thanks google translate
     /**
      * I can't find an efficient way to monitor the height of the Dock,
      * so I'll just return a constant larger than the maximum size of the Dock.
@@ -387,6 +381,6 @@ class MacEnvironment extends Environment {
     }
 
     @Override
-    public void refreshCache() {
-    }
+    public void refreshCache() {}
+
 }

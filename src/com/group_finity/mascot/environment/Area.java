@@ -2,156 +2,144 @@ package com.group_finity.mascot.environment;
 
 import java.awt.Rectangle;
 
-
 public class Area {
 
-	private boolean visible = true;
+    private boolean visible = true;
 
-	private int left;
+    private int left;
+    private int right;
+    private int top;
+    private int bottom;
 
-	private int top;
+    private int dleft;
+    private int dright;
+    private int dtop;
+    private int dbottom;
 
-	private int right;
+    private final Wall leftBorder = new Wall(this, false);
+    private final Wall rightBorder = new Wall(this, true);
+    private final FloorCeiling topBorder = new FloorCeiling(this, false);
+    private final FloorCeiling bottomBorder = new FloorCeiling(this, true);
 
-	private int bottom;
+    public void set(final Rectangle value) {
+        setDleft(value.x - getLeft());
+        setDtop(value.y - getTop());
+        setDright(value.x + value.width - getRight());
+        setDbottom(value.y + value.height - getBottom());
 
-	private int dleft;
+        setLeft(value.x);
+        setTop(value.y);
+        setRight(value.x + value.width);
+        setBottom(value.y + value.height);
+    }
 
-	private int dtop;
+    public Rectangle toRectangle() {
+        return new Rectangle(left, top, right - left, bottom - top);
+    }
 
-	private int dright;
+    public boolean contains(final int x, final int y) {
+        return (getLeft() <= x) && (x <= getRight()) && (getTop() <= y) && (y <= getBottom());
+    }
 
-	private int dbottom;
+    public int getWidth() {
+        return getRight() - getLeft();
+    }
 
-	private final Wall leftBorder = new Wall(this, false);
+    public int getHeight() {
+        return getBottom() - getTop();
+    }
 
-	private final FloorCeiling topBorder = new FloorCeiling(this, false);
+    public boolean isVisible() {
+        return this.visible;
+    }
 
-	private final Wall rightBorder = new Wall(this, true);
+    public void setVisible(final boolean visible) {
+        this.visible = visible;
+    }
 
-	private final FloorCeiling bottomBorder = new FloorCeiling(this, true);
+    public int getLeft() {
+        return this.left;
+    }
 
-	public boolean isVisible() {
-		return this.visible;
-	}
+    public void setLeft(final int left) {
+        this.left = left;
+    }
 
-	public void setVisible(final boolean visible) {
-		this.visible = visible;
-	}
+    public int getRight() {
+        return this.right;
+    }
 
-	public int getLeft() {
-		return this.left;
-	}
+    public void setRight(final int right) {
+        this.right = right;
+    }
 
-	public void setLeft(final int left) {
-		this.left = left;
-	}
+    public int getTop() {
+        return this.top;
+    }
 
-	public int getTop() {
-		return this.top;
-	}
+    public void setTop(final int top) {
+        this.top = top;
+    }
 
-	public void setTop(final int top) {
-		this.top = top;
-	}
+    public int getBottom() {
+        return this.bottom;
+    }
 
-	public int getRight() {
-		return this.right;
-	}
+    public void setBottom(final int bottom) {
+        this.bottom = bottom;
+    }
 
-	public void setRight(final int right) {
-		this.right = right;
-	}
+    public int getDleft() {
+        return this.dleft;
+    }
 
-	public int getBottom() {
-		return this.bottom;
-	}
+    public void setDleft(final int dleft) {
+        this.dleft = dleft;
+    }
 
-	public void setBottom(final int bottom) {
-		this.bottom = bottom;
-	}
+    public int getDright() {
+        return this.dright;
+    }
 
-	public int getDleft() {
-		return this.dleft;
-	}
+    public void setDright(final int dright) {
+        this.dright = dright;
+    }
 
-	public void setDleft(final int dleft) {
-		this.dleft = dleft;
-	}
+    public int getDtop() {
+        return this.dtop;
+    }
 
-	public int getDtop() {
-		return this.dtop;
-	}
+    public void setDtop(final int dtop) {
+        this.dtop = dtop;
+    }
 
-	public void setDtop(final int dtop) {
-		this.dtop = dtop;
-	}
+    public int getDbottom() {
+        return this.dbottom;
+    }
 
-	public int getDright() {
-		return this.dright;
-	}
+    public void setDbottom(final int dbottom) {
+        this.dbottom = dbottom;
+    }
 
-	public void setDright(final int dright) {
-		this.dright = dright;
-	}
+    public Wall getLeftBorder() {
+        return this.leftBorder;
+    }
 
-	public int getDbottom() {
-		return this.dbottom;
-	}
+    public Wall getRightBorder() {
+        return this.rightBorder;
+    }
 
-	public void setDbottom(final int dbottom) {
-		this.dbottom = dbottom;
-	}
+    public FloorCeiling getTopBorder() {
+        return this.topBorder;
+    }
 
-	public Wall getLeftBorder() {
-		return this.leftBorder;
-	}
+    public FloorCeiling getBottomBorder() {
+        return this.bottomBorder;
+    }
 
-	public FloorCeiling getTopBorder() {
-		return this.topBorder;
-	}
-
-	public Wall getRightBorder() {
-		return this.rightBorder;
-	}
-
-	public FloorCeiling getBottomBorder() {
-		return this.bottomBorder;
-	}
-
-	public int getWidth() {
-		return getRight() - getLeft();
-	}
-
-	public int getHeight() {
-		return getBottom() - getTop();
-	}
-
-	public void set(final Rectangle value) {
-
-		setDleft(value.x - getLeft());
-		setDtop(value.y - getTop());
-		setDright(value.x + value.width - getRight());
-		setDbottom(value.y + value.height - getBottom());
-
-		setLeft(value.x);
-		setTop(value.y);
-		setRight(value.x + value.width);
-		setBottom(value.y + value.height);
-	}
-
-	public boolean contains(final int x, final int y) {
-
-		return (getLeft() <= x) && (x <= getRight()) && (getTop() <= y) && (y <= getBottom());
-	}
-
-	public Rectangle toRectangle() {
-		return new Rectangle(left, top, right - left, bottom - top);
-	}
-
-	@Override
-	public String toString() {
-		return "Area [left=" + left + ", top=" + top + ", right=" + right + ", bottom=" + bottom + "]";
-	}
+    @Override
+    public String toString() {
+        return "Area [left=" + left + ", top=" + top + ", right=" + right + ", bottom=" + bottom + "]";
+    }
 
 }

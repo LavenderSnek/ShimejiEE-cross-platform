@@ -10,7 +10,7 @@ public interface ImageSetUI {
     /**
      * All the imageSets selected by the user
      *
-     * @return ImageSets if any are selected, returns an empty list if no
+     * @return ImageSets if any are selected, an empty list if 0
      * imageSets are selected, and null if the user canceled the selection.
      */
     ArrayList<String> getSelections();

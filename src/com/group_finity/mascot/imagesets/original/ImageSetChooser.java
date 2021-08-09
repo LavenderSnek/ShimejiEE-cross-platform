@@ -10,10 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** Original imageSet UI */
-public class ImageSetChooser extends javax.swing.JDialog implements ImageSetUI{
-    private static final String configFile = "./conf/settings.properties"; // Config file name
-    private static final String topDir = "./img/"; // Top Level Directory
+/**
+ * Original imageSet UI
+ */
+public class ImageSetChooser extends javax.swing.JDialog implements ImageSetUI {
+
+    private static final String SETTINGS_FILE = "./conf/settings.properties"; // Config file name
+    private static final String TOP_DIR = "./img/"; // Top Level Directory
+
     private ArrayList<String> imageSets = new ArrayList<>();
     private boolean closeProgram = true; // Whether the program closes on dispose
     private boolean selectAllSets = false; // Default all to selected
@@ -37,7 +41,7 @@ public class ImageSetChooser extends javax.swing.JDialog implements ImageSetUI{
         int row = 0;    // Current row
 
         for (String imageSet : children) {
-            String imageFile = "./img/" + imageSet + "/shime1.png";
+            String imageFile = TOP_DIR + imageSet + "/shime1.png";
 
             // Determine xml
             String behaviorsFile = null;
@@ -105,7 +109,7 @@ public class ImageSetChooser extends javax.swing.JDialog implements ImageSetUI{
     }
 
     private void updateConfigFile() {
-        try (FileOutputStream output = new FileOutputStream(configFile)) {
+        try (FileOutputStream output = new FileOutputStream(SETTINGS_FILE)) {
             Main.getInstance().getProperties().setProperty("ActiveShimeji", imageSets.toString()
                     .replace("[", "").replace("]", "").replace(", ", "/"));
             Main.getInstance().getProperties().store(output, "Shimeji-ee Configuration Options");

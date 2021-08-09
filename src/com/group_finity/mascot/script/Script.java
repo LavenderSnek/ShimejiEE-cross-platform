@@ -9,18 +9,14 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-
 public class Script extends Variable {
 
 	@SuppressWarnings("removal")
 	private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine(className -> false);
 
 	private final String source;
-	
 	private final boolean clearAtInitFrame;
-	
 	private final CompiledScript compiled;
-	
 	private Object value;
 	
 	public Script(final String source, final boolean clearAtInitFrame)  throws VariableException {
@@ -66,23 +62,24 @@ public class Script extends Variable {
 		return getValue();
 	}
 
-	private void setValue(final Object value) {
-		this.value = value;
+	private String getSource() {
+		return this.source;
+	}
+
+	private boolean isClearAtInitFrame() {
+		return this.clearAtInitFrame;
 	}
 
 	private Object getValue() {
 		return this.value;
 	}
-	
-	private boolean isClearAtInitFrame() {
-		return this.clearAtInitFrame;
+
+	private void setValue(final Object value) {
+		this.value = value;
 	}
-	
+
 	private CompiledScript getCompiled() {
 		return this.compiled;
 	}
-	
-	private String getSource() {
-		return this.source;
-	}
+
 }

@@ -8,10 +8,14 @@ import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 import com.group_finity.mascot.sound.Sounds;
 
-import javax.swing.*;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -30,9 +34,6 @@ import java.util.logging.Logger;
  * To animate the mascot.
  * <p>
  * (@link Action) or exits, the other at a certain time is called (@link Behavior), the next move to (@link Action).
- * <p>
- * Original Author: Yuki Yamada of Group Finity (http://www.group-finity.com/Shimeji/)
- * Currently developed by Shimeji-ee Group.
  */
 public class Mascot {
 
@@ -46,10 +47,14 @@ public class Mascot {
 
     private String imageSet;
 
-    /** A window that displays the mascot. */
+    /**
+     * A window that displays the mascot.
+     */
     private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();
 
-    /** Manager managing the mascot. */
+    /**
+     * Manager managing the mascot.
+     */
     private Manager manager = null;
 
     /**
@@ -58,7 +63,9 @@ public class Mascot {
      */
     private Point anchor = new Point(0, 0);
 
-    /**Image to display.*/
+    /**
+     * Image to display.
+     */
     private MascotImage image = null;
 
     /**
@@ -67,13 +74,19 @@ public class Mascot {
      */
     private boolean lookRight = false;
 
-    /** Object representing the long-term behavior. */
+    /**
+     * Object representing the long-term behavior.
+     */
     private Behavior behavior = null;
 
-    /** Increases with each tick of the timer.*/
+    /**
+     * Increases with each tick of the timer.
+     */
     private int time = 0;
 
-    /** Whether the animation is running. */
+    /**
+     * Whether the animation is running.
+     */
     private boolean animating = true;
 
     private MascotEnvironment environment = new MascotEnvironment(this);
@@ -152,7 +165,8 @@ public class Mascot {
         popup.setLightWeightPopupEnabled(false);
 
         popup.addPopupMenuListener(new PopupMenuListener() {
-            @Override public void popupMenuCanceled(final PopupMenuEvent e) {}
+            @Override
+            public void popupMenuCanceled(final PopupMenuEvent e) {}
 
             @Override
             public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
@@ -351,8 +365,6 @@ public class Mascot {
         this.behavior.init(this);
     }
 
-    //-----------Simple Getters & setters-------------//
-
     public Behavior getBehavior() {
         return this.behavior;
     }
@@ -387,6 +399,7 @@ public class Mascot {
     public Point getAnchor() {
         return this.anchor;
     }
+
     public void setAnchor(Point anchor) {
         this.anchor = anchor;
     }
@@ -394,6 +407,7 @@ public class Mascot {
     public MascotImage getImage() {
         return this.image;
     }
+
     public void setImage(final MascotImage image) {
         this.image = image;
     }
@@ -401,6 +415,7 @@ public class Mascot {
     public boolean isLookRight() {
         return this.lookRight;
     }
+
     public void setLookRight(final boolean lookRight) {
         this.lookRight = lookRight;
     }
@@ -408,6 +423,7 @@ public class Mascot {
     public int getTime() {
         return this.time;
     }
+
     private void setTime(final int time) {
         this.time = time;
     }
@@ -415,6 +431,7 @@ public class Mascot {
     private boolean isAnimating() {
         return this.animating;
     }
+
     private void setAnimating(final boolean animating) {
         this.animating = animating;
     }
@@ -422,6 +439,7 @@ public class Mascot {
     public String getImageSet() {
         return imageSet;
     }
+
     public void setImageSet(final String set) {
         imageSet = set;
     }
@@ -429,7 +447,9 @@ public class Mascot {
     public String getSound() {
         return sound;
     }
+
     public void setSound(final String name) {
         sound = name;
     }
+
 }

@@ -2,10 +2,10 @@ package com.group_finity.mascot.sound;
 
 import com.group_finity.mascot.Main;
 
+import javax.sound.sampled.Clip;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import javax.sound.sampled.Clip;
 
 /**
  * This static class contains all the sounds loaded by Shimeji-ee.
@@ -15,6 +15,7 @@ import javax.sound.sampled.Clip;
  * @author Kilkakon
  */
 public class Sounds {
+
     private final static Hashtable<String, Clip> SOUNDS = new Hashtable<String, Clip>();
 
     public static void load(final String filename, final Clip clip) {
@@ -59,4 +60,5 @@ public class Sounds {
             }
         }
     }
+
 }

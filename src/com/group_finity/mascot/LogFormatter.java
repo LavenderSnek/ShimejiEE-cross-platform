@@ -15,7 +15,7 @@ public class LogFormatter extends SimpleFormatter {
 
 	private Object[] args = new Object[1];
 
-	private String lineSeparator = System.getProperty("line.separator");
+	private final String lineSeparator = System.getProperty("line.separator");
 
 	/**
 	 * Format the given LogRecord.

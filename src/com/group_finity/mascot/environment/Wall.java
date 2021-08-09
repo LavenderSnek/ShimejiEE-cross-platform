@@ -2,77 +2,77 @@ package com.group_finity.mascot.environment;
 
 import java.awt.Point;
 
-
 public class Wall implements Border {
 
-	private Area area;
+    private Area area;
 
-	private boolean right;
+    private boolean right;
 
-	public Wall(final Area area, final boolean right) {
-		this.area = area;
-		this.right = right;
-	}
+    public Wall(final Area area, final boolean right) {
+        this.area = area;
+        this.right = right;
+    }
 
-	public Area getArea() {
-		return this.area;
-	}
+    @Override
+    public boolean isOn(final Point location) {
+        return getArea().isVisible() && (getX() == location.x) && (getTop() <= location.y)
+                && (location.y <= getBottom());
+    }
 
-	public boolean isRight() {
-		return this.right;
-	}
+    public Point move(final Point location) {
 
-	public int getX() {
-		return isRight() ? getArea().getRight() : getArea().getLeft();
-	}
+        if (!getArea().isVisible()) {
+            return location;
+        }
 
-	public int getTop() {
-		return getArea().getTop();
-	}
+        final int d = getBottom() - getDBottom() - (getTop() - getDTop());
+        if (d == 0) {
+            return location;
+        }
 
-	public int getBottom() {
-		return getArea().getBottom();
-	}
+        final Point newLocation = new Point(location.x + getDX(), (location.y - (getTop() - getDTop()))
+                * (getBottom() - getTop()) / d + getTop());
 
-	public int getDX() {
-		return isRight() ? getArea().getDright() : getArea().getDleft();
-	}
+        if ((Math.abs(newLocation.x - location.x) >= 80) || (Math.abs(newLocation.y - location.y) >= 80)) {
+            return location;
+        }
+        return newLocation;
+    }
 
-	public int getDTop() {
-		return getArea().getDtop();
-	}
+    public Area getArea() {
+        return this.area;
+    }
 
-	public int getDBottom() {
-		return getArea().getDbottom();
-	}
-	
-	public int getHeight() {
-		return getArea().getHeight();
-	}
+    public boolean isRight() {
+        return this.right;
+    }
 
-	@Override
-	public boolean isOn(final Point location) {
-		return getArea().isVisible() && (getX() == location.x) && (getTop() <= location.y)
-				&& (location.y <= getBottom());
-	}
+    public int getX() {
+        return isRight() ? getArea().getRight() : getArea().getLeft();
+    }
 
-	public Point move(final Point location) {
+    public int getTop() {
+        return getArea().getTop();
+    }
 
-		if (!getArea().isVisible()) {
-			return location;
-		}
-		
-		final int d = getBottom() - getDBottom() - (getTop() - getDTop());
-		if ( d==0 ) {
-			return location;
-		}
+    public int getBottom() {
+        return getArea().getBottom();
+    }
 
-		final Point newLocation = new Point(location.x + getDX(), (location.y - (getTop() - getDTop()))
-				* (getBottom() - getTop()) / d + getTop());
+    public int getDX() {
+        return isRight() ? getArea().getDright() : getArea().getDleft();
+    }
 
-		if ((Math.abs(newLocation.x - location.x) >= 80) || (Math.abs(newLocation.y - location.y) >= 80)) {
-			return location;
-		}
-		return newLocation;
-	}
+    public int getDTop() {
+        return getArea().getDtop();
+    }
+
+    public int getDBottom() {
+        return getArea().getDbottom();
+    }
+
+    public int getHeight() {
+        return getArea().getHeight();
+    }
+
 }

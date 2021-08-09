@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class BehaviorBuilder {
 
     private static final Logger log = Logger.getLogger(BehaviorBuilder.class.getName());
@@ -25,20 +24,15 @@ public class BehaviorBuilder {
     private final Configuration configuration;
 
     private final String name;
-
     private final String actionName;
-
     private final int frequency;
-
     private final List<String> conditions;
-
     private final boolean hidden;
-
     private final boolean nextAdditive;
 
-    private final List<BehaviorBuilder> nextBehaviorBuilders = new ArrayList<>();
-
     private final Map<String, String> params = new LinkedHashMap<>();
+
+    private final List<BehaviorBuilder> nextBehaviorBuilders = new ArrayList<>();
 
     public BehaviorBuilder(final Configuration configuration, final Entry behaviorNode, final List<String> conditions) {
         this.configuration = configuration;
@@ -67,7 +61,6 @@ public class BehaviorBuilder {
             log.log(Level.INFO, "Lists the Following Behaviors...");
 
             nextAdditive = Boolean.parseBoolean(nextList.getAttribute(configuration.getSchema().getString("Add")));
-
             loadBehaviors(nextList, new ArrayList<>());
         }
 
@@ -87,7 +80,6 @@ public class BehaviorBuilder {
         for (final Entry node : list.getChildren()) {
 
             if (node.getName().equals(configuration.getSchema().getString("Condition"))) {
-
                 final List<String> newConditions = new ArrayList<>(conditions);
                 newConditions.add(node.getAttribute(configuration.getSchema().getString("Condition")));
 
@@ -101,7 +93,6 @@ public class BehaviorBuilder {
     }
 
     public void validate() throws ConfigurationException {
-
         if (!getConfiguration().getActionBuilders().containsKey(getActionName())) {
             log.log(Level.SEVERE, "There is no corresponding action(" + this + ")");
             throw new ConfigurationException(Main.getInstance().getLanguageBundle().getString("NoActionFoundErrorMessage") + "(" + this + ")");
@@ -109,7 +100,6 @@ public class BehaviorBuilder {
     }
 
     public Behavior buildBehavior() throws BehaviorInstantiationException {
-
         try {
             return new UserBehavior(getName(),
                     getConfiguration().buildAction(getActionName(),
@@ -122,8 +112,9 @@ public class BehaviorBuilder {
 
 
     public boolean isEffective(final VariableMap context) throws VariableException {
-        if (frequency == 0)
+        if (frequency == 0) {
             return false;
+        }
 
         for (final String condition : getConditions()) {
             if (condition != null) {
@@ -136,39 +127,40 @@ public class BehaviorBuilder {
         return true;
     }
 
+    private Configuration getConfiguration() {
+        return this.configuration;
+    }
+
     public String getName() {
         return this.name;
-    }
-
-    public int getFrequency() {
-        return this.frequency;
-    }
-
-    public boolean isHidden() {
-        return this.hidden;
     }
 
     private String getActionName() {
         return this.actionName;
     }
 
-    private Map<String, String> getParams() {
-        return this.params;
+    public int getFrequency() {
+        return this.frequency;
     }
 
     private List<String> getConditions() {
         return this.conditions;
     }
 
-    private Configuration getConfiguration() {
-        return this.configuration;
+    public boolean isHidden() {
+        return this.hidden;
     }
 
     public boolean isNextAdditive() {
         return this.nextAdditive;
     }
 
+    private Map<String, String> getParams() {
+        return this.params;
+    }
+
     public List<BehaviorBuilder> getNextBehaviorBuilders() {
         return this.nextBehaviorBuilders;
     }
+
 }

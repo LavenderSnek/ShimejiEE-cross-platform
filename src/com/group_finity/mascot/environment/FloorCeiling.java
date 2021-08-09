@@ -2,7 +2,6 @@ package com.group_finity.mascot.environment;
 
 import java.awt.Point;
 
-
 public class FloorCeiling implements Border {
 
 	private Area area;
@@ -12,6 +11,38 @@ public class FloorCeiling implements Border {
 	public FloorCeiling(final Area area, final boolean bottom) {
 		this.area = area;
 		this.bottom = bottom;
+	}
+
+	@Override
+	public boolean isOn(final Point location) {
+		return getArea().isVisible() && (getY() == location.y) && (getLeft() <= location.x)
+				&& (location.x <= getRight());
+	}
+
+	@Override
+	public Point move(final Point location) {
+		if (!getArea().isVisible()) {
+			return location;
+		}
+
+		final int d = getRight() - getDRight() - (getLeft() - getDLeft());
+		if (d == 0) {
+			return location;
+		}
+
+		final Point newLocation = new Point(
+				(location.x - (getLeft() - getDLeft())) * ((getRight() - getLeft()) / d) + getLeft(),
+				location.y + getDY()
+		);
+
+		if ((Math.abs(newLocation.x - location.x) >= 80)
+				|| (newLocation.y - location.y > 20)
+				|| (newLocation.y - location.y < -80))
+		{
+			return location;
+		}
+
+		return newLocation;
 	}
 
 	public Area getArea() {
@@ -50,32 +81,4 @@ public class FloorCeiling implements Border {
 		return getArea().getWidth();
 	}
 
-	@Override
-	public boolean isOn(final Point location) {
-		return getArea().isVisible() && (getY() == location.y) && (getLeft() <= location.x)
-				&& (location.x <= getRight());
-	}
-
-
-	public Point move(final Point location) {
-
-		if (!getArea().isVisible()) {
-			return location;
-		}
-		
-		final int d = getRight() - getDRight() - (getLeft() - getDLeft());
-		if (d == 0) {
-			return location;
-		}
-
-		final Point newLocation = new Point((location.x - (getLeft() - getDLeft())) * ((getRight() - getLeft()) / d)
-				+ getLeft(), location.y + getDY());
-
-		if ((Math.abs(newLocation.x - location.x) >= 80) || (newLocation.y - location.y > 20)
-				|| (newLocation.y - location.y < -80)) {			
-			return location;
-		}
-
-		return newLocation;
-	}
 }

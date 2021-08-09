@@ -25,18 +25,20 @@ import com.joconner.i18n.Utf8ResourceBundleControl;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-
 public class Configuration {
+
     private static final Logger log = Logger.getLogger(Configuration.class.getName());
+
+    private ResourceBundle schema;
+
     private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<String, ActionBuilder>();
     private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<String, BehaviorBuilder>();
-    private ResourceBundle schema;
 
     public void load(final Entry configurationNode, final String imageSet) throws IOException, ConfigurationException {
         log.log(Level.INFO, "Start Reading Configuration File...");
 
         // prepare schema
-        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl(false);
+        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
         Locale locale;
 
         // check for Japanese XML tag and adapt locale accordingly
@@ -146,7 +148,9 @@ public class Configuration {
                     (int) (Math.random() * (mascot.getEnvironment().getScreen().getRight()
                             - mascot.getEnvironment()
                             .getScreen().getLeft()))
-                            + mascot.getEnvironment().getScreen().getLeft(), mascot.getEnvironment().getScreen().getTop() - 256));
+                            + mascot.getEnvironment().getScreen().getLeft(),
+                    mascot.getEnvironment().getScreen().getTop() - 256
+            ));
             return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL));
         }
 

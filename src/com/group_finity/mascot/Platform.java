@@ -6,6 +6,7 @@ package com.group_finity.mascot;
  * @author TigerHix
  */
 public enum Platform {
+
     x86(20), x86_64(24);
 
     private final int bitmapSize;
@@ -17,4 +18,5 @@ public enum Platform {
     public int getBitmapSize() {
         return bitmapSize;
     }
+
 }

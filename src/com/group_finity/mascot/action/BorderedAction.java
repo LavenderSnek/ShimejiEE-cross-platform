@@ -1,8 +1,5 @@
 package com.group_finity.mascot.action;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.environment.Border;
@@ -10,19 +7,18 @@ import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
+import java.util.List;
+import java.util.logging.Logger;
 
 public abstract class BorderedAction extends ActionBase {
 
     private static final Logger log = Logger.getLogger(BorderedAction.class.getName());
 
     private static final String PARAMETER_BORDERTYPE = "BorderType";
-
     public static final String DEFAULT_BORDERTYPE = null;
 
     public static final String BORDERTYPE_CEILING = "Ceiling";
-
     public static final String BORDERTYPE_WALL = "Wall";
-
     public static final String BORDERTYPE_FLOOR = "Floor";
 
     private Border border;
@@ -57,12 +53,12 @@ public abstract class BorderedAction extends ActionBase {
         return eval(getSchema().getString(PARAMETER_BORDERTYPE), String.class, DEFAULT_BORDERTYPE);
     }
 
-    private void setBorder(final Border border) {
-        this.border = border;
-    }
-
     protected Border getBorder() {
         return this.border;
+    }
+
+    private void setBorder(final Border border) {
+        this.border = border;
     }
 
 }

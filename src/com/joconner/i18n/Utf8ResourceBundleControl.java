@@ -6,48 +6,42 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**
- * Created by joconner on 1/11/17.
+ * @author joconner
  */
-public class Utf8ResourceBundleControl extends PackageableResourceControl {
+public class Utf8ResourceBundleControl extends ResourceBundle.Control {
 
-
-    public Utf8ResourceBundleControl() {}
-
-    public Utf8ResourceBundleControl(boolean isPackageBased) {
-        super(isPackageBased);
+    public Utf8ResourceBundleControl() {
+        super();
     }
 
-    public ResourceBundle newBundle(String baseName, Locale locale, String format,
-                                    ClassLoader loader, boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+    @Override
+    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
         String bundleName = toBundleName(baseName, locale);
         ResourceBundle bundle = null;
+
         if (format.equals("java.class")) {
             bundle = super.newBundle(baseName, locale, format, loader, reload);
         } else if (format.equals("java.properties")) {
             final String resourceName = bundleName.contains("://") ? null :
                     toResourceName(bundleName, "properties");
             if (resourceName == null) {
-                return bundle;
+                return null;
             }
-            final ClassLoader classLoader = loader;
-            InputStream stream = null;
+            InputStream stream;
             if (reload) {
-                stream = reload(resourceName, classLoader);
+                stream = reload(resourceName, loader);
             } else {
-                stream = classLoader.getResourceAsStream(resourceName);
+                stream = loader.getResourceAsStream(resourceName);
             }
             if (stream != null) {
-                Reader reader = new InputStreamReader(stream, "UTF-8");
-                try {
+                try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                     bundle = new PropertyResourceBundle(reader);
-                } finally {
-                    reader.close();
                 }
             }
         } else {
