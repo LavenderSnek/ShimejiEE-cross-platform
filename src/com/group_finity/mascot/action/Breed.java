@@ -14,19 +14,40 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Creates a new mascot
+ * <p>
+ * The mascot will be created after the animations/sub-actions have finished playing
+ * */
 public class Breed extends Animate {
 
     private static final Logger log = Logger.getLogger(Breed.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see Breed#getBornX()
+     * */
     public static final String PARAMETER_BORNX = "BornX";
     private static final int DEFAULT_BORNX = 0;
 
+    /**
+     * @custom.shimeji.param
+     * @see Breed#getBornY()
+     * */
     public static final String PARAMETER_BORNY = "BornY";
     private static final int DEFAULT_BORNY = 0;
 
+    /**
+     * @custom.shimeji.param
+     * @see Breed#getBornBehaviour()
+     * */
     public static final String PARAMETER_BORNBEHAVIOUR = "BornBehaviour";
     private static final String DEFAULT_BORNBEHAVIOUR = "";
 
+    /**
+     * @custom.shimeji.param
+     * @see Breed#getBornMascot()
+     * */
     public static final String PARAMETER_BORNMASCOT = "BornMascot";
     private static final String DEFAULT_BORNMASCOT = "";
 
@@ -88,18 +109,32 @@ public class Breed extends Animate {
         }
     }
 
+    /**
+     * The X co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
+     * */
     private int getBornX() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORNX), Number.class, DEFAULT_BORNX).intValue();
     }
 
+    /**
+     * The Y co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
+     * */
     private int getBornY() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORNY), Number.class, DEFAULT_BORNY).intValue();
     }
 
+    /**
+     * The starting behaviour of the newly created mascot when it spawns
+     * */
     private String getBornBehaviour() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORNBEHAVIOUR), String.class, DEFAULT_BORNBEHAVIOUR);
     }
 
+    /**
+     * Name of the imageSet that the new mascot will be of.
+     * <p>
+     * If this is not provided, the imageSet of the creating mascot will be used.
+     * */
     private String getBornMascot() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORNMASCOT), String.class, DEFAULT_BORNMASCOT);
     }

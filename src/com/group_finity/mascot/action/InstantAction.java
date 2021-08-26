@@ -8,6 +8,10 @@ import com.group_finity.mascot.script.VariableMap;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+/**
+ * The base class of an action that ends instantly after starting (only lasting for one tick).
+ * These can be used to change the state of the mascot
+ * */
 public abstract class InstantAction extends ActionBase {
 
     private static final Logger log = Logger.getLogger(InstantAction.class.getName());

@@ -12,19 +12,38 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+/**
+ * An abstract class that implements the common functionality of actions.
+ * */
 public abstract class ActionBase implements Action {
 
     private static final Logger log = Logger.getLogger(ActionBase.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see ActionBase#isEffective()
+     */
     public static final String PARAMETER_CONDITION = "Condition";
     private static final boolean DEFAULT_CONDITION = true;
 
+    /**
+     * @custom.shimeji.param
+     * @see ActionBase#getDuration()
+     */
     public static final String PARAMETER_DURATION = "Duration";
     private static final int DEFAULT_DURATION = Integer.MAX_VALUE;
 
+    /**
+     * @custom.shimeji.param
+     * @see ActionBase#isDraggable()
+     */
     public static final String PARAMETER_DRAGGABLE = "Draggable";
     private static final boolean DEFAULT_DRAGGABLE = true;
 
+    /**
+     * @custom.shimeji.param
+     * @see ActionBase#getName()
+     */
     public static final String PARAMETER_NAME = "Name";
     private static final String DEFAULT_NAME = null;
 
@@ -56,11 +75,14 @@ public abstract class ActionBase implements Action {
         this.setMascot(mascot);
         this.setTime(0);
 
+        // Add mascot and action to the variable map for use in the script
         this.getVariables().put("mascot", mascot);
         this.getVariables().put("action", this);
 
+        // Initialize the value of a variable
         getVariables().init();
 
+        // Initialize animation
         for (final Animation animation : this.animations) {
             animation.init();
         }
@@ -103,6 +125,13 @@ public abstract class ActionBase implements Action {
         return null;
     }
 
+    /**
+     * @param <T>          the return type
+     * @param name         of the xml parameter you want to evaluate
+     * @param type         the return type
+     * @param defaultValue The value returned if the parameter isn't there
+     * @return The result of the script in the xml parameter
+     */
     protected <T> T eval(final String name, final Class<T> type, final T defaultValue) throws VariableException {
         synchronized (getVariables()) {
             final Variable variable = getVariables().getRawMap().get(name);
@@ -114,18 +143,30 @@ public abstract class ActionBase implements Action {
         return defaultValue;
     }
 
+    /**
+     * Whether the action can continue.
+     */
     private Boolean isEffective() throws VariableException {
         return eval(schema.getString(PARAMETER_CONDITION), Boolean.class, DEFAULT_CONDITION);
     }
 
+    /**
+     * The length of the action in frames (shimeji runs at 25 fps).
+     */
     private int getDuration() throws VariableException {
         return eval(schema.getString(PARAMETER_DURATION), Number.class, DEFAULT_DURATION).intValue();
     }
 
+    /**
+     * Whether the shimeji can be dragged by the user
+     */
     public Boolean isDraggable() throws VariableException {
         return eval(schema.getString(PARAMETER_DRAGGABLE), Boolean.class, DEFAULT_DRAGGABLE);
     }
 
+    /**
+     * The name of the action
+     */
     private String getName() throws VariableException {
         return this.eval(schema.getString(PARAMETER_NAME), String.class, DEFAULT_NAME);
     }

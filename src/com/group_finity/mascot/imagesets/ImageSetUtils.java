@@ -16,8 +16,6 @@ import java.util.Arrays;
  * <p>
  * Does not directly modify the global selection settings,
  * this class should only provide information.
- *
- * @apiNote this might just be temporary refactoring leftovers, not sure yet
  */
 public final class ImageSetUtils {
 
@@ -78,10 +76,12 @@ public final class ImageSetUtils {
     /**
      * Returns list of imageSets that are present in the
      * settings.properties ActiveShimeji property
-     * <p>Returns null if none are found
-     * <p>Beware that these sets might not exist due to name changes and deletions
-     *
-     * @implNote does not actually fetch data from the file, instead it reads
+     * <p>
+     * Returns null if none are found
+     * <p>
+     * Beware that these sets might not exist due to name changes and deletions
+     * <p>
+     * does not actually fetch data from the file, instead it reads
      * the properties of the Main instance and parses that.
      */
     public static ArrayList<String> getImageSetsFromSettings() {
@@ -103,8 +103,6 @@ public final class ImageSetUtils {
 
     /**
      * Returns the path of the action config for the specified imageSet.
-     *
-     * @implNote uses {@link #findConfig(String[], String)} and passes in {@link #ACTION_FILENAMES}
      */
     public static String findActionConfig(String imageSet) throws FileNotFoundException {
         return findConfig(ACTION_FILENAMES, imageSet);
@@ -113,8 +111,6 @@ public final class ImageSetUtils {
 
     /**
      * Returns the path of the behaviour config for the specified imageSet.
-     *
-     * @implNote uses {@link #findConfig(String[], String)} and passes in {@link #BEHAVIOUR_FILENAMES}
      */
     public static String findBehaviorConfig(String imageSet) throws FileNotFoundException {
         return findConfig(BEHAVIOUR_FILENAMES, imageSet);

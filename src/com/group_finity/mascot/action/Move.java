@@ -14,11 +14,19 @@ public class Move extends BorderedAction {
 
     private static final Logger log = Logger.getLogger(Move.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see Move#getTargetX()
+     */
     private static final String PARAMETER_TARGETX = "TargetX";
-    private static final int DEFAULT_TARGETX = Integer.MAX_VALUE;
+    public static final int DEFAULT_TARGETX = Integer.MAX_VALUE;
 
+    /**
+     * @custom.shimeji.param
+     * @see Move#getTargetY()
+     */
     private static final String PARAMETER_TARGETY = "TargetY";
-    private static final int DEFAULT_TARGETY = Integer.MAX_VALUE;
+    public static final int DEFAULT_TARGETY = Integer.MAX_VALUE;
 
     public Move(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
@@ -76,25 +84,29 @@ public class Move extends BorderedAction {
 
         if (targetX != DEFAULT_TARGETX) {
             if ((getMascot().isLookRight() && (getMascot().getAnchor().x >= targetX))
-					|| (!getMascot().isLookRight() && (getMascot().getAnchor().x <= targetX)))
-            {
+                    || (!getMascot().isLookRight() && (getMascot().getAnchor().x <= targetX))) {
                 getMascot().setAnchor(new Point(targetX, getMascot().getAnchor().y));
             }
         }
         if (targetY != DEFAULT_TARGETY) {
             if ((down && (getMascot().getAnchor().y >= targetY))
-					|| (!down && (getMascot().getAnchor().y <= targetY)))
-            {
+                    || (!down && (getMascot().getAnchor().y <= targetY))) {
                 getMascot().setAnchor(new Point(getMascot().getAnchor().x, targetY));
             }
         }
 
     }
 
+    /**
+     * The action stops when the mascot reaches this x-axis
+     * */
     private int getTargetX() throws VariableException {
         return eval(getSchema().getString(PARAMETER_TARGETX), Number.class, DEFAULT_TARGETX).intValue();
     }
 
+    /**
+     * The action stops when the mascot reaches this y-axis
+     * */
     private int getTargetY() throws VariableException {
         return eval(getSchema().getString(PARAMETER_TARGETY), Number.class, DEFAULT_TARGETY).intValue();
     }

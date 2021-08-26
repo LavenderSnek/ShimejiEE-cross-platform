@@ -10,12 +10,19 @@ import com.group_finity.mascot.script.VariableMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * That base class of actions that depend on sticking to a certain wall
+ * */
 public abstract class BorderedAction extends ActionBase {
 
     private static final Logger log = Logger.getLogger(BorderedAction.class.getName());
 
-    private static final String PARAMETER_BORDERTYPE = "BorderType";
-    public static final String DEFAULT_BORDERTYPE = null;
+    /**
+     * @custom.shimeji.param
+     * @see BorderedAction#getBorderType()
+     * */
+    public static final String PARAMETER_BORDERTYPE = "BorderType";
+    private static final String DEFAULT_BORDERTYPE = null;
 
     public static final String BORDERTYPE_CEILING = "Ceiling";
     public static final String BORDERTYPE_WALL = "Wall";
@@ -49,6 +56,16 @@ public abstract class BorderedAction extends ActionBase {
         }
     }
 
+    /**
+     * The type of border the action will be operating on
+     * <p>
+     * Options, (see schema properties for true values):
+     * <ul>
+     *   <li>{@value BORDERTYPE_CEILING}/li>
+     *   <li>{@value BORDERTYPE_WALL}</li>
+     *   <li>{@value BORDERTYPE_FLOOR}</li>
+     * </ul>
+     * */
     private String getBorderType() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORDERTYPE), String.class, DEFAULT_BORDERTYPE);
     }

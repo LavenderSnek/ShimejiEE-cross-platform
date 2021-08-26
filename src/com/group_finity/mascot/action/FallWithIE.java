@@ -12,13 +12,24 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Action to fall while holding a window(IE)
+ * */
 public class FallWithIE extends Fall {
 
     private static final Logger log = Logger.getLogger(FallWithIE.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see FallWithIE#getIEOffsetX()
+     * */
     public static final String PARAMETER_IEOFFSETX = "IeOffsetX";
     private static final int DEFAULT_IEOFFSETX = 0;
 
+    /**
+     * @custom.shimeji.param
+     * @see FallWithIE#getIEOffsetY()
+     * */
     public static final String PARAMETER_IEOFFSETY = "IeOffsetY";
     private static final int DEFAULT_IEOFFSETY = 0;
 
@@ -61,6 +72,7 @@ public class FallWithIE extends Fall {
 
         super.tick();
 
+        // move window
         if (activeIE.isVisible()) {
             if (getMascot().isLookRight()) {
                 getEnvironment().moveActiveIE(new Point(
@@ -77,6 +89,9 @@ public class FallWithIE extends Fall {
 
     }
 
+    /**
+     *
+     * */
     private int getIEOffsetX() throws VariableException {
         return eval(getSchema().getString(PARAMETER_IEOFFSETX), Number.class, DEFAULT_IEOFFSETX).intValue();
     }

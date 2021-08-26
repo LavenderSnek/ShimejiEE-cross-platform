@@ -16,7 +16,7 @@ public class Mute extends InstantAction {
     private static final Logger log = Logger.getLogger(Offset.class.getName());
 
     public static final String PARAMETER_SOUND = "Sound";
-    private static final String DEFAULT_SOUND = null;
+    public static final String DEFAULT_SOUND = null;
 
     public Mute(java.util.ResourceBundle schema, final VariableMap params) {
         super(schema, params);

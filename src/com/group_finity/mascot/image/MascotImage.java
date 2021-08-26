@@ -27,6 +27,9 @@ public class MascotImage {
         return this.image;
     }
 
+    /**
+     * Note that the center is actually the image anchor
+     * */
     public Point getCenter() {
         return this.center;
     }

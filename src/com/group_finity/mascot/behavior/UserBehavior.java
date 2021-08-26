@@ -74,7 +74,8 @@ public class UserBehavior implements Behavior {
 
 
     /**
-     * On Mouse Pressed: Start dragging.
+     * The mouse was pressed.
+     * If it is the left button, start dragging.
      */
     public synchronized void mousePressed(final MouseEvent event) throws CantBeAliveException {
 
@@ -101,7 +102,8 @@ public class UserBehavior implements Behavior {
     }
 
     /**
-     * On Mouse Release: End dragging.
+     * The mouse has left.
+     * If it is the left button, end dragging.
      */
     public synchronized void mouseReleased(final MouseEvent event) throws CantBeAliveException {
         if (SwingUtilities.isLeftMouseButton(event)) {

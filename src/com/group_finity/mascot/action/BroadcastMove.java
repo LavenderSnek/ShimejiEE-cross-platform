@@ -12,6 +12,10 @@ public class BroadcastMove extends Move {
 
     private static final Logger log = Logger.getLogger(BroadcastMove.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see BroadcastMove#getAffordance()
+     * */
     public static final String PARAMETER_AFFORDANCE = "Affordance";
     private static final String DEFAULT_AFFORDANCE = "";
 

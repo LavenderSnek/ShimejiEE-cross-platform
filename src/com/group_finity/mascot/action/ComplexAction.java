@@ -9,6 +9,9 @@ import com.group_finity.mascot.script.VariableMap;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+/**
+ * The base class of actions that group and interact with multiple actions as a group
+ */
 public abstract class ComplexAction extends ActionBase {
 
     private static final Logger log = Logger.getLogger(ComplexAction.class.getName());
@@ -63,17 +66,19 @@ public abstract class ComplexAction extends ActionBase {
     @Override
     public Boolean isDraggable() throws VariableException {
         if (currentAction < actions.length
-				&& actions[currentAction] != null
-				&& actions[currentAction] instanceof ActionBase)
-        {
+                && actions[currentAction] != null
+                && actions[currentAction] instanceof ActionBase) {
             return ((ActionBase) actions[currentAction]).isDraggable();
         }
         return true;
     }
 
-	protected int getCurrentAction() {
-		return this.currentAction;
-	}
+    /**
+     * index of the current action in {@link ComplexAction#actions}
+     */
+    protected int getCurrentAction() {
+        return this.currentAction;
+    }
 
     protected void setCurrentAction(final int currentAction) throws VariableException {
         this.currentAction = currentAction;

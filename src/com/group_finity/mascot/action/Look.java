@@ -5,6 +5,9 @@ import com.group_finity.mascot.script.VariableMap;
 
 import java.util.logging.Logger;
 
+/**
+ * Changes the direction the mascot is facing
+ * */
 public class Look extends InstantAction {
 
     private static final Logger log = Logger.getLogger(Look.class.getName());

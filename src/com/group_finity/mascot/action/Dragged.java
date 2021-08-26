@@ -16,7 +16,8 @@ public class Dragged extends ActionBase {
 
     private static final Logger log = Logger.getLogger(Dragged.class.getName());
 
-    private static final String VARIABLE_FOOTX = "FootX";
+    public static final String VARIABLE_FOOTX = "FootX";
+
     private double footX;
 
     private double footDx;

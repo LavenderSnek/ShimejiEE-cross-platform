@@ -11,18 +11,21 @@ import java.awt.Point;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Action to throw a window(IE)
+ * */
 public class ThrowIE extends Animate {
 
     private static final Logger log = Logger.getLogger(ThrowIE.class.getName());
 
     public static final String PARAMETER_INITIALVX = "InitialVX";
-    private static final int DEFAULT_INITIALVX = 32;
+    public static final int DEFAULT_INITIALVX = 32;
 
     public static final String PARAMETER_INITIALVY = "InitialVY";
-    private static final int DEFAULT_INITIALVY = -10;
+    public static final int DEFAULT_INITIALVY = -10;
 
     public static final String PARAMETER_GRAVITY = "Gravity";
-    private static final double DEFAULT_GRAVITY = 0.5;
+    public static final double DEFAULT_GRAVITY = 0.5;
 
     public ThrowIE(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap params) {
         super(schema, animations, params);

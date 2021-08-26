@@ -24,20 +24,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Mascot object.
+ * Mascot/Shimeji object; This object is inserted into scripts as {@code mascot}
  * <p>
- * The mascot represents the long-term, complex behavior and (@link Behavior),
- * Represents a short-term movements in the monotonous work with (@link Action).
- * <p>
- * The mascot they have an internal timer, at a constant interval to call (@link Action).
- * (@link Action) is (@link #animate (Point, MascotImage, boolean)) method or by calling
- * To animate the mascot.
- * <p>
- * (@link Action) or exits, the other at a certain time is called (@link Behavior), the next move to (@link Action).
+ * The {@link com.group_finity.mascot.action.Action Action} represents the short-term animation of the mascot.
+ * When this short-term action ends, {@link Behavior} picks the next action to be executed,
+ * forming the long-term pattern of actions.
  */
 public class Mascot {
-
-    private static final long serialVersionUID = 1L;
 
     private static final Logger log = Logger.getLogger(Mascot.class.getName());
 
@@ -47,46 +40,20 @@ public class Mascot {
 
     private String imageSet;
 
-    /**
-     * A window that displays the mascot.
-     */
     private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();
 
-    /**
-     * Manager managing the mascot.
-     */
     private Manager manager = null;
 
-    /**
-     * Mascot ground coordinates.
-     * Or feet, for example, when part of the hand is hanging.
-     */
     private Point anchor = new Point(0, 0);
 
-    /**
-     * Image to display.
-     */
     private MascotImage image = null;
 
-    /**
-     * Whether looking right or left.
-     * The original image is treated as left, true means picture must be inverted.
-     */
     private boolean lookRight = false;
 
-    /**
-     * Object representing the long-term behavior.
-     */
     private Behavior behavior = null;
 
-    /**
-     * Increases with each tick of the timer.
-     */
     private int time = 0;
 
-    /**
-     * Whether the animation is running.
-     */
     private boolean animating = true;
 
     private MascotEnvironment environment = new MascotEnvironment(this);
@@ -181,7 +148,7 @@ public class Mascot {
 
         // Add menu item
         final JMenuItem increaseMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("CallAnother"));
-        increaseMenu.addActionListener(event -> Main.getInstance().createMascot(imageSet));
+        increaseMenu.addActionListener(event -> Main.getInstance().createMascot(getImageSet()));
 
         // Dismiss menu item
         final JMenuItem disposeMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("Dismiss"));
@@ -189,11 +156,11 @@ public class Mascot {
 
         // Chase mouse menu item
         final JMenuItem gatherMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("FollowCursor"));
-        gatherMenu.addActionListener(event -> getManager().setBehaviorAll(Main.getInstance().getConfiguration(imageSet), Main.BEHAVIOR_GATHER, imageSet));
+        gatherMenu.addActionListener(event -> getManager().setBehaviorAll(Main.getInstance().getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet()));
 
         // Reduce to One menu item
         final JMenuItem oneMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissOthers"));
-        oneMenu.addActionListener(event -> getManager().remainOne(imageSet));
+        oneMenu.addActionListener(event -> getManager().remainOne(getImageSet()));
 
         // Restore IE! menu item
         final JMenuItem restoreMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("RestoreWindows"));
@@ -373,21 +340,22 @@ public class Mascot {
         return this.manager;
     }
 
-    /*public int getCount() {
-        return getManager().getCount(imageSet);
-    }
-    public int getTotalCount() {
-        return getManager().getCount();
-    }*/
-
     public void setManager(final Manager manager) {
         this.manager = manager;
     }
 
+    /**
+     * The window that displays the mascot.
+     * <p>
+     * do not to use this in actions/scripts. AWT/Swing breaks in many creative ways,
+     */
     private TranslucentWindow getWindow() {
         return this.window;
     }
 
+    /**
+     * Represents the screen environment of the mascot. Includes thing like screen size and interactive windows.
+     * */
     public MascotEnvironment getEnvironment() {
         return environment;
     }
@@ -396,10 +364,24 @@ public class Mascot {
         return affordances;
     }
 
+    /**
+     * The location of the mascot on the screen. 0,0 is top left.
+     * <p>
+     * For xml scripting: The mascot itself can be moved by using the methods in {@link Point} to manipulate location.
+     * <p>
+     * Where the point is within the mascot is the determined by the {@code ImageAnchor} property of the current image.
+     * This image anchor is generally placed where the mascot touches the environment.
+     * For example the default standing frame has it placed at bottom middle (64,128) where the feet are.
+     */
     public Point getAnchor() {
         return this.anchor;
     }
 
+    /**
+     * Can't be used from the xml because it's not possible to create a point object from the xml.
+     * <p>
+     * To move the mascot, use {@link #getAnchor()} along with the methods in {@link Point} to manipulate location.
+     * */
     public void setAnchor(Point anchor) {
         this.anchor = anchor;
     }
@@ -412,14 +394,30 @@ public class Mascot {
         this.image = image;
     }
 
+    /**
+     * Whether the mascot is looking right or left.
+     * <p>
+     * Note that the default image is treated as facing left.
+     */
     public boolean isLookRight() {
         return this.lookRight;
     }
 
+    /**
+     * Sets the direction the mascot is facing.
+     * <p>
+     * When this is set to true the {@code ImageRight} image will be used if present.
+     * If not then the flipped version of the default image is used
+     *
+     * @see com.group_finity.mascot.action.Look
+     * */
     public void setLookRight(final boolean lookRight) {
         this.lookRight = lookRight;
     }
 
+    /**
+     * Counter that increases with each frame.
+     * */
     public int getTime() {
         return this.time;
     }
@@ -436,10 +434,19 @@ public class Mascot {
         this.animating = animating;
     }
 
+    /**
+     * The name of the image set this mascot belongs to
+     * */
     public String getImageSet() {
         return imageSet;
     }
 
+    /**
+     * Do not use directly in scripts as it can have unpredictable results when sharing imageSets
+     * <p>
+     * There is no guarantee that the new imageSet is loaded even when it is present. To covert to a different
+     * imageSet properly, use the {@link com.group_finity.mascot.action.Transform Transform} action.
+     * */
     public void setImageSet(final String set) {
         imageSet = set;
     }

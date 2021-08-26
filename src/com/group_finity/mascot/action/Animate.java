@@ -8,6 +8,9 @@ import com.group_finity.mascot.script.VariableMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * An action that just performs an animation.
+ * */
 public class Animate extends BorderedAction {
 
     private static final Logger log = Logger.getLogger(Animate.class.getName());

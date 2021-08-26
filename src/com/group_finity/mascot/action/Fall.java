@@ -14,18 +14,38 @@ public class Fall extends ActionBase {
 
     private static final Logger log = Logger.getLogger(Fall.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see Fall#getInitialVx()
+     */
     public static final String PARAMETER_INITIALVX = "InitialVX";
     private static final int DEFAULT_INITIALVX = 0;
 
-    private static final String PARAMETER_INITIALVY = "InitialVY";
+    /**
+     * @custom.shimeji.param
+     * @see Fall#getInitialVy()
+     */
+    public static final String PARAMETER_INITIALVY = "InitialVY";
     private static final int DEFAULT_INITIALVY = 0;
 
+    /**
+     * @custom.shimeji.param
+     * @see Fall#getResistanceX()
+     */
     public static final String PARAMETER_RESISTANCEX = "ResistanceX";
     private static final double DEFAULT_RESISTANCEX = 0.05;
 
+    /**
+     * @custom.shimeji.param
+     * @see Fall#getResistanceY()
+     */
     public static final String PARAMETER_RESISTANCEY = "ResistanceY";
     private static final double DEFAULT_RESISTANCEY = 0.1;
 
+    /**
+     * @custom.shimeji.param
+     * @see Fall#getGravity()
+     */
     public static final String PARAMETER_GRAVITY = "Gravity";
     private static final double DEFAULT_GRAVITY = 2;
 
@@ -104,40 +124,55 @@ public class Fall extends ActionBase {
         getAnimation().next(getMascot(), getTime());
     }
 
+    /**
+     * Initial velocity in the x-axis
+     */
     private int getInitialVx() throws VariableException {
         return eval(getSchema().getString(PARAMETER_INITIALVX), Number.class, DEFAULT_INITIALVX).intValue();
     }
 
+    /**
+     * Initial velocity in the y-axis
+     */
     private int getInitialVy() throws VariableException {
         return eval(getSchema().getString(PARAMETER_INITIALVY), Number.class, DEFAULT_INITIALVY).intValue();
     }
 
+    /**
+     * Air resistance in the x-axis
+     */
     private double getResistanceX() throws VariableException {
         return eval(getSchema().getString(PARAMETER_RESISTANCEX), Number.class, DEFAULT_RESISTANCEX).doubleValue();
     }
 
+    /**
+     * Air resistance in the y-axis
+     */
     private double getResistanceY() throws VariableException {
         return eval(getSchema().getString(PARAMETER_RESISTANCEY), Number.class, DEFAULT_RESISTANCEY).doubleValue();
     }
 
+    /**
+     * Amount of gravity, negative numbers mean that it will float
+     */
     private double getGravity() throws VariableException {
         return eval(getSchema().getString(PARAMETER_GRAVITY), Number.class, DEFAULT_GRAVITY).doubleValue();
     }
 
-    private void setVelocityY(final double velocityY) {
-        this.velocityY = velocityY;
-    }
-
-    private double getVelocityY() {
-        return this.velocityY;
+    private double getVelocityX() {
+        return this.velocityX;
     }
 
     private void setVelocityX(final double velocityX) {
         this.velocityX = velocityX;
     }
 
-    private double getVelocityX() {
-        return this.velocityX;
+    private double getVelocityY() {
+        return this.velocityY;
+    }
+
+    private void setVelocityY(final double velocityY) {
+        this.velocityY = velocityY;
     }
 
     private double getModX() {

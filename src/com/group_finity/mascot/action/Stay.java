@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Actions that do not move.
+ */
 public class Stay extends BorderedAction {
 
     private static final Logger log = Logger.getLogger(Stay.class.getName());

@@ -1,7 +1,7 @@
 package com.group_finity.mascot.image;
 
 /**
- * A right and left facing pair of images
+ * Left-right pair of mascot images.
  */
 public class ImagePair {
 

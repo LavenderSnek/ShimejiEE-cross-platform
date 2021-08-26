@@ -5,12 +5,15 @@ import com.group_finity.mascot.script.VariableMap;
 
 import java.util.logging.Logger;
 
+/**
+ * Action to executes multiple actions in a sequence
+ * */
 public class Sequence extends ComplexAction {
 
     private static final Logger log = Logger.getLogger(Sequence.class.getName());
 
     public static final String PARAMETER_LOOP = "Loop";
-    private static final boolean DEFAULT_LOOP = false;
+    public static final boolean DEFAULT_LOOP = false;
 
     public Sequence(java.util.ResourceBundle schema, final VariableMap params, final Action... actions) {
         super(schema, params, actions);

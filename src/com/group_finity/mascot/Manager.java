@@ -6,53 +6,48 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 
 import java.awt.Point;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Maintains and manages list of mascots.
+ * An object that manages a list of mascots and takes timing.
+ * <p>
+ * This class adjusts the overall timing because each mascot moves asynchronously
+ * (such as when throwing a window).
+ * The {@link #tick()} method gets the latest environmental information.
+ * It then moves all the mascots
  */
 public class Manager {
 
     private static final Logger log = Logger.getLogger(Manager.class.getName());
 
     /**
-     * Interval of timer in milliseconds. set to 25fps
+     * Interval of timer in milliseconds. Is at 25fps
      */
     public static final int TICK_INTERVAL = 40;
 
-    /**
-     * A list of actual mascots
-     */
     private final List<Mascot> mascots = new ArrayList<>();
 
     /**
-     * The mascot will be added later.
-     * ConcurrentModificationException to prevent the addition of the mascot while
-     * {@link #tick()} are each simultaneously reflecting.
+     * List of mascots to be added. To prevent {@link ConcurrentModificationException},
+     * mascot additions are delayed until the next {@link #tick()}.
      */
     private final Set<Mascot> added = new LinkedHashSet<>();
 
     /**
-     * The mascot will be removed later.
-     * {@link java.util.ConcurrentModificationException} to prevent the deletion of the mascot {@link #tick()}  are
-     * each simultaneously reflecting.
+     * List of mascots to be added. To prevent {@link ConcurrentModificationException},
+     * mascot removals are delayed until the next {@link #tick()}.
      */
     private final Set<Mascot> removed = new LinkedHashSet<>();
+
+    private boolean exitOnLastRemoved = true;
 
     /**
      * timing thread that controls the ticks
      */
     private Thread thread;
 
-    /**
-     * causes the program to exit on the removal of the last mascot if set to true
-     */
-    private boolean exitOnLastRemoved = true;
 
     public Manager() {
         new Thread() {
@@ -123,6 +118,9 @@ public class Manager {
         }
     }
 
+    /**
+     * Advance the mascot one frame.
+     * */
     private void tick() {
 
         // Update the environmental information
@@ -245,7 +243,7 @@ public class Manager {
     }
 
     /**
-     * Disposes all mascots made from the specified imageSet
+     * Disposes all mascots made from the specified imageSet. NON-STANDARD, do not use in scripts!
      */
     public void remainNone(String imageSet) {
         synchronized (this.getMascots()) {
@@ -260,10 +258,16 @@ public class Manager {
     }
 
 
+    /**
+     * The total number of mascots that are being controlled by this manager
+     * */
     public int getCount() {
         return getCount(null);
     }
 
+    /**
+     * The number of mascots from a certain imageSet that are being controlled by this manager
+     * */
     public int getCount(String imageSet) {
 
         synchronized (getMascots()) {
@@ -332,6 +336,12 @@ public class Manager {
         }
     }
 
+    /**
+     * Whether the program should be terminated when the last mascot is deleted.
+     * <p>
+     * If the tray icon creation fails, the process will remain forever if the program
+     * is not terminated when the mascot disappears.
+     */
 	public boolean isExitOnLastRemoved() {
 		return exitOnLastRemoved;
 	}

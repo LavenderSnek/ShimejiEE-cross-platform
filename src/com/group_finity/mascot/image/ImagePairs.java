@@ -28,7 +28,9 @@ public class ImagePairs {
     }
 
     public static MascotImage getImage(String filename, boolean isLookRight) {
-        if (!imagepairs.containsKey(filename)) return null;
+        if (!imagepairs.containsKey(filename)) {
+            return null;
+        }
         return imagepairs.get(filename).getImage(isLookRight);
     }
 

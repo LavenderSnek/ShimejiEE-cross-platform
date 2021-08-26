@@ -15,10 +15,10 @@ public class MoveWithTurn extends BorderedAction {
     private static final Logger log = Logger.getLogger(MoveWithTurn.class.getName());
 
     private static final String PARAMETER_TARGETX = "TargetX";
-    private static final int DEFAULT_TARGETX = Integer.MAX_VALUE;
+    public static final int DEFAULT_TARGETX = Integer.MAX_VALUE;
 
     private static final String PARAMETER_TARGETY = "TargetY";
-    private static final int DEFAULT_TARGETY = Integer.MAX_VALUE;
+    public static final int DEFAULT_TARGETY = Integer.MAX_VALUE;
 
     private boolean turning = false;
 

@@ -12,15 +12,26 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Action to walk while holding a window(IE)
+ * */
 public class WalkWithIE extends Move {
 
     private static final Logger log = Logger.getLogger(Stay.class.getName());
 
+    /**
+     * @custom.shimeji.param
+     * @see WalkWithIE#getIEOffsetX()
+     * */
     public static final String PARAMETER_IEOFFSETX = "IeOffsetX";
-    private static final int DEFAULT_IEOFFSETX = 0;
+    public static final int DEFAULT_IEOFFSETX = 0;
 
+    /**
+     * @custom.shimeji.param
+     * @see WalkWithIE#getIEOffsetY()
+     * */
     public static final String PARAMETER_IEOFFSETY = "IeOffsetY";
-    private static final int DEFAULT_IEOFFSETY = 0;
+    public static final int DEFAULT_IEOFFSETY = 0;
 
     public WalkWithIE(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap params) {
         super(schema, animations, params);

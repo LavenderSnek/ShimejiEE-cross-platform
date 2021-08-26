@@ -8,6 +8,11 @@ import com.group_finity.mascot.script.VariableMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Action to make the mascot to dismiss itself
+ * <p>
+ * The mascot dismisses itself after all the animations/sub-action have finished playing
+ * */
 public class SelfDestruct extends Animate {
 
     private static final Logger log = Logger.getLogger(SelfDestruct.class.getName());

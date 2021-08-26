@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Action to resist a dragging action.
+ * <p>
+ * I think this meant to be "Resist" but the misspelling is now part of the api ¯\_(ツ)_/¯
+ */
 public class Regist extends ActionBase {
 
     private static final Logger log = Logger.getLogger(Regist.class.getName());
