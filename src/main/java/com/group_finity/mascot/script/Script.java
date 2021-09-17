@@ -2,7 +2,7 @@ package com.group_finity.mascot.script;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.exception.VariableException;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -11,7 +11,6 @@ import javax.script.ScriptException;
 
 public class Script extends Variable {
 
-	@SuppressWarnings("removal")
 	private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine(className -> false);
 
 	private final String source;

@@ -12,16 +12,31 @@ target/
 *.out
 *.log.lck
 tmp/
-ShimejiEE/ShimejiEE.jar
-ShimejiEE/lib/custom-jre/
-releases/
+
+# Netbeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+nbactions.xml
+nb-configuration.xml
 
 # Windows
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
+*.bak
+*.lnk
 
-# mac
+# macOS
 .DS_Store
 ._*
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

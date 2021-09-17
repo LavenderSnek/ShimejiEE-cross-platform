@@ -1,6 +1,6 @@
 # Snek Changelog
 
-## 2.1.0
+## 1.1.0
 Image set and file finding fixes
 
 - Re-adds original options for config file locations 
@@ -9,7 +9,7 @@ Image set and file finding fixes
 - Adds setting key `ShowChooserAtStart`
 - Adds menu item to refresh all mascots
  
-## 2.0.4
+## 1.0.3
 Launcher script & UI
 
 - Bundled customized jre and added bash script to launch the app with the correct jre
@@ -21,7 +21,7 @@ Launcher script & UI
 - Tray icon language refreshes immediately after language change again
 
 
-## 2.0.3
+## 1.0.2
 Complete macOS dragging fix
 
 - Dragging now uses the regular code without flickering
@@ -30,7 +30,7 @@ Complete macOS dragging fix
 - Fixed a bug I made on the behaviour toggle part of the tray icon
 - found ceiling interaction workaround
 
-## 2.0.2
+## 1.0.1
 UI adjustments
 
 - Context menu now works
@@ -43,7 +43,7 @@ UI adjustments
   - Split everything into smaller functions 
   - uses AWT because it feels more native + has access to tray icon
 
-## 2.0.1
+## 1.0.0
 Initial macOS functionality + cleanup
 
 - Runs _okay_ on macOS
