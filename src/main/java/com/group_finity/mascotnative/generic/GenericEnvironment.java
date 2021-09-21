@@ -7,7 +7,7 @@ import java.awt.Point;
 
 class GenericEnvironment extends Environment {
 
-    private static Area activeIE = new Area();
+    private static final Area activeIE = new Area();
 
     @Override
     public void tick() {

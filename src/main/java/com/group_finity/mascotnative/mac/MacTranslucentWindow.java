@@ -1,50 +1,65 @@
 package com.group_finity.mascotnative.mac;
 
-import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 
-import javax.swing.JRootPane;
+import javax.swing.JPanel;
 import javax.swing.JWindow;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 /**
- * @author nonowarn
+ * Can't pass mouse clicks through the transparent areas like other platforms
+ *
+ * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8013450">Bug [JDK-8013450]</a>
  */
-class MacTranslucentWindow implements TranslucentWindow {
+class MacTranslucentWindow extends JWindow implements TranslucentWindow {
 
-    private TranslucentWindow delegate;
+    private static final MacNativeImage START_IMAGE = new MacNativeImage(new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB));
 
     private boolean imageChanged = false;
-    private NativeImage oldImage = null;
 
-    MacTranslucentWindow(NativeFactory factory) {
-        delegate = factory.newTransparentWindow();
-        JRootPane rootPane = delegate.asJWindow().getRootPane();
+    private MacNativeImage currentImage;
+    private MacNativeImage nextImage;
+
+    MacTranslucentWindow() {
+        super();
+
+        setBackground(new Color(0, 0, 0, 0));
+
+        currentImage = START_IMAGE;
+
+        setContentPane(new JPanel() {
+            @Override
+            protected void paintComponent(final Graphics g) {
+                g.drawImage(currentImage.getManagedImage(), 0, 0, null);
+            }
+        });
 
         //so it won't interfere with any custom shadows the user wants to add
-        rootPane.putClientProperty("Window.shadow", Boolean.FALSE);
+        getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);
 
         // it gets rid of the 'flickering' when dragging,
-        // im guessing that the java dragging clashes with the native
-        rootPane.putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
+        getRootPane().putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
     }
 
     @Override
     public JWindow asJWindow() {
-        return delegate.asJWindow();
+        return this;
     }
 
     @Override
     public void setImage(NativeImage image) {
-        this.imageChanged = (this.oldImage != null && image != oldImage);
-        this.oldImage = image;
-        delegate.setImage(image);
+        this.imageChanged = (this.currentImage != null && image != currentImage);
+        nextImage = (MacNativeImage) image;
     }
 
     @Override
     public void updateImage() {
         if (this.imageChanged) {
-            delegate.updateImage();
+            currentImage = nextImage;
+            this.repaint();
             this.imageChanged = false;
         }
     }
