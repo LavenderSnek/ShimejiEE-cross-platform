@@ -32,7 +32,7 @@
         <attribute name="Gap" type="tns:Parameter"/>
         <attribute name="BornX" type="tns:Parameter"/>
         <attribute name="BornY" type="tns:Parameter"/>
-        <attribute name="BornBehavior" type="tns:Parameter"/>
+        <attribute name="BornBehavior"/>
         <attribute name="VelocityParam" type="tns:Parameter"/>
         <attribute name="RegistanceX" type="tns:Parameter"/>
         <attribute name="RegistanceY" type="tns:Parameter"/>
@@ -112,14 +112,14 @@
         <attribute name="Image" use="required">
             <simpleType>
                 <restriction base="string">
-                    <pattern value=".+\.(png|gif|bmp|PNG|GIF|BMP)"/>
+                    <pattern value="/.+\.(png|bmp|PNG|BMP)"/>
                 </restriction>
             </simpleType>
         </attribute>
         <attribute name="ImageRight">
             <simpleType>
                 <restriction base="string">
-                    <pattern value=".+\.(png|gif|bmp|PNG|GIF|BMP)"/>
+                    <pattern value="/.+\.(png|bmp|PNG|BMP)"/>
                 </restriction>
             </simpleType>
         </attribute>
@@ -138,6 +138,15 @@
             </simpleType>
         </attribute>
         <attribute name="Duration" type="int" use="required"/>
+        <!--    sound    -->
+        <attribute name="Sound">
+            <simpleType>
+                <restriction base="string">
+                    <pattern value="/.*"/>
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="Volume" type="float" default="0"/>
     </complexType>
 
     <complexType name="ActionReference">
