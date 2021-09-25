@@ -3,7 +3,6 @@ package com.group_finity.mascotnative.mac;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
 import com.group_finity.mascotnative.mac.jna.*;
-import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -24,6 +23,9 @@ class MacEnvironment extends Environment {
     //a lot of the comments here have been though google translate, it did a surprisingly good job tbh
 
     private static final Carbon carbon = Carbon.INSTANCE;
+
+    private static final int MENUBAR_HEIGHT = 22;
+    private static final int MAX_DOCK_SIZE = 100;
 
     /**
      * On Mac, you can take the active window,
@@ -55,9 +57,6 @@ class MacEnvironment extends Environment {
     static final CFStringRef kAXPosition = createCFString("AXPosition");
     static final CFStringRef kAXSize = createCFString("AXSize");
     static final CFStringRef kAXFocusedWindow = createCFString("AXFocusedWindow");
-    static final CFStringRef kDock = createCFString("com.apple.Dock");
-    static final CFStringRef kTileSize = createCFString("tilesize");
-    static final CFStringRef kOrientation = createCFString("orientation");
     static final CFStringRef kAXChildren = createCFString("AXChildren");
 
 
@@ -212,98 +211,18 @@ class MacEnvironment extends Environment {
     }
 
     /**
-     * On a Mac, trying to move a window completely off screen pushes it back into the screen. so...
+     * On a Mac, trying to move a window completely off-screen pushes it back into the screen.
+     * Going beyond the dock is also considered offscreen. This returns an area where that won't happen
      *
      * @return A rectangle where the window will still be visible on screen
      */
     private static Rectangle getWindowVisibleArea() {
-        final int menuBarHeight = 22;//also y
-        int x = 1;
-        int width = getScreenWidth() - 2;
-        int height = getScreenHeight() - menuBarHeight;
-
-        refreshDockState();
-        final String orientation = getDockOrientation();
-        final int tilesize = getDockTileSize();
-
-        if ("bottom".equals(orientation)) {
-            height -= tilesize;
-        } else if ("right".equals(orientation)) {
-            width -= tilesize;
-        } else if ("left".equals(orientation)) {
-            x += tilesize;
-            width -= tilesize;
-        } else {
-            // unknown
-            x += tilesize;
-            width -= 2 * tilesize;
-        }
-
-        return new Rectangle(x, menuBarHeight, width, height);
-    }
-
-    private static String getDockOrientation() {
-        CFTypeRef orientationRef =
-                carbon.CFPreferencesCopyValue(
-                        kOrientation, kDock, carbon.kCurrentUser, carbon.kAnyHost);
-
-        // I have an environment where CFPreferencesCopyValue returns null
-        if (orientationRef == null) {
-            return "null";
-        }
-
-        final int bufsize = 64;
-        Memory buf = new Memory(64);
-        carbon.CFStringGetCString(orientationRef, buf, bufsize, carbon.CFStringGetSystemEncoding());
-        carbon.CFRelease(orientationRef);
-        String ret = buf.getString(0, false);
-        buf.clear();
-        return ret;
-    }
-
-    /**
-     * I can't find an efficient way to monitor the height of the Dock,
-     * so I'll just return a constant larger than the maximum size of the Dock.
-     * <p>
-     * The value obtained with CFPreferencesCopyValue is different from the
-     * value obtained with AppleScript,and AppleScript is the correct value.
-     * <p>
-     * If you get the pid and use the Accessibility API,
-     * you can get the correct value, but if killall Dock is done, it will segfault.
-     * I have to re-take the pid every time to avoid segfault, but I can't
-     * find any other way than searching through the list of processes.
-     * I don't want to use AppleScript because of how often it is called.
-     * We will consider this trade-off later.
-     */
-    private static int getDockTileSize() {
-        return 100;
-    }
-
-    private static void refreshDockState() {
-        carbon.CFPreferencesAppSynchronize(kDock);
-    }
-
-    private static void setCurrentPID(long newPID) {
-        if (newPID != myPID) {
-            currentPID = newPID;
-            getTouchedProcesses().add(newPID);
-        }
-    }
-
-    private static long getCurrentPID() {
-        return currentPID;
-    }
-
-    private static HashSet<Long> getTouchedProcesses() {
-        return touchedProcesses;
-    }
-
-    private static int getScreenWidth() {
-        return screenWidth;
-    }
-
-    private static int getScreenHeight() {
-        return screenHeight;
+        return new Rectangle(
+                MAX_DOCK_SIZE,
+                MENUBAR_HEIGHT,
+                getScreenWidth() - 2 * MAX_DOCK_SIZE,
+                getScreenHeight() - MENUBAR_HEIGHT
+        );
     }
 
     private void updateFrontmostWindow() {
@@ -316,7 +235,10 @@ class MacEnvironment extends Environment {
                         && !frontmostWindowRect.contains(windowVisibleArea) // Exclude desktop
         );
         frontmostWindow.set(
-                frontmostWindowRect == null ? new Rectangle(-1, -1, 0, 0) : frontmostWindowRect);
+                frontmostWindowRect == null
+                        ? new Rectangle(-1, -1, 0, 0)
+                        : frontmostWindowRect
+        );
     }
 
     private static void updateFrontmostApp() {
@@ -337,9 +259,8 @@ class MacEnvironment extends Environment {
      */
     @Override
     public void moveActiveIE(final Point point) {
-        final Rectangle
-                visibleRect = getWindowVisibleArea(),
-                windowRect = getFrontmostAppRect();
+        final Rectangle visibleRect = getWindowVisibleArea();
+        final Rectangle windowRect = getFrontmostAppRect();
 
         // Wrap coordinates to the left
         final double minX = visibleRect.getMinX() - windowRect.getWidth();
@@ -382,5 +303,29 @@ class MacEnvironment extends Environment {
 
     @Override
     public void refreshCache() {}
+
+
+    private static void setCurrentPID(long newPID) {
+        if (newPID != myPID) {
+            currentPID = newPID;
+            getTouchedProcesses().add(newPID);
+        }
+    }
+
+    private static long getCurrentPID() {
+        return currentPID;
+    }
+
+    private static HashSet<Long> getTouchedProcesses() {
+        return touchedProcesses;
+    }
+
+    private static int getScreenWidth() {
+        return screenWidth;
+    }
+
+    private static int getScreenHeight() {
+        return screenHeight;
+    }
 
 }
