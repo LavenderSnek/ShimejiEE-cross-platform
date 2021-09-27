@@ -10,7 +10,7 @@ import com.sun.jna.ptr.PointerByReference;
 
 public interface Carbon extends Library {
 
-    Carbon INSTANCE = (Carbon) Native.loadLibrary("Carbon", Carbon.class);
+    Carbon INSTANCE = Native.load("Carbon", Carbon.class);
 
     NativeLibrary nl = NativeLibrary.getProcess();
     Pointer kCurrentUser = nl.getGlobalVariableAddress("kCFPreferencesCurrentUser").getPointer(0);

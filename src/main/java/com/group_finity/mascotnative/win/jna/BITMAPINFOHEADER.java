@@ -2,6 +2,9 @@ package com.group_finity.mascotnative.win.jna;
 
 import com.sun.jna.Structure;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class BITMAPINFOHEADER extends Structure {
 
     public int biSize;
@@ -15,5 +18,10 @@ public class BITMAPINFOHEADER extends Structure {
     public int biYPelsPerMeter;
     public int biClrUsed;
     public int biClrImportant;
+
+    @Override
+    protected List<String> getFieldOrder() {
+        return Arrays.asList("biSize", "biWidth", "biHeight", "biPlanes", "biBitCount", "biCompression", "biSizeImage", "biXPelsPerMeter", "biYPelsPerMeter", "BiClrUsed", "BiClrImportant");
+    }
 
 }

@@ -68,7 +68,7 @@ class WindowsNativeImage implements NativeImage {
                 //UpdateLayeredWindow has a bug that the alpha value is ignored when the RGB value is #FFFFFF.
                 //Photoshop sets the RGB value to 0 where the alpha value is 0.
 
-                bmp.bmBits.setInt(destIndex + x * 4,
+                bmp.bmBits.setInt(destIndex + x * 4L,
                         (rgb[srcColIndex / scaling] & 0xFF000000) == 0 ? 0 : rgb[srcColIndex / scaling]);
 
                 ++srcColIndex;

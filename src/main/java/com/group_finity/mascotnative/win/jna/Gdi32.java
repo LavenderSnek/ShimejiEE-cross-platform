@@ -6,7 +6,7 @@ import com.sun.jna.win32.StdCallLibrary;
 
 public interface Gdi32 extends StdCallLibrary {
 
-    Gdi32 INSTANCE = (Gdi32) Native.loadLibrary("Gdi32", Gdi32.class);
+    Gdi32 INSTANCE = Native.load("Gdi32", Gdi32.class);
 
     Pointer CreateCompatibleDC(Pointer HDC);
 

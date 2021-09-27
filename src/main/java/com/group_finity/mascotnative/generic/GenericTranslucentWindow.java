@@ -2,7 +2,7 @@ package com.group_finity.mascotnative.generic;
 
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
-import com.sun.jna.examples.WindowUtils;
+import com.sun.jna.platform.WindowUtils;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -17,7 +17,6 @@ class GenericTranslucentWindow extends JWindow implements TranslucentWindow {
     private GenericNativeImage image;
 
     private JPanel panel;
-    private float alpha = 1.0f;
 
     public GenericTranslucentWindow() {
         super(WindowUtils.getAlphaCompatibleGraphicsConfiguration());
@@ -50,18 +49,9 @@ class GenericTranslucentWindow extends JWindow implements TranslucentWindow {
     @Override
     protected void addImpl(final Component comp, final Object constraints, final int index) {
         super.addImpl(comp, constraints, index);
-        if (comp instanceof JComponent) {
-            final JComponent jcomp = (JComponent) comp;
+        if (comp instanceof final JComponent jcomp) {
             jcomp.setOpaque(false);
         }
-    }
-
-    public void setAlpha(final float alpha) {
-        WindowUtils.setWindowAlpha(this, alpha);
-    }
-
-    public float getAlpha() {
-        return this.alpha;
     }
 
     @Override

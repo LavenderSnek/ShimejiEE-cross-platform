@@ -6,7 +6,7 @@ import com.sun.jna.win32.StdCallLibrary;
 
 public interface User32 extends StdCallLibrary {
 
-    User32 INSTANCE = (User32) Native.loadLibrary("User32", User32.class);
+    User32 INSTANCE = Native.load("User32", User32.class);
 
     int SM_CXSCREEN = 0;
     int SM_CYSCREEN = 1;

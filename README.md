@@ -49,7 +49,7 @@ Vector: The only thing I could still find online.
 - macOS: tested on 11.1 Intel, but it'll probably work on other models too
     
 - Windows 10: Works for now.
-  - Needs java 11
+  - Needs java 17
   - Download the no jre version
 
 - Linux

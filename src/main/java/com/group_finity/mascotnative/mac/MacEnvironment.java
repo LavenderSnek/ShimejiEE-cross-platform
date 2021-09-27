@@ -189,7 +189,7 @@ class MacEnvironment extends Environment {
     }
 
     private static void moveWindow(AXUIElementRef window, int x, int y) {
-        CGPoint position = new CGPoint((double) x, (double) y);
+        CGPoint position = new CGPoint(x, y);
         position.write();
         AXValueRef axvalue = carbon.AXValueCreate(
                 carbon.kAXValueCGPointType, position.getPointer());

@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.JWindow;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 
 /**
  * Can't pass mouse clicks through the transparent areas like other platforms
@@ -16,26 +15,26 @@ import java.awt.image.BufferedImage;
  */
 class MacTranslucentWindow extends JWindow implements TranslucentWindow {
 
-    private static final MacNativeImage START_IMAGE = new MacNativeImage(new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB));
+    private static final Color CLEAR = new Color(0, 0, 0, 0);
 
     private boolean imageChanged = false;
 
     private MacNativeImage currentImage;
-    private MacNativeImage nextImage;
 
     MacTranslucentWindow() {
         super();
 
-        setBackground(new Color(0, 0, 0, 0));
-
-        currentImage = START_IMAGE;
-
-        setContentPane(new JPanel() {
+        JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(final Graphics g) {
                 g.drawImage(currentImage.getManagedImage(), 0, 0, null);
             }
-        });
+        };
+
+        setBackground(CLEAR);
+        panel.setBackground(CLEAR);
+
+        setContentPane(panel);
 
         //so it won't interfere with any custom shadows the user wants to add
         getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);
@@ -51,16 +50,15 @@ class MacTranslucentWindow extends JWindow implements TranslucentWindow {
 
     @Override
     public void setImage(NativeImage image) {
-        this.imageChanged = (this.currentImage != null && image != currentImage);
-        nextImage = (MacNativeImage) image;
+        imageChanged = (currentImage != null && image != currentImage);
+        currentImage = (MacNativeImage) image;
     }
 
     @Override
     public void updateImage() {
         if (this.imageChanged) {
-            currentImage = nextImage;
-            this.repaint();
-            this.imageChanged = false;
+            getContentPane().repaint();
+            imageChanged = false;
         }
     }
 

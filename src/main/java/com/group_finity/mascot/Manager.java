@@ -280,8 +280,9 @@ public class Manager {
                 for (int index = 0; index < getMascots().size(); index++) {
 
                     Mascot m = getMascots().get(index);
-                    if (m.getImageSet().equals(imageSet))
+                    if (m.getImageSet().equals(imageSet)) {
                         count++;
+                    }
                 }
                 return count;
             }
