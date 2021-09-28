@@ -7,6 +7,7 @@ import com.group_finity.mascot.imagesets.ImageSetUtils;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascotnative.win.WindowsInteractiveWindowForm;
 import com.joconner.i18n.Utf8ResourceBundleControl;
+import com.sun.jna.Platform;
 import org.w3c.dom.Document;
 
 import javax.imageio.ImageIO;
@@ -71,11 +72,6 @@ public final class Main {
         //--------//
     }
 
-    /**
-     * 32 or 64 bits stuff
-     */
-    private Platform platform;
-
     private ResourceBundle languageBundle;
     private static final JFrame frame = new javax.swing.JFrame();
     //-----//
@@ -105,10 +101,6 @@ public final class Main {
 
     private Manager getManager() {
         return this.manager;
-    }
-
-    public Platform getPlatform() {
-        return platform;
     }
 
     public Properties getProperties() {
@@ -149,8 +141,6 @@ public final class Main {
     }
 
     public void run() {
-        // test platform (32 or 64 bit)
-        platform = System.getProperty("sun.arch.data.model").equals("64") ? Platform.x86_64 : Platform.x86;
 
         // load settings.properties
         properties = new Properties();
@@ -618,7 +608,7 @@ public final class Main {
         trayPopup.add(new MenuItem("-"));
 
         trayPopup.add(languageMenu);
-        if (com.sun.jna.Platform.isWindows()) {
+        if (Platform.isWindows()) {
             trayPopup.add(scalingMenu);
         }
         trayPopup.add(togglesMenu);
@@ -628,7 +618,7 @@ public final class Main {
         trayPopup.add(chooseShimeji);
         trayPopup.add(reloadMascot);
         // selective window interaction is only available on windows for now
-        if (com.sun.jna.Platform.isWindows()) {
+        if (Platform.isWindows()) {
             trayPopup.add(interactiveMenu);
         }
         trayPopup.add(dismissAll);
@@ -641,7 +631,7 @@ public final class Main {
             );
 
             // Flip the click required to create mascot on non-windows
-            if (!com.sun.jna.Platform.isWindows()) {
+            if (Platform.isWindows()) {
                 icon.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(final MouseEvent e) {

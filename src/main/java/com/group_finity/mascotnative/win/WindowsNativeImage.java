@@ -24,6 +24,14 @@ import java.awt.image.ImageProducer;
  */
 class WindowsNativeImage implements NativeImage {
 
+    private static final OsArchitecture ARCHITECTURE;
+
+    static {
+        ARCHITECTURE = System.getProperty("sun.arch.data.model").equals("64")
+                ? OsArchitecture.x86_64
+                : OsArchitecture.x86;
+    }
+
     /**
      * Creates the windows bitmap
      *
@@ -52,7 +60,7 @@ class WindowsNativeImage implements NativeImage {
     private static void flushNative(final Pointer nativeHandle, final int[] rgb, final int scaling) {
 
         final BITMAP bmp = new BITMAP();
-        Gdi32.INSTANCE.GetObjectW(nativeHandle, Main.getInstance().getPlatform().getBitmapSize() + Native.POINTER_SIZE, bmp);
+        Gdi32.INSTANCE.GetObjectW(nativeHandle, ARCHITECTURE.getBitmapSize() + Native.POINTER_SIZE, bmp);
 
         // Copy at the pixel level. These dimensions are already scaled
         int width = bmp.bmWidth;
