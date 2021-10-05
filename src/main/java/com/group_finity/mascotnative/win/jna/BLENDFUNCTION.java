@@ -17,7 +17,7 @@ public class BLENDFUNCTION extends Structure {
 
     @Override
     protected List<String> getFieldOrder() {
-        return Arrays.asList("AC_SRC_OVER", "AC_SRC_ALPHA", "BlendOp", "BlendFlags", "SourceConstantAlpha", "AlphaFormat");
+        return Arrays.asList("BlendOp", "BlendFlags", "SourceConstantAlpha", "AlphaFormat");
     }
 
 }

@@ -21,7 +21,7 @@ public class BITMAPINFOHEADER extends Structure {
 
     @Override
     protected List<String> getFieldOrder() {
-        return Arrays.asList("biSize", "biWidth", "biHeight", "biPlanes", "biBitCount", "biCompression", "biSizeImage", "biXPelsPerMeter", "biYPelsPerMeter", "BiClrUsed", "BiClrImportant");
+        return Arrays.asList("biSize", "biWidth", "biHeight", "biPlanes", "biBitCount", "biCompression", "biSizeImage", "biXPelsPerMeter", "biYPelsPerMeter", "biClrUsed", "biClrImportant");
     }
 
 }
