@@ -345,6 +345,21 @@ public class Mascot {
     }
 
     /**
+     * The number of mascots of the same image set being controlled by
+     * the same manager
+     * */
+    public int getCount() {
+        return getManager().getCount(imageSet);
+    }
+
+    /**
+     * The total number of mascots being controlled by the same manager
+     * */
+    public int getTotalCount() {
+        return getManager().getCount();
+    }
+
+    /**
      * The window that displays the mascot.
      * <p>
      * do not to use this in actions/scripts. AWT/Swing breaks in many creative ways,
