@@ -3,8 +3,6 @@
 ## Building
 Install maven + jdk 17, set `JAVA_HOME` to jdk 17, then run `mvn clean package` to build. The complete program folder shows up in `tagret/ShimejiEE/`.
 
-To run it navigate to `tagret/ShimejiEE/` and run ShimejiEE.jar with java 17+. The working directory needs to be set to the program folder.
-
 ## Custom Java on macOS
 _This part isn't necessary to get the program to run_, it just fixes something that annoys me.
 

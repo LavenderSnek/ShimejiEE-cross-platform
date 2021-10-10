@@ -8,43 +8,16 @@ import java.awt.Point;
 
 public class Pose {
 
-    private final String image;
-    private final String rightImage;
+    private final String imageName;
 
     private final int dx;
     private final int dy;
 
     private final int duration;
-
     private final String sound;
 
-    public Pose(final String image) {
-        this(image, "", 0, 0, 1);
-    }
-
-    public Pose(final String image, final int duration) {
-        this(image, "", 0, 0, duration);
-    }
-
-    public Pose(final String image, final String rightImage) {
-        this(image, rightImage, 0, 0, 1);
-    }
-
-    public Pose(final String image, final String rightImage, final int duration) {
-        this(image, rightImage, 0, 0, duration);
-    }
-
-    public Pose(final String image, final int dx, final int dy, final int duration) {
-        this(image, "", dx, dy, duration);
-    }
-
-    public Pose(final String image, final String rightImage, final int dx, final int dy, final int duration) {
-        this(image, rightImage, dx, dy, duration, null);
-    }
-
-    public Pose(final String image, final String rightImage, final int dx, final int dy, final int duration, final String sound) {
-        this.image = image;
-        this.rightImage = rightImage;
+    public Pose(final String imageName, final int dx, final int dy, final int duration, final String sound) {
+        this.imageName = imageName;
         this.dx = dx;
         this.dy = dy;
         this.duration = duration;
@@ -75,7 +48,7 @@ public class Pose {
     }
 
     public String getImageName() {
-        return (image == null ? "" : image) + (rightImage == null ? "" : rightImage);
+        return imageName;
     }
 
     public int getDx() {

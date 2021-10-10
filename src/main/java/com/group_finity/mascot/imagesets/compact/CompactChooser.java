@@ -6,6 +6,7 @@ import com.group_finity.mascot.imagesets.ImageSetUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -57,10 +58,22 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         toFront();
     }
 
+    private void cancelSelection() {
+        cancelSelection = true;
+        this.dispose();
+    }
+
     private void addDataToUI() {
         DefaultListModel<CompactImageSetPreview> listModel = new DefaultListModel<>();
 
-        String[] allImageSets = ImageSetUtils.getAllImageSets();
+        String[] allImageSets = new String[0];
+        try {
+            allImageSets = Main.getInstance().getProgramFolder().getImageSetNames().toArray(new String[0]);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Main.showError("Unable to load imageSets");
+            cancelSelection();
+        }
 
         if (allImageSets.length == 0) {
             imageSetJlist = new CompactImageSetList(listModel);
@@ -80,12 +93,10 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
         //yes, i know this is horribly inefficient, im just hoping it wont be called enough to matter
         var selectedIndices = new ArrayList<Integer>();
 
-        if (selected != null) {
-            for (String str : selected) {
-                for (int j = 0; j < allImageSets.length; j++) {
-                    if (allImageSets[j].equals(str)) {
-                        selectedIndices.add(j);
-                    }
+        for (String str : selected) {
+            for (int j = 0; j < allImageSets.length; j++) {
+                if (allImageSets[j].equals(str)) {
+                    selectedIndices.add(j);
                 }
             }
         }
@@ -117,10 +128,7 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
         //--------buttons--------//
         var buttonCancel = new JButton(Main.getInstance().getLanguageBundle().getString("Cancel"));
-        buttonCancel.addActionListener(e -> {
-            cancelSelection = true;
-            this.dispose();
-        });
+        buttonCancel.addActionListener(e -> this.cancelSelection());
 
         var buttonOK = new JButton(Main.getInstance().getLanguageBundle().getString("UseSelected"));
         buttonOK.addActionListener(e -> this.dispose());

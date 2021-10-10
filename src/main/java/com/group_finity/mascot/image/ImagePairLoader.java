@@ -1,39 +1,55 @@
 package com.group_finity.mascot.image;
 
+import com.group_finity.mascot.Main;
+
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class ImagePairLoader {
 
     /**
-     * Loads an image into {@link ImagePairs#imagepairs} if it isn't already loaded
+     * Loads a pair of images into {@link ImagePairs#imagepairs} if it isn't already loaded
      *
-     * @param name      Path to the image
-     * @param rightName Path to the right facing version of the image
-     * @param center    Anchor point of the image
+     * @param leftName      Path to the image
+     * @param rightName Path to the right facing version of the image, flipped left image will be used if this is null
+     * @param anchor    Anchor point of the image
      * @param scaling   amount of scaling applied to the image, also affects anchor paint
+     *
+     * @return The key with which the loaded image pair can be accessed with {@link ImagePairs#getImagePair(String)}
      */
-    public static void load(final String name, final String rightName, final Point center, final int scaling) throws IOException {
-        if (ImagePairs.contains(name + (rightName == null ? "" : rightName))) {
-            return;
+    public static String load(String imageSetName, final String leftName, final String rightName, final Point anchor, final int scaling) throws IOException {
+        String identifier =
+                Path.of(imageSetName, leftName) +
+                (rightName == null ? "" : (":" + Path.of(imageSetName, rightName)));
+
+        if (ImagePairs.contains(identifier)) {
+            return identifier;
         }
 
-        final BufferedImage leftImage = premultiply(ImageIO.read(ImagePairLoader.class.getResource(name)));
+        Path imgSetFolder = Main.getInstance().getProgramFolder().imgPath().resolve(imageSetName).toAbsolutePath();
+
+        Path leftImagePath = Path.of(imgSetFolder.toString(), leftName); // ignores the leading slashes
+        final BufferedImage leftImage = premultiply(ImageIO.read(leftImagePath.toFile()));
         final BufferedImage rightImage;
         if (rightName == null) {
             rightImage = flip(leftImage);
         } else {
-            rightImage = premultiply(ImageIO.read(ImagePairLoader.class.getResource(rightName)));
+            Path rightImagePath = Path.of(imgSetFolder.toString(), rightName);
+            rightImage = premultiply(ImageIO.read(rightImagePath.toFile()));
         }
 
         ImagePair ip = new ImagePair(
-                new MascotImage(leftImage, new Point(center.x * scaling, center.y * scaling)),
-                new MascotImage(rightImage, new Point((rightImage.getWidth() - center.x) * scaling, center.y * scaling))
+                new MascotImage(leftImage, new Point(anchor.x * scaling, anchor.y * scaling)),
+                new MascotImage(rightImage, new Point((rightImage.getWidth() - anchor.x) * scaling, anchor.y * scaling))
         );
-        ImagePairs.load(name + (rightName == null ? "" : rightName), ip);
+
+        ImagePairs.load(identifier, ip);
+
+        return identifier;
     }
 
 

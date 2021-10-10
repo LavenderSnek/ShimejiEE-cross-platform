@@ -1,12 +1,15 @@
 package com.group_finity.mascot.imagesets.compact;
 
+import com.group_finity.mascot.Main;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.SystemColor;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Holds the data needed to for the menu to display an imageSet panel
@@ -14,25 +17,23 @@ import java.io.IOException;
 public class CompactImageSetPreview {
 
     private JPanel panel;
-    private JLabel label = new JLabel();
+    private final JLabel label = new JLabel();
     private final String name;
 
     private static final int nameTrim = 40;
     private static final int THUMB_SIZE = 60;
     private static final int PANEL_H = 70;
     private static final int PANEL_W = 400;
-
+    private static final BufferedImage DEFAULT_IMG = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
 
     CompactImageSetPreview(String imageSet) {
         this.name = imageSet;
     }
 
-
     @Override
     public String toString() {
         return name;
     }
-
 
     JPanel getPanel() {
         if (panel == null) {
@@ -41,32 +42,30 @@ public class CompactImageSetPreview {
         return panel;
     }
 
-
     private JPanel createJpanel(String imageSet) {
         var component = new JPanel();
         component.setPreferredSize(new Dimension(CompactImageSetPreview.PANEL_W, CompactImageSetPreview.PANEL_H));
         component.setLayout(new BoxLayout(component, BoxLayout.LINE_AXIS));
 
-
         // get icon
+        Path iconPath = Main.getInstance().getProgramFolder().getIconPathForImageSet(imageSet);
         BufferedImage icon = null;
-        try {
-            icon = ImageIO.read(new File("./img/" + imageSet + "/icon.png"));
-        } catch (IOException e) {
+        if (iconPath != null) {
             try {
-                icon = ImageIO.read(new File("./img/" + imageSet + "/shime1.png"));
-            } catch (IOException ioException) {
-                // just ignore it
+                icon = ImageIO.read(iconPath.toFile());
+            } catch (IOException ignored) {
             }
+        }
+
+        if (icon == null) {
+            icon = DEFAULT_IMG;
         }
 
         component.add(Box.createRigidArea(new Dimension(4, 1)));
 
-        if (icon != null) {
-            icon = makeThumbnail(icon, CompactImageSetPreview.THUMB_SIZE);
-            component.add(new JLabel(new ImageIcon(icon)));
-            component.add(Box.createRigidArea(new Dimension(8, 1)));
-        }
+        icon = makeThumbnail(icon, CompactImageSetPreview.THUMB_SIZE);
+        component.add(new JLabel(new ImageIcon(icon)));
+        component.add(Box.createRigidArea(new Dimension(8, 1)));
 
         //trims name
         String trimmedImageSet =

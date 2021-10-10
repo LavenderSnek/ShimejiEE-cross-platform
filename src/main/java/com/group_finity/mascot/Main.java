@@ -6,6 +6,7 @@ import com.group_finity.mascot.image.ImagePairs;
 import com.group_finity.mascot.imagesets.ImageSetUtils;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascotnative.win.WindowsInteractiveWindowForm;
+import com.group_finity.shimejiutils.ShimejiProgramFolder;
 import com.joconner.i18n.Utf8ResourceBundleControl;
 import com.sun.jna.Platform;
 import org.w3c.dom.Document;
@@ -19,10 +20,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -40,10 +44,31 @@ public final class Main {
     // Action that matches the followCursor action
     static final String BEHAVIOR_GATHER = "ChaseMouse";
 
+    private static final Path SETTINGS_PATH;
+
     static {
-        // sets up the logging
+
+        // sets up the logging + settings
+
+        Path trueConfDir = null;
         try {
-            LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
+            trueConfDir = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()).getParent().resolve("conf");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        if (trueConfDir == null || !Files.isDirectory(trueConfDir)) {
+            showError("unable find conf dir\n" +
+                    "The original conf directory containing settings and " +
+                    "logging properties needs to exist in the jar's " +
+                    "parent folder.");
+            System.exit(1);
+        }
+
+        SETTINGS_PATH = trueConfDir.resolve("settings.properties");
+
+        try (var ins = new FileInputStream(trueConfDir.resolve("logging.properties").toFile())){
+            LogManager.getLogManager().readConfiguration(ins);
         } catch (final SecurityException | IOException e) {
             e.printStackTrace();
         }
@@ -55,26 +80,13 @@ public final class Main {
         } catch (Exception ignored) {
         }
 
-        // Dock icon on platforms that support it
-        // https://stackoverflow.com/questions/6006173/
-        final URL imageResource = Main.class.getClassLoader().getResource("dock-icon.png");
-        if (imageResource != null) {
-            try {
-                final Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
-                final Image image = defaultToolkit.getImage(imageResource);
-
-                final Taskbar taskbar = Taskbar.getTaskbar();
-                taskbar.setIconImage(image);
-            } catch (final UnsupportedOperationException | SecurityException ignored) {
-            }
-        }
-
-        //--------//
     }
 
     private ResourceBundle languageBundle;
+
+    private ShimejiProgramFolder programFolder;
+
     private static final JFrame frame = new javax.swing.JFrame();
-    //-----//
 
     private final Manager manager = new Manager();
 
@@ -111,6 +123,10 @@ public final class Main {
         return languageBundle;
     }
 
+    public ShimejiProgramFolder getProgramFolder() {
+        return programFolder;
+    }
+
     //-----------------------------------//
 
     public Configuration getConfiguration(String imageSet) {
@@ -128,28 +144,23 @@ public final class Main {
      */
     public static void main(final String[] args) {
         try {
+            getInstance().programFolder = ShimejiProgramFolder
+                    .fromFolder(Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        try {
             getInstance().run();
         } catch (OutOfMemoryError error) {
-            final String msg = "Out of Memory.  There are probably have too many \n"
-                    + "Shimeji mascots for your computer to handle.\n"
-                    + "Select fewer image sets or move some to the \n"
-                    + "img/unused folder and try again.";
+            final String msg = "Out of Memory.";
             log.log(Level.SEVERE, msg, error);
             Main.showError(msg);
             System.exit(0);
         }
     }
 
-    public void run() {
-
-        // load settings.properties
-        properties = new Properties();
-        try (FileInputStream input = new FileInputStream("./conf/settings.properties")) {
-            properties.load(input);
-        } catch (IOException ignored) {
-        }
-
-        // load language bundle
+    private void loadChosenLanguage() {
         try {
             ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
             languageBundle = ResourceBundle.getBundle(
@@ -158,24 +169,54 @@ public final class Main {
                     utf8Control
             );
         } catch (Exception ex) {
-            Main.showError("The default language file could not be loaded. " +
-                    "Ensure that you have the latest shimeji language.properties in your conf directory.");
+            Main.showError("The language files could not be loaded. Make sure java is set up properly");
             exit();
         }
+    }
+
+    public void run() {
+
+        // Dock icon on platforms that support it
+        // https://stackoverflow.com/questions/6006173/
+        final Path imageResource = getProgramFolder().getDockIconPath();
+        if (imageResource != null) {
+            try {
+                final Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
+                final Image image = defaultToolkit.getImage(imageResource.toString());
+
+                final Taskbar taskbar = Taskbar.getTaskbar();
+                taskbar.setIconImage(image);
+            } catch (final UnsupportedOperationException | SecurityException ignored) {
+            }
+        }
+
+        // load settings.properties
+        properties = new Properties();
+        try (FileInputStream input = new FileInputStream(SETTINGS_PATH.toFile())) {
+            properties.load(input);
+        } catch (IOException ignored) {
+        }
+
+        loadChosenLanguage();
 
         //image choosing at startup
-
         boolean chooseAtStart = Boolean.parseBoolean(properties.getProperty("ShowChooserAtStart", "false"));
         ArrayList<String> selection = ImageSetUtils.getImageSetsFromSettings();
 
         // i think this works but i have no idea tbh
 
         // the policy is basically that the user should see the chooser or a mascot atleast once
-        if (chooseAtStart || selection == null) {
+        if (chooseAtStart || selection.isEmpty()) {
             setActiveImageSets(ImageSetUtils.askUserForSelection());
         } else {
             // keeps only existent setting selections to avoid unnecessary errors
-            selection.retainAll(Arrays.asList(ImageSetUtils.getAllImageSets()));
+            try {
+                selection.retainAll(getProgramFolder().getImageSetNames());
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "unable to load imageSets", e);
+                showError("unable to load imageSets");
+                exit();
+            }
             setActiveImageSets(selection);
 
             if (imageSets.isEmpty()) {
@@ -198,22 +239,22 @@ public final class Main {
             Configuration configuration = new Configuration();
 
             //--actions.xml--/
-            String actionsFile = ImageSetUtils.findActionConfig(imageSet);
+            Path actionsFilePath = getProgramFolder().getActionConfPath(imageSet);
 
-            log.log(Level.INFO, imageSet + " Read Action File ({0})", actionsFile);
+            log.log(Level.INFO, imageSet + " Read Action File ({0})", actionsFilePath);
 
             final Document actions = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(new FileInputStream(actionsFile));
+                    .parse(actionsFilePath.toFile());
             configuration.load(new Entry(actions.getDocumentElement()), imageSet);
 
 
             //--behaviors.xml--//
-            String behaviorsFile = ImageSetUtils.findBehaviorConfig(imageSet);
+            Path behaviorsFilePath = getProgramFolder().getBehaviorConfPath(imageSet);
 
-            log.log(Level.INFO, imageSet + " Read Behavior File ({0})", behaviorsFile);
+            log.log(Level.INFO, imageSet + " Read Behavior File ({0})", behaviorsFilePath);
 
             final Document behaviors = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(new FileInputStream(behaviorsFile));
+                    .parse(behaviorsFilePath.toFile());
             configuration.load(new Entry(behaviors.getDocumentElement()), imageSet);
 
 
@@ -241,7 +282,7 @@ public final class Main {
 
             // error cleanup
             configurations.remove(imageSet);
-            ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[1]));
+            ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[0]));
 
             Main.showError(languageBundle.getString("FailedLoadConfigErrorMessage") + "\n"
                     + e.getMessage() + "\n" + languageBundle.getString("SeeLogForDetails"));
@@ -261,7 +302,9 @@ public final class Main {
      * @param newImageSets All the imageSets that should now be active
      */
     private void setActiveImageSets(ArrayList<String> newImageSets) {
-        if (newImageSets == null) return;
+        if (newImageSets == null) {
+            return;
+        }
 
         //Not worth using a HashSet
         var toRemove = new ArrayList<>(imageSets);
@@ -287,14 +330,14 @@ public final class Main {
 
         getManager().setExitOnLastRemoved(isExit);
 
-        writeImageSetSettings();
+        serializeImageSetSettings();
     }
 
     private void removeLoadedImageSet(String imageSet) {
         imageSets.remove(imageSet);
         getManager().remainNone(imageSet);
         configurations.remove(imageSet);
-        ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[1]));
+        ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[0]));
     }
 
     private void addNewImageSet(String imageSet) {
@@ -387,7 +430,7 @@ public final class Main {
      * Serializes and writes current imageSets into
      * the `ActiveShimeji` property in settings.properties
      */
-    private void writeImageSetSettings() {
+    private void serializeImageSetSettings() {
         StringBuilder builder = new StringBuilder();
         HashSet<String> uniqueImgSets = new HashSet<>(imageSets); // makes sure its all unique
         for (String imgSet : uniqueImgSets) {
@@ -399,12 +442,11 @@ public final class Main {
     }
 
     /**
-     * writes the current {@link #properties} to `./conf/settings.properties`
-     *
-     * @see #writeImageSetSettings() for imageSetSettings
+     * writes the current {@link #properties} to `settings.properties`
+     * @see #serializeImageSetSettings() for imageSetSettings
      */
     private void writeSettings() {
-        try (FileOutputStream output = new FileOutputStream("./conf/settings.properties")) {
+        try (FileOutputStream output = new FileOutputStream(SETTINGS_PATH.toFile())) {
             properties.store(output, "Shimeji-ee Configuration Options");
         } catch (Exception e) {
             log.log(Level.WARNING, "Unable to write to settings.properties", e);
@@ -422,13 +464,7 @@ public final class Main {
     }
 
     private void refreshLanguage() {
-        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
-        languageBundle = ResourceBundle.getBundle(
-                "language",
-                Locale.forLanguageTag(properties.getProperty("Language", "en-GB")),
-                utf8Control
-        );
-
+        loadChosenLanguage();
         //reload tray icon if it exists
         if (SystemTray.isSupported()) {
             SystemTray.getSystemTray().remove(SystemTray.getSystemTray().getTrayIcons()[0]);
@@ -439,9 +475,7 @@ public final class Main {
 
     private void setScaling(String scaling) {
         properties.setProperty("Scaling", scaling);
-
         writeSettings();
-
         // need to reload the shimeji as the images have rescaled
         reloadMascots();
     }
@@ -587,6 +621,7 @@ public final class Main {
         interactiveMenu.addActionListener(e -> {
             new WindowsInteractiveWindowForm(frame, true).display();
             NativeFactory.getInstance().getEnvironment().refreshCache();
+            writeSettings();
         });
 
         //reload button
@@ -625,10 +660,14 @@ public final class Main {
 
         try {
             //adding the tray icon
-            final TrayIcon icon = new TrayIcon(
-                    ImageIO.read(Main.class.getResource("/icon.png")),
-                    "Shimeji", trayPopup
-            );
+            Path trayIconPath = getProgramFolder().getIconPath();
+            Image trayIcon;
+            if (trayIconPath != null) {
+                trayIcon = ImageIO.read(trayIconPath.toFile());
+            } else {
+                trayIcon = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+            }
+            final TrayIcon icon = new TrayIcon(trayIcon, "ShimejiEE", trayPopup);
 
             // Flip the click required to create mascot on non-windows
             if (Platform.isWindows()) {

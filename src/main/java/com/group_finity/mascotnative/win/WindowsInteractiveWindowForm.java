@@ -3,7 +3,6 @@ package com.group_finity.mascotnative.win;
 import com.group_finity.mascot.Main;
 
 import javax.swing.JOptionPane;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -11,8 +10,6 @@ import java.util.Arrays;
  * @author Kilkakon
  */
 public class WindowsInteractiveWindowForm extends javax.swing.JDialog {
-
-    private final String configFile = "./conf/settings.properties";    // Config file name
 
     ArrayList<String> listData = new ArrayList<String>();
 
@@ -135,13 +132,11 @@ public class WindowsInteractiveWindowForm extends javax.swing.JDialog {
     {//GEN-HEADEREND:event_jButton2ActionPerformed
         // done button
         try {
-            FileOutputStream output = new FileOutputStream(configFile);
-            try {
-                Main.getInstance().getProperties().setProperty("InteractiveWindows", listData.toString().replace("[", "").replace("]", "").replace(", ", "/"));
-                Main.getInstance().getProperties().store(output, "Shimeji-ee Configuration Options");
-            } finally {
-                output.close();
+            StringBuilder serializedProperty = new StringBuilder();
+            for (String s: listData) {
+                serializedProperty.append(s);
             }
+            Main.getInstance().getProperties().setProperty("InteractiveWindows", serializedProperty.toString());
         } catch (Exception e) {
             // Doesn't matter at all
         }
@@ -152,11 +147,9 @@ public class WindowsInteractiveWindowForm extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new WindowsInteractiveWindowForm(new javax.swing.JFrame(), true).display();
-                System.exit(0);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new WindowsInteractiveWindowForm(new javax.swing.JFrame(), true).display();
+            System.exit(0);
         });
     }
 

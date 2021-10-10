@@ -5,7 +5,7 @@ import java.util.Hashtable;
 public class ImagePairs {
 
     /**
-     * Key: The filename as '/shimeji-name/image-name.png'
+     * Key: The filename as 'shimeji-name/image-left.png' or 'shimeji-name/image-left.png:shimeji-name/image-right.png'
      * <br>Value: The {@link ImagePair} associated with that filename
      */
     public static Hashtable<String, ImagePair> imagepairs = new Hashtable<>(40);

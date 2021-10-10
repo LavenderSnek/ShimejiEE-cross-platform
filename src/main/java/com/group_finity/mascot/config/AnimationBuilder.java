@@ -3,7 +3,6 @@ package com.group_finity.mascot.config;
 import com.group_finity.mascot.Main;
 
 import java.awt.Point;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,7 @@ public class AnimationBuilder {
 
     public AnimationBuilder(final ResourceBundle schema, final Entry animationNode, final String imageSet) throws IOException {
         if (!imageSet.isEmpty()) {
-            this.imageSet = "/" + imageSet;
+            this.imageSet = imageSet;
         }
 
         this.schema = schema;
@@ -51,8 +50,8 @@ public class AnimationBuilder {
     //todo: xml doc note
     private Pose loadPose(final Entry frameNode) throws IOException {
 
-        final String imageText = frameNode.getAttribute(schema.getString("Image")) != null ? imageSet + frameNode.getAttribute(schema.getString("Image")) : null;
-        final String imageRightText = frameNode.getAttribute(schema.getString("ImageRight")) != null ? imageSet + frameNode.getAttribute(schema.getString("ImageRight")) : null;
+        final String imageText = frameNode.getAttribute(schema.getString("Image"));
+        final String imageRightText = frameNode.getAttribute(schema.getString("ImageRight"));
 
         //very much not optional
         final String anchorText = frameNode.getAttribute(schema.getString("ImageAnchor"));
@@ -60,23 +59,24 @@ public class AnimationBuilder {
         final String durationText = frameNode.getAttribute(schema.getString("Duration"));
 
         //optional
-        String soundText = frameNode.getAttribute(schema.getString("Sound"));
+        final String soundText = frameNode.getAttribute(schema.getString("Sound"));
         final String volumeText = frameNode.getAttribute(schema.getString("Volume")) != null ? frameNode.getAttribute(schema.getString("Volume")) : "0";
         final int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
 
+        String imagePairIdentifier = null;
         if (imageText != null) { // if you don't have anchor text defined as well you're going to have a bad time
 
             final String[] anchorCoordinates = anchorText.split(",");
             final Point anchor = new Point(Integer.parseInt(anchorCoordinates[0]), Integer.parseInt(anchorCoordinates[1]));
 
             try {
-                ImagePairLoader.load(imageText, imageRightText, anchor, scaling);
+                imagePairIdentifier = ImagePairLoader.load(imageSet, imageText, imageRightText, anchor, scaling);
             } catch (Exception e) {
                 String error;
                 if (imageRightText == null) {
-                    error = " [image: "+imageText+"]";
+                    error = " [Image: "+imageText+"]";
                 }else {
-                    error = " [image: "+imageText+", imageRight: "+imageRightText+"]";
+                    error = " [Image: "+imageText+", ImageRight: "+imageRightText+"]";
                 }
                 log.log(Level.SEVERE, "Failed to load image: " + error);
                 throw new IOException(Main.getInstance().getLanguageBundle().getString("FailedLoadImageErrorMessage") + " " + error);
@@ -87,25 +87,18 @@ public class AnimationBuilder {
         final Point move = new Point(Integer.parseInt(moveCoordinates[0]) * scaling, Integer.parseInt(moveCoordinates[1]) * scaling);
         final int duration = Integer.parseInt(durationText);
 
+        String soundIdentifier = null;
         if (soundText != null) {
             try {
-                if (new File("./sound" + soundText).exists()) {
-                    soundText = "./sound" + soundText;
-                } else if (new File("./sound" + imageSet + soundText).exists()) {
-                    soundText = "./sound" + imageSet + soundText;
-                } else {
-                    soundText = "./img" + imageSet + "/sound" + soundText;
-                }
-
-                SoundLoader.load(soundText, Float.parseFloat(volumeText));
-                soundText += Float.parseFloat(volumeText);
+                final float volume = Float.parseFloat(volumeText);
+                soundIdentifier = SoundLoader.load(imageSet, soundText, volume);
             } catch (Exception e) {
                 log.log(Level.SEVERE, "Failed to load sound: " + soundText);
                 throw new IOException(Main.getInstance().getLanguageBundle().getString("FailedLoadSoundErrorMessage") + soundText);
             }
         }
 
-        final Pose pose = new Pose(imageText, imageRightText, move.x, move.y, duration, soundText);
+        final Pose pose = new Pose(imagePairIdentifier, move.x, move.y, duration, soundIdentifier);
 
         log.log(Level.INFO, "ReadPosition({0})", pose);
 
