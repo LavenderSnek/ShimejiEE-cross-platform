@@ -13,8 +13,8 @@ import java.util.stream.Stream;
  * Represents the standard directory layout for shimeji and shimejiEE.
  * Note that these paths can be named anything and not just the default names.
  *
- * @param confPath The folder that contains the default configs, logging.properties, and optionally settings.properties.
- *                 Needs to exist and contain specified files.
+ * @param confPath The folder that contains the default config files. Does not need to
+ *                 exist if all the image sets have their own conf folders.
  *
  * @param imgPath The folder that contains the imageSet folders (or just the imageSet if isMonoImageSet is true).
  *                It also contains icon.png for the tray icon and optionally dock-icon.png for the dock icon.
@@ -44,29 +44,23 @@ public record ShimejiProgramFolder(
     private static final String SHIME_1 = "shime1.png";
 
     /**
-     * Creates a {@link ShimejiProgramFolder} object from an existing shimeji installation
+     * Creates a {@link ShimejiProgramFolder} object from an existing shimeji installation.
+     * It does not guarantee that any of the paths will actually exist.
      */
     public static ShimejiProgramFolder fromFolder(Path programFolder) throws IOException {
-        final Path confPath = programFolder.resolve(DEFAULT_CONF_DIR);
         final Path imgPath = programFolder.resolve(DEFAULT_IMG_DIR);
+        final Path confPath = programFolder.resolve(DEFAULT_CONF_DIR);
+        final Path soundPath = programFolder.resolve(DEFAULT_SOUND_DIR);
 
-        if (Files.isDirectory(confPath) && Files.isDirectory(imgPath)){
-            final Path soundPath = programFolder.resolve(DEFAULT_SOUND_DIR);
-
-            // this isn't a surefire way to check if it's a mono imageSet, but it'll work most of the time
-            boolean isMono = listMatchingFilesIn(imgPath, (path, basicFileAttributes) -> {
-                boolean isFile = basicFileAttributes.isRegularFile();
-                boolean isImage = path.toString().toLowerCase().endsWith(".png");
-                return isFile && isImage;
-            }
-            ).size() > MONO_CHECK_THRESHOLD;
-
-            return new ShimejiProgramFolder(confPath, imgPath, soundPath, isMono);
-
-        } else {
-            throw new FileNotFoundException("Missing folders. "
-                    + "Please make sure a 'conf' and 'img' folder are present in the provided program folder");
+        // this isn't a surefire way to check if it's a mono imageSet, but it'll work most of the time
+        boolean isMono = listMatchingFilesIn(imgPath, (path, basicFileAttributes) -> {
+            boolean isFile = basicFileAttributes.isRegularFile();
+            boolean isImage = path.toString().toLowerCase().endsWith(".png");
+            return isFile && isImage;
         }
+        ).size() > MONO_CHECK_THRESHOLD;
+
+        return new ShimejiProgramFolder(confPath, imgPath, soundPath, isMono);
     }
 
     /**
@@ -111,17 +105,17 @@ public record ShimejiProgramFolder(
      *                     value ignored if {@link #isMonoImageSet()} is true.
      * @param soundFileName name of the sound file to find
      */
-    public Path getSoundPath(String imageSetName, String soundFileName) throws FileNotFoundException {
+    public Path getSoundFilePath(String imageSetName, String soundFileName) throws FileNotFoundException {
         imageSetName = isMonoImageSet ? "" : imageSetName;
         // this is a reversed order from the official code; but it fits better w other file finding in shimeji
         Path[] SOUND_DIRS = {
-                imgPath.resolve(imageSetName).resolve(DEFAULT_CONF_DIR),
+                imgPath.resolve(imageSetName).resolve(DEFAULT_SOUND_DIR),
                 soundPath.resolve(imageSetName),
                 soundPath
         };
 
         for (Path dir : SOUND_DIRS) {
-            Path fp = dir.resolve(soundFileName);
+            Path fp = Path.of(dir.toString(), soundFileName);
             if (Files.isRegularFile(fp)) {
                 return fp;
             }
