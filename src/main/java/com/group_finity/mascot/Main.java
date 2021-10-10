@@ -58,10 +58,12 @@ public final class Main {
             e.printStackTrace();
         }
         if (trueConfDir == null || !Files.isDirectory(trueConfDir)) {
-            showError("unable find conf dir\n" +
-                    "The original conf directory containing settings and " +
-                    "logging properties needs to exist in the jar's " +
-                    "parent folder.");
+            showError(
+                    """
+                    unable find conf dir!
+                    The original conf directory containing settings + logging properties\s
+                    needs to exist in the jar's parent folder even if all folders were specified manually
+                    """);
             System.exit(1);
         }
 
@@ -144,8 +146,27 @@ public final class Main {
      */
     public static void main(final String[] args) {
         try {
-            getInstance().programFolder = ShimejiProgramFolder
-                    .fromFolder(Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+            // not ideal, but too few people will use the command line for a proper lib to be worth it
+            Map<String, String> argsMap = new HashMap<>();
+            for (String arg: args) {
+                String[] parts = arg.split("=",2);
+                argsMap.put(parts[0], parts[1]);
+            }
+
+            ShimejiProgramFolder base;
+            if (argsMap.containsKey("--pf")) {
+                base = ShimejiProgramFolder.fromFolder(Path.of(argsMap.get("--pf")));
+            } else {
+                base = ShimejiProgramFolder
+                        .fromFolder(Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+            }
+
+            Path altConfPath = argsMap.containsKey("--conf") ? Path.of(argsMap.get("--conf")): base.confPath();
+            Path altImgPath= argsMap.containsKey("--img") ? Path.of(argsMap.get("--img")) : base.imgPath();
+            Path altSoundPath = argsMap.containsKey("--sound") ? Path.of(argsMap.get("--sound")) : base.soundPath();
+            boolean altMono = argsMap.containsKey("--mono") ? Boolean.parseBoolean(argsMap.get("--mono")) : base.isMonoImageSet();
+
+            getInstance().programFolder = new ShimejiProgramFolder(altConfPath, altImgPath, altSoundPath, altMono);
 
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
