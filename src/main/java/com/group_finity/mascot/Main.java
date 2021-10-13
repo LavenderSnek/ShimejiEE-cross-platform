@@ -220,16 +220,22 @@ public final class Main {
 
         loadChosenLanguage();
 
+        //because the chooser is async
+        boolean isExit = getManager().isExitOnLastRemoved();
+        getManager().setExitOnLastRemoved(false);
+
         //image choosing at startup
         boolean chooseAtStart = Boolean.parseBoolean(properties.getProperty("ShowChooserAtStart", "false"));
         ArrayList<String> selection = ImageSetUtils.getImageSetsFromSettings();
 
-        // i think this works but i have no idea tbh
-
         // the policy is basically that the user should see the chooser or a mascot atleast once
         if (chooseAtStart || selection.isEmpty()) {
-            setActiveImageSets(ImageSetUtils.askUserForSelection());
-        } else {
+            ImageSetUtils.askUserForSelection(newImageSets -> {
+                setActiveImageSets(newImageSets);
+                getManager().setExitOnLastRemoved(isExit);
+            });
+        }
+        else {
             // keeps only existent setting selections to avoid unnecessary errors
             try {
                 selection.retainAll(getProgramFolder().getImageSetNames());
@@ -241,7 +247,12 @@ public final class Main {
             setActiveImageSets(selection);
 
             if (imageSets.isEmpty()) {
-                setActiveImageSets(ImageSetUtils.askUserForSelection());
+                ImageSetUtils.askUserForSelection(newImageSets -> {
+                    setActiveImageSets(newImageSets);
+                    getManager().setExitOnLastRemoved(isExit);
+                });
+            } else {
+                getManager().setExitOnLastRemoved(isExit);
             }
         }
 
@@ -631,11 +642,7 @@ public final class Main {
 
         //image set chooser
         final MenuItem chooseShimeji = new MenuItem(languageBundle.getString("ChooseShimeji"));
-        chooseShimeji.addActionListener(e -> {
-            chooseShimeji.setEnabled(false);
-            setActiveImageSets(ImageSetUtils.askUserForSelection());
-            chooseShimeji.setEnabled(true);//poor man's synchronization lol
-        });
+        chooseShimeji.addActionListener(e -> ImageSetUtils.askUserForSelection(this::setActiveImageSets));
 
         //interactive window chooser
         MenuItem interactiveMenu = new MenuItem(languageBundle.getString("ChooseInteractiveWindows"));

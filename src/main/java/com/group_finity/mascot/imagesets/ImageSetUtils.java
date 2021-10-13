@@ -3,10 +3,10 @@ package com.group_finity.mascot.imagesets;
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.imagesets.compact.CompactChooser;
 
-import javax.swing.JFrame;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Provides utility functions to deal with the contents of the img directory (imageSets).
@@ -19,11 +19,12 @@ public final class ImageSetUtils {
     /**
      * Displays UI for choosing imageSets.
      *
-     * @see ImageSetUI#getSelections()
+     * @param onSelection consumer for an array of all selected image sets after
+     *                    the selection has been completed.
      */
-    public static ArrayList<String> askUserForSelection() {
-        ImageSetUI chooser = new CompactChooser(new JFrame());
-        return chooser.getSelections();
+    public static void askUserForSelection(Consumer<ArrayList<String>> onSelection) {
+        CompactChooser chooser = new CompactChooser(onSelection);
+        chooser.createGui();
     }
 
     /**

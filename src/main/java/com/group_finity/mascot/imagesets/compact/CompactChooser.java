@@ -1,7 +1,6 @@
 package com.group_finity.mascot.imagesets.compact;
 
 import com.group_finity.mascot.Main;
-import com.group_finity.mascot.imagesets.ImageSetUI;
 import com.group_finity.mascot.imagesets.ImageSetUtils;
 
 import javax.swing.*;
@@ -9,70 +8,57 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
+public class CompactChooser extends JFrame {
 
     private JList<CompactImageSetPreview> imageSetJlist;
 
-    // set to true by the "cancel" button
-    private boolean cancelSelection = false;
+    Consumer<ArrayList<String>> onSelection;
 
-    public CompactChooser(JFrame parent) {
-        super(parent, true);
-        createGui();
+    public CompactChooser(Consumer<ArrayList<String>> onSelection) {
+        this.onSelection = onSelection;
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    @Override
-    public ArrayList<String> getSelections() {
-        setVisible(true);
+    /**
+     * GUI entry point
+     */
+    public void createGui() {
+        SwingUtilities.invokeLater(() -> {
+            //Set up data and selections
+            addDataToUI();
 
-        if (cancelSelection) {
-            return null;
-        }
+            //Set up the content pane.
+            addContentToPane(getContentPane());
 
+            this.setResizable(false);
+
+            pack();
+            setLocationRelativeTo(null);
+            setVisible(true);
+            toFront();
+        });
+    }
+
+    private ArrayList<String> getSelections() {
         return imageSetJlist.getSelectedValuesList().stream()
                 .map(Objects::toString)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-
-    /**
-     * GUI entry point
-     */
-    private void createGui() {
-        if (this.isVisible()) {
-            getOwner().toFront();
-            return;
-        }
-        //Set up data and selections
-        addDataToUI();
-
-        //Set up the content pane.
-        addContentToPane(getContentPane());
-
-        this.setResizable(false);
-
-        pack();
-        setLocationRelativeTo(null);
-        toFront();
-    }
-
-    private void cancelSelection() {
-        cancelSelection = true;
-        this.dispose();
-    }
-
     private void addDataToUI() {
         DefaultListModel<CompactImageSetPreview> listModel = new DefaultListModel<>();
 
-        String[] allImageSets = new String[0];
+        String[] allImageSets;
         try {
             allImageSets = Main.getInstance().getProgramFolder().getImageSetNames().toArray(new String[0]);
         } catch (IOException e) {
             e.printStackTrace();
             Main.showError("Unable to load imageSets");
-            cancelSelection();
+            this.dispose();
+            return;
         }
 
         if (allImageSets.length == 0) {
@@ -128,10 +114,13 @@ public class CompactChooser extends javax.swing.JDialog implements ImageSetUI {
 
         //--------buttons--------//
         var buttonCancel = new JButton(Main.getInstance().getLanguageBundle().getString("Cancel"));
-        buttonCancel.addActionListener(e -> this.cancelSelection());
+        buttonCancel.addActionListener(e -> this.dispose());
 
         var buttonOK = new JButton(Main.getInstance().getLanguageBundle().getString("UseSelected"));
-        buttonOK.addActionListener(e -> this.dispose());
+        buttonOK.addActionListener(e -> {
+            this.dispose();
+            onSelection.accept(getSelections());
+        });
 
         this.getRootPane().setDefaultButton(buttonOK);
 
