@@ -4,8 +4,7 @@ import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 import com.group_finity.mascot.sound.Sounds;
 
-import javax.sound.sampled.Clip;
-import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 /**
@@ -18,7 +17,7 @@ public class Mute extends InstantAction {
     public static final String PARAMETER_SOUND = "Sound";
     public static final String DEFAULT_SOUND = null;
 
-    public Mute(java.util.ResourceBundle schema, final VariableMap params) {
+    public Mute(ResourceBundle schema, final VariableMap params) {
         super(schema, params);
     }
 
@@ -26,30 +25,7 @@ public class Mute extends InstantAction {
     protected void apply() throws VariableException {
         String soundName = getSound();
         if (soundName != null) {
-            ArrayList<Clip> clips = Sounds.getSoundsIgnoringVolume("./sound" + soundName);
-            if (clips.size() > 0) {
-                for (Clip clip : clips) {
-                    if (clip != null && clip.isRunning()) {
-                        clip.stop();
-                    }
-                }
-            } else {
-                clips = Sounds.getSoundsIgnoringVolume("./sound/" + getMascot().getImageSet() + soundName);
-                if (clips.size() > 0) {
-                    for (Clip clip : clips) {
-                        if (clip != null && clip.isRunning()) {
-                            clip.stop();
-                        }
-                    }
-                } else {
-                    clips = Sounds.getSoundsIgnoringVolume("./img/" + getMascot().getImageSet() + "/sound" + soundName);
-                    for (Clip clip : clips) {
-                        if (clip != null && clip.isRunning()) {
-                            clip.stop();
-                        }
-                    }
-                }
-            }
+            Sounds.muteSpecifiedSound(getMascot().getImageSet(), soundName);
         } else {
             if (!Sounds.isMuted()) {
                 Sounds.setMuted(true);

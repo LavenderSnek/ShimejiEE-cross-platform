@@ -3,8 +3,8 @@ package com.group_finity.mascot.sound;
 import com.group_finity.mascot.Main;
 
 import javax.sound.sampled.Clip;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -24,27 +24,42 @@ public class Sounds {
         }
     }
 
-    public static boolean contains(String filename) {
-        return SOUNDS.containsKey(filename);
+    public static boolean contains(String identifier) {
+        return SOUNDS.containsKey(identifier);
     }
 
-    public static Clip getSound(String filename) {
-        if (!SOUNDS.containsKey(filename)) {
+    public static Clip getSound(String identifier) {
+        if (!SOUNDS.containsKey(identifier)) {
             return null;
         }
-        return SOUNDS.get(filename);
+        return SOUNDS.get(identifier);
     }
 
-    public static ArrayList<Clip> getSoundsIgnoringVolume(String filename) {
-        ArrayList<Clip> sounds = new ArrayList<>(5);
-        Enumeration<String> keys = SOUNDS.keys();
-        while (keys.hasMoreElements()) {
-            String soundName = keys.nextElement();
-            if (soundName.startsWith(filename)) {
-                sounds.add(SOUNDS.get(soundName));
+    private static ArrayList<Clip> getSoundsIgnoringVolume(String imageSetName, String filename) {
+        String namePath;
+        ArrayList<Clip> ret = new ArrayList<>(5);
+        try {
+            namePath = Main.getInstance().getProgramFolder().getSoundFilePath(imageSetName, filename).toString();
+        } catch (FileNotFoundException e) {
+            return ret;
+        }
+
+        for (String name : SOUNDS.keySet()) {
+            if (name.startsWith(namePath)) {
+                ret.add(SOUNDS.get(name));
             }
         }
-        return sounds;
+
+        return ret;
+    }
+
+    public static void muteSpecifiedSound(String imageSetName, String filename) {
+        ArrayList<Clip> affectedSounds = getSoundsIgnoringVolume(imageSetName, filename);
+        for (Clip clip : affectedSounds) {
+            if (clip != null && clip.isRunning()) {
+                clip.stop();
+            }
+        }
     }
 
     public static boolean isMuted() {
@@ -54,9 +69,8 @@ public class Sounds {
     public static void setMuted(boolean mutedFlag) {
         if (mutedFlag) {
             // mute everything
-            Enumeration<String> keys = SOUNDS.keys();
-            while (keys.hasMoreElements()) {
-                SOUNDS.get(keys.nextElement()).stop();
+            for (Clip clip : SOUNDS.values()) {
+                clip.stop();
             }
         }
     }
