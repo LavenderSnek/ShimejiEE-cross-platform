@@ -74,7 +74,7 @@ public record ShimejiProgramFolder(
         }
         var matches =  listMatchingFilesIn(imgPath, ((path, basicFileAttributes) -> {
             String name = path.getFileName().toString().toLowerCase();
-            boolean ignored = name.charAt(0) == '.' || name.equals(UNUSED_DIR);
+            boolean ignored = name.charAt(0) == '.' || name.equalsIgnoreCase(UNUSED_DIR);
             boolean isDir = basicFileAttributes.isDirectory();
             return !ignored && isDir;
         }));
