@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -47,16 +46,11 @@ public final class Main {
 
     static {
 
-        // sets up the logging + settings
+        System.setProperty("java.util.PropertyResourceBundle.encoding", "UTF-8");
 
-        Path trueConfDir = null;
-        try {
-            trueConfDir = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).getParent().resolve("conf");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        if (trueConfDir == null || !Files.isDirectory(trueConfDir)) {
+        // sets up the logging + settings
+        Path trueConfDir = getJarParentFolder().resolve("conf");
+        if (!Files.isDirectory(trueConfDir)) {
             showError(
                     """
                     unable find conf dir!
@@ -72,13 +66,6 @@ public final class Main {
             LogManager.getLogManager().readConfiguration(ins);
         } catch (final SecurityException | IOException e) {
             e.printStackTrace();
-        }
-
-        System.setProperty("java.util.PropertyResourceBundle.encoding", "UTF-8");
-
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
         }
 
     }
@@ -138,6 +125,18 @@ public final class Main {
         return instance;
     }
 
+    private static Path getJarParentFolder() {
+        Path folder = null;
+        try {
+            folder = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        } catch (URISyntaxException e) {
+            log.log(Level.SEVERE, "Unable to find path to jar");
+            showError("Unable to find path to jar");
+            System.exit(1);
+        }
+        return folder;
+    }
+
     //-----------------Initialization--------------------//
 
     /**
@@ -156,8 +155,7 @@ public final class Main {
             if (argsMap.containsKey("--pf")) {
                 base = ShimejiProgramFolder.fromFolder(Path.of(argsMap.get("--pf")));
             } else {
-                base = ShimejiProgramFolder
-                        .fromFolder(Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+                base = ShimejiProgramFolder.fromFolder(getJarParentFolder());
             }
 
             Path altConfPath = argsMap.containsKey("--conf") ? Path.of(argsMap.get("--conf")): base.confPath();
@@ -167,7 +165,7 @@ public final class Main {
 
             getInstance().programFolder = new ShimejiProgramFolder(altConfPath, altImgPath, altSoundPath, altMono);
 
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         try {
