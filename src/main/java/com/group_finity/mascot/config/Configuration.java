@@ -20,7 +20,6 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException;
 import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
-import com.joconner.i18n.Utf8ResourceBundleControl;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -37,8 +36,6 @@ public class Configuration {
     public void load(final Entry configurationNode, final String imageSet) throws IOException, ConfigurationException {
         log.log(Level.INFO, "Start Reading Configuration File...");
 
-        // prepare schema
-        ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
         Locale locale;
 
         // check for Japanese XML tag and adapt locale accordingly
@@ -48,7 +45,7 @@ public class Configuration {
             locale = Locale.forLanguageTag("en-US");
         }
 
-        schema = ResourceBundle.getBundle("schema", locale, utf8Control);
+        schema = ResourceBundle.getBundle("schema", locale);
 
         for (final Entry list : configurationNode.selectChildren(schema.getString("ActionList"))) {
             log.log(Level.INFO, "Action List...");

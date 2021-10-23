@@ -7,7 +7,6 @@ import com.group_finity.mascot.imagesets.ImageSetUtils;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascotnative.win.WindowsInteractiveWindowForm;
 import com.group_finity.shimejiutils.ShimejiProgramFolder;
-import com.joconner.i18n.Utf8ResourceBundleControl;
 import com.sun.jna.Platform;
 import org.w3c.dom.Document;
 
@@ -75,7 +74,7 @@ public final class Main {
             e.printStackTrace();
         }
 
-        //----------UI setup-----------/
+        System.setProperty("java.util.PropertyResourceBundle.encoding", "UTF-8");
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -183,11 +182,9 @@ public final class Main {
 
     private void loadChosenLanguage() {
         try {
-            ResourceBundle.Control utf8Control = new Utf8ResourceBundleControl();
             languageBundle = ResourceBundle.getBundle(
                     "language",
-                    Locale.forLanguageTag(properties.getProperty("Language", "en-GB")),
-                    utf8Control
+                    Locale.forLanguageTag(properties.getProperty("Language", "en-GB"))
             );
         } catch (Exception ex) {
             Main.showError("The language files could not be loaded. Make sure java is set up properly");
