@@ -1,3 +1,5 @@
 package com.group_finity.mascotnative.mac.jna;
 
-public class AXUIElementRef extends CFTypeRef {}
+import com.sun.jna.platform.mac.CoreFoundation;
+
+public class AXUIElementRef extends CoreFoundation.CFTypeRef {}

@@ -28,7 +28,7 @@ public interface Carbon extends Library {
 
     long AXUIElementCopyAttributeValue(AXUIElementRef element, CoreFoundation.CFStringRef attr, PointerByReference value);
 
-    int AXUIElementSetAttributeValue(AXUIElementRef element, CoreFoundation.CFStringRef attr, CFTypeRef value);
+    int AXUIElementSetAttributeValue(AXUIElementRef element, CoreFoundation.CFStringRef attr, CoreFoundation.CFTypeRef value);
 
     AXUIElementRef AXUIElementCreateApplication(long pid);
 
@@ -36,15 +36,15 @@ public interface Carbon extends Library {
 
     AXValueRef AXValueCreate(long type, Pointer valuep);
 
-    CFTypeRef CFPreferencesCopyValue(CoreFoundation.CFStringRef key, CoreFoundation.CFStringRef app, Pointer user, Pointer host);
+    CoreFoundation.CFTypeRef CFPreferencesCopyValue(CoreFoundation.CFStringRef key, CoreFoundation.CFStringRef app, Pointer user, Pointer host);
 
     boolean CFPreferencesAppSynchronize(CoreFoundation.CFStringRef app);
 
-    boolean CFNumberGetValue(CFTypeRef number, long type, ByReference ref);
+    boolean CFNumberGetValue(CoreFoundation.CFTypeRef number, long type, ByReference ref);
 
     CoreFoundation.CFStringRef CFStringCreateWithCharacters(Pointer alloc, char[] source, long length);
 
-    boolean CFStringGetCString(CFTypeRef strRef, Pointer buffer, long length, int encoding);
+    boolean CFStringGetCString(CoreFoundation.CFTypeRef strRef, Pointer buffer, long length, int encoding);
 
     int CFStringGetSystemEncoding();
 
@@ -52,10 +52,10 @@ public interface Carbon extends Library {
 
     Pointer CFArrayGetValueAtIndex(CoreFoundation.CFArrayRef array, long i);
 
-    void CFRetain(CFTypeRef any);
+    void CFRetain(CoreFoundation.CFTypeRef any);
 
-    void CFRelease(CFTypeRef any);
+    void CFRelease(CoreFoundation.CFTypeRef any);
 
-    void CFShow(CFTypeRef any);
+    void CFShow(CoreFoundation.CFTypeRef any);
 
 }

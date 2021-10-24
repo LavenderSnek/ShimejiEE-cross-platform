@@ -54,7 +54,6 @@ class MacEnvironment extends Environment {
 
     private static final HashSet<Long> touchedProcesses = new HashSet<>();
 
-
     private static final CoreFoundation.CFStringRef kAXPosition = toCFString("AXPosition");
     private static final CoreFoundation.CFStringRef kAXSize = toCFString("AXSize");
     private static final CoreFoundation.CFStringRef kAXFocusedWindow = toCFString("AXFocusedWindow");
@@ -76,11 +75,10 @@ class MacEnvironment extends Environment {
 
 
     private static Rectangle getFrontmostAppRect() {
-        Rectangle rect;
+        Rectangle rect = null;
         long pid = getCurrentPID();
 
-        AXUIElementRef application =
-                carbon.AXUIElementCreateApplication(pid);
+        AXUIElementRef application = carbon.AXUIElementCreateApplication(pid);
 
         PointerByReference windowp = new PointerByReference();
 
@@ -89,11 +87,9 @@ class MacEnvironment extends Environment {
             AXUIElementRef window = new AXUIElementRef();
             window.setPointer(windowp.getValue());
             rect = getRectOfWindow(window);
-        } else {
-            rect = null;
         }
 
-        carbon.CFRelease(application);
+        application.release();
         return rect;
     }
 
@@ -132,14 +128,13 @@ class MacEnvironment extends Environment {
 
         PointerByReference windowp = new PointerByReference();
 
-        if (carbon.AXUIElementCopyAttributeValue(
-                application, kAXFocusedWindow, windowp) == carbon.kAXErrorSuccess) {
+        if (carbon.AXUIElementCopyAttributeValue(application, kAXFocusedWindow, windowp) == carbon.kAXErrorSuccess) {
             AXUIElementRef window = new AXUIElementRef();
             window.setPointer(windowp.getValue());
             moveWindow(window, point.x, point.y);
         }
 
-        carbon.CFRelease(application);
+        application.release();
     }
 
 
@@ -150,15 +145,15 @@ class MacEnvironment extends Environment {
                     carbon.AXUIElementCreateApplication(pid);
 
             for (AXUIElementRef window : getWindowsOf(application)) {
-                carbon.CFRetain(window);
+                window.retain();
                 Rectangle windowRect = getRectOfWindow(window);
                 if (!visibleArea.intersects(windowRect)) {
                     moveWindow(window, 0, 0);
                 }
-                carbon.CFRelease(window);
+                window.release();
             }
 
-            carbon.CFRelease(application);
+            application.release();
         }
     }
 
