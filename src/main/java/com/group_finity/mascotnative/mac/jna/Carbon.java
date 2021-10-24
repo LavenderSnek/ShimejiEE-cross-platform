@@ -4,6 +4,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.mac.CoreFoundation;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -48,9 +49,9 @@ public interface Carbon extends Library {
 
     int CFStringGetSystemEncoding();
 
-    long CFArrayGetCount(CFArrayRef array);
+    long CFArrayGetCount(CoreFoundation.CFArrayRef array);
 
-    Pointer CFArrayGetValueAtIndex(CFArrayRef array, long i);
+    Pointer CFArrayGetValueAtIndex(CoreFoundation.CFArrayRef array, long i);
 
     void CFRetain(CFTypeRef any);
 

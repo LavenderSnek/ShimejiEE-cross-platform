@@ -4,6 +4,7 @@ import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
 import com.group_finity.mascotnative.mac.jna.*;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.mac.CoreFoundation;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -169,11 +170,10 @@ class MacEnvironment extends Environment {
             return ret;
         }
 
-        CFArrayRef cfWindows = new CFArrayRef();
-        cfWindows.setPointer(axWindowsp.getValue());
+        var cfWindows = new CoreFoundation.CFArrayRef(axWindowsp.getValue());
 
-        for (long i = 0, l = carbon.CFArrayGetCount(cfWindows); i < l; ++i) {
-            Pointer p = carbon.CFArrayGetValueAtIndex(cfWindows, i);
+        for (int i = 0, l = cfWindows.getCount(); i < l; ++i) {
+            Pointer p = cfWindows.getValueAtIndex(i);
             AXUIElementRef el = new AXUIElementRef();
             el.setPointer(p);
             ret.add(el);
