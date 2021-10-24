@@ -26,9 +26,9 @@ public interface Carbon extends Library {
 
     long GetProcessPID(final ProcessSerialNumber psn, LongByReference pidp);
 
-    long AXUIElementCopyAttributeValue(AXUIElementRef element, CFStringRef attr, PointerByReference value);
+    long AXUIElementCopyAttributeValue(AXUIElementRef element, CoreFoundation.CFStringRef attr, PointerByReference value);
 
-    int AXUIElementSetAttributeValue(AXUIElementRef element, CFStringRef attr, CFTypeRef value);
+    int AXUIElementSetAttributeValue(AXUIElementRef element, CoreFoundation.CFStringRef attr, CFTypeRef value);
 
     AXUIElementRef AXUIElementCreateApplication(long pid);
 
@@ -36,14 +36,13 @@ public interface Carbon extends Library {
 
     AXValueRef AXValueCreate(long type, Pointer valuep);
 
-    CFTypeRef CFPreferencesCopyValue(
-            CFStringRef key, CFStringRef app, Pointer user, Pointer host);
+    CFTypeRef CFPreferencesCopyValue(CoreFoundation.CFStringRef key, CoreFoundation.CFStringRef app, Pointer user, Pointer host);
 
-    boolean CFPreferencesAppSynchronize(CFStringRef app);
+    boolean CFPreferencesAppSynchronize(CoreFoundation.CFStringRef app);
 
     boolean CFNumberGetValue(CFTypeRef number, long type, ByReference ref);
 
-    CFStringRef CFStringCreateWithCharacters(Pointer alloc, char[] source, long length);
+    CoreFoundation.CFStringRef CFStringCreateWithCharacters(Pointer alloc, char[] source, long length);
 
     boolean CFStringGetCString(CFTypeRef strRef, Pointer buffer, long length, int encoding);
 

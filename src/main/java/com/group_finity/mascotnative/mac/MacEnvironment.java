@@ -55,11 +55,14 @@ class MacEnvironment extends Environment {
     private static final HashSet<Long> touchedProcesses = new HashSet<>();
 
 
-    static final CFStringRef kAXPosition = createCFString("AXPosition");
-    static final CFStringRef kAXSize = createCFString("AXSize");
-    static final CFStringRef kAXFocusedWindow = createCFString("AXFocusedWindow");
-    static final CFStringRef kAXChildren = createCFString("AXChildren");
+    private static final CoreFoundation.CFStringRef kAXPosition = toCFString("AXPosition");
+    private static final CoreFoundation.CFStringRef kAXSize = toCFString("AXSize");
+    private static final CoreFoundation.CFStringRef kAXFocusedWindow = toCFString("AXFocusedWindow");
+    private static final CoreFoundation.CFStringRef kAXChildren = toCFString("AXChildren");
 
+    private static CoreFoundation.CFStringRef toCFString(String s) {
+        return CoreFoundation.CFStringRef.createCFString(s);
+    }
 
     private static long getFrontmostAppsPID() {
         ProcessSerialNumber frontProcessPsn = new ProcessSerialNumber();
@@ -194,10 +197,6 @@ class MacEnvironment extends Environment {
         AXValueRef axvalue = carbon.AXValueCreate(
                 carbon.kAXValueCGPointType, position.getPointer());
         carbon.AXUIElementSetAttributeValue(window, kAXPosition, axvalue);
-    }
-
-    private static CFStringRef createCFString(String s) {
-        return carbon.CFStringCreateWithCharacters(null, s.toCharArray(), s.length());
     }
 
     /**
