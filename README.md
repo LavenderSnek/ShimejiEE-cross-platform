@@ -1,59 +1,57 @@
-# Shimeji-EE | Shimeji English Enhanced
 
-My attempt at getting the Kilkakon version of Shimeji to work on macOS, and hopefully Linux at some point. See docs folder for instructions on stuff.
+ShimejiEE Cross Platform
+========================
 
-## Credits
+https://github.com/LavenderSnek/ShimejiEE-cross-platform
 
-This is all the info I could find about it, and it's definitely possible that I missed something.
+Go to the releases section for the latest release.
 
-### Kilkakon
+This project is a fork of [Kilkakon's shimeji version](http://kilkakon.com/shimeji) and incorporates the work from [nonowarn's shimeji4mac](https://github.com/nonowarn/shimeji4mac)
 
-The current developer of Shimeji-EE.
+Installation
+-------
 
-Homepage: [http://kilkakon.com/shimeji](http://kilkakon.com/shimeji)
+- macOS:
+  - Download the `mac-jre` version
+  - Click the file named `ShimejiEE-launcher`. 
+  - If the OS doesn't let you open it because it's from an unidentified developer, right click it and click open and there should be an option to open it.
+  - If it still doesn't work, try re-downloading it directly from the GitHub releases page and make sure to unzip with Archiver.app
 
-Discord: [https://discord.gg/dcJGAn3](https://discord.gg/dcJGAn3)
+- Linux:
+  - First consider trying out [linux-shimeji](https://github.com/asdfman/linux-shimeji), it has x11 support
+  - Download the `no-jre` version. 
+  - Still a WIP with lots of issues, but you can use java 17 to launch `ShimejiEE.jar`. 
+  - Install java from a different vendor if `libawt_xawt.so` is missing. 
+  - All program files are lowercase by default but Image-sets might break due to case sensitivity.
 
-### TigerHix universal
+- Windows:
+  - Download the `no-jre` version. 
+  - Untested but you can try it out; Just make sure to use java 17.
 
-Added 64 bit support
+- From Source:
+  - see [docs](/docs/devnotes.md)
 
-Repository: [https://github.com/TigerHix/shimeji-universal](https://github.com/TigerHix/shimeji-universal)
+Credits
+-------
 
-### nonowarn macOS Port _(Abandoned)_
+- Kilkakon
+  - Current maintainer. Added sounds, affordances, and japanese conf compatibility.
+  - [Homepage](http://kilkakon.com/shimeji)
+  - [Shimeji discord](https://discord.gg/dcJGAn3)
 
-Wrote all the native macOS code.
+- nonowarn
+  - Wrote all the native macOS environment code
+  - [GitHub page](https://github.com/nonowarn/shimeji4mac)
 
-Repository: [https://github.com/nonowarn/shimeji4mac](https://github.com/nonowarn/shimeji4mac)
+- TigerHix
+  - Added 64 bit support for windows
+  - [GitHub page](https://github.com/TigerHix/shimeji-universal)
 
-Homepage: [Abandoned homepage](http://nonowarn.jp/shimeji/index-en.html),
-[Snapshot from Dec 2013](https://web.archive.org/web/20131221091851/http://nonowarn.jp/shimeji/index-en.html)
+- The shimeji-ee Group
+  - Added i18n
+  - [Google Code repo](https://code.google.com/archive/p/shimeji-ee/source/default/commits)
 
-### shimeji-ee Group _(Abandoned)_
-
-Added the translation to english
-
-Repository: [https://code.google.com/archive/p/shimeji-ee/source/default/commits](https://code.google.com/archive/p/shimeji-ee/source/default/commits)
-
-### Original _(Abandoned)_
-
-The furthest back I could find it existing was in ~June 2009, but it was labeled version 2.0, so I'm still not sure when this originated. I also can't find the source code for it.
-
-Homepage: [Defunct; Snapshot from Sep 2016](https://web.archive.org/web/20160901003054/http://www.group-finity.com:80/Shimeji/)
-
-Vector: The only thing I could still find online.
-[https://www.vector.co.jp/soft/winnt/amuse/se476479.html](https://www.vector.co.jp/soft/winnt/amuse/se476479.html)
-
-## Requirements
-
-- macOS: tested on 11.1 Intel, but it'll probably work on other models too
-    
-- Windows 10: Works for now.
-  - Needs java 17
-  - Download the no jre version
-
-- Linux
-  - Technically "ran" on a VM, but it crashed the VM pretty quickly
-    - I'm not sure how well it works on a real computer, so try it out I guess
-  - Needs a bit of fiddling with jna path
-  - You might need to install the jdk from a different place if you're missing `libawt_xawt.so`
+- Group Finity (Original)
+  - The original creator(s) of shimeji
+  - [Homepage snapshot](https://web.archive.org/web/20140530231026/http://www.group-finity.com/Shimeji/)
+  - [Vector page](https://www.vector.co.jp/soft/winnt/amuse/se476479.html )

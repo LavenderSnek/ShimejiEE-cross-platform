@@ -56,20 +56,36 @@
                         <restriction base="string">
                             <enumeration value="Embedded"/>
                             <enumeration value="Move"/>
-                            <enumeration value="Pause"/>
-                            <enumeration value="Fixed"/>
-                            <enumeration value="Composite"/>
-                            <enumeration value="Select"/>
                             <enumeration value="Stay"/>
                             <enumeration value="Animate"/>
                             <enumeration value="Sequence"/>
+                            <enumeration value="Select"/>
                         </restriction>
                     </simpleType>
                 </attribute>
                 <attribute name="Class">
                     <simpleType>
                         <restriction base="string">
-                            <pattern value="com\.group_finity\.mascot\.action\.[a-zA-Z][a-zA-Z0-9]+"/>
+                            <enumeration value="com.group_finity.mascot.action.Breed"/>
+                            <enumeration value="com.group_finity.mascot.action.Broadcast"/>
+                            <enumeration value="com.group_finity.mascot.action.BroadcastMove"/>
+                            <enumeration value="com.group_finity.mascot.action.BroadcastStay"/>
+                            <enumeration value="com.group_finity.mascot.action.Dragged"/>
+                            <enumeration value="com.group_finity.mascot.action.Fall"/>
+                            <enumeration value="com.group_finity.mascot.action.FallWithIE"/>
+                            <enumeration value="com.group_finity.mascot.action.Interact"/>
+                            <enumeration value="com.group_finity.mascot.action.Jump"/>
+                            <enumeration value="com.group_finity.mascot.action.Look"/>
+                            <enumeration value="com.group_finity.mascot.action.MoveWithTurn"/>
+                            <enumeration value="com.group_finity.mascot.action.Mute"/>
+                            <enumeration value="com.group_finity.mascot.action.Offset"/>
+                            <enumeration value="com.group_finity.mascot.action.Regist"/>
+                            <enumeration value="com.group_finity.mascot.action.ScanMove"/>
+                            <enumeration value="com.group_finity.mascot.action.SelfDestruct"/>
+                            <enumeration value="com.group_finity.mascot.action.ThrowIE"/>
+                            <enumeration value="com.group_finity.mascot.action.Transform"/>
+                            <enumeration value="com.group_finity.mascot.action.Turn"/>
+                            <enumeration value="com.group_finity.mascot.action.WalkWithIE"/>
                         </restriction>
                     </simpleType>
                 </attribute>
