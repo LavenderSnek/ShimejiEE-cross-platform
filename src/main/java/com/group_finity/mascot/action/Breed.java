@@ -24,28 +24,24 @@ public class Breed extends Animate {
     private static final Logger log = Logger.getLogger(Breed.class.getName());
 
     /**
-     * @custom.shimeji.param
      * @see Breed#getBornX()
      * */
     public static final String PARAMETER_BORNX = "BornX";
     private static final int DEFAULT_BORNX = 0;
 
     /**
-     * @custom.shimeji.param
      * @see Breed#getBornY()
      * */
     public static final String PARAMETER_BORNY = "BornY";
     private static final int DEFAULT_BORNY = 0;
 
     /**
-     * @custom.shimeji.param
      * @see Breed#getBornBehaviour()
      * */
     public static final String PARAMETER_BORNBEHAVIOUR = "BornBehaviour";
     private static final String DEFAULT_BORNBEHAVIOUR = "";
 
     /**
-     * @custom.shimeji.param
      * @see Breed#getBornMascot()
      * */
     public static final String PARAMETER_BORNMASCOT = "BornMascot";
@@ -76,27 +72,27 @@ public class Breed extends Animate {
     private void breed() throws VariableException {
         String childType = Main.getInstance().getConfiguration(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
 
-        final Mascot mascot = new Mascot(childType);
+        final Mascot newMascot = new Mascot(childType);
 
-        log.log(Level.INFO, "Breed Mascot ({0},{1},{2})", new Object[]{getMascot(), this, mascot});
+        log.log(Level.INFO, "Breed Mascot ({0},{1},{2})", new Object[]{getMascot(), this, newMascot});
 
         if (getMascot().isLookRight()) {
-            mascot.setAnchor(new Point(
+            newMascot.setAnchor(new Point(
                     getMascot().getAnchor().x - (getBornX() * scaling),
                     getMascot().getAnchor().y + (getBornY() * scaling)
             ));
         } else {
-            mascot.setAnchor(new Point(
+            newMascot.setAnchor(new Point(
                     getMascot().getAnchor().x + (getBornX() * scaling),
                     getMascot().getAnchor().y + (getBornY() * scaling)
             ));
         }
 
-        mascot.setLookRight(getMascot().isLookRight());
+        newMascot.setLookRight(getMascot().isLookRight());
 
         try {
-            mascot.setBehavior(Main.getInstance().getConfiguration(childType).buildBehavior(getBornBehaviour()));
-            getMascot().getManager().add(mascot);
+            newMascot.setBehavior(Main.getInstance().getConfiguration(childType).buildBehavior(getBornBehaviour()));
+            getMascot().getManager().add(newMascot);
 
         } catch (final BehaviorInstantiationException | CantBeAliveException e) {
             log.log(Level.SEVERE, "Fatal Exception", e);
@@ -105,7 +101,7 @@ public class Breed extends Animate {
                             + "\n" + e.getMessage()
                             + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails")
             );
-            mascot.dispose();
+            newMascot.dispose();
         }
     }
 

@@ -58,15 +58,13 @@ public class Jump extends ActionBase {
             final int velocityX = (int) (velocity * distanceX / distance);
             final int velocityY = (int) (velocity * distanceY / distance);
 
-            getMascot().setAnchor(new Point(
-            		getMascot().getAnchor().x + velocityX,
-                    getMascot().getAnchor().y + velocityY
-			));
+            getMascot().getAnchor().translate(velocityX, velocityY);
+
             getAnimation().next(getMascot(), getTime());
         }
 
         if (distance <= velocity) {
-            getMascot().setAnchor(new Point(targetX, targetY));
+            getMascot().getAnchor().setLocation(targetX, targetY);
         }
     }
 

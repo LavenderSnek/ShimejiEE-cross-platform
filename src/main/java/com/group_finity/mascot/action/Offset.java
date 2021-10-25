@@ -25,10 +25,10 @@ public class Offset extends InstantAction {
 
     @Override
     protected void apply() throws VariableException {
-        getMascot().setAnchor(new Point(
-                getMascot().getAnchor().x + getOffsetX(),
-                getMascot().getAnchor().y + getOffsetY()
-        ));
+        getMascot().getAnchor().translate(
+                getOffsetX(),
+                getOffsetY()
+        );
     }
 
     private int getOffsetX() throws VariableException {
