@@ -7,7 +7,7 @@
     <name>ShimejiEE</name>
     <groupId>com.group_finity</groupId>
     <artifactId>ShimejiEE</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -56,6 +56,13 @@
                             <resources>
                                 <resource>
                                     <directory>ext-resources</directory>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>LICENSE.md</include>
+                                        <include>README.md</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>
