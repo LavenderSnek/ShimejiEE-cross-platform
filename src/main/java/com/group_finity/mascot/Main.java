@@ -220,7 +220,7 @@ public final class Main {
         getManager().setExitOnLastRemoved(false);
 
         //image choosing at startup
-        boolean chooseAtStart = Boolean.parseBoolean(properties.getProperty("ShowChooserAtStart", "false"));
+        boolean chooseAtStart = Boolean.parseBoolean(properties.getProperty("AlwaysShowShimejiChooser", "false"));
         ArrayList<String> selection = ImageSetUtils.getImageSetsFromSettings();
 
         // the policy is basically that the user should see the chooser or a mascot atleast once
@@ -520,10 +520,10 @@ public final class Main {
 
 //--------------v-UI RELATED CODE IS BELOW-v-------------//
 
-    private CheckboxMenuItem getGenericToggleItem(String langBundleKey, String propertyKey) {
+    private CheckboxMenuItem getGenericToggleItem(String langBundleKey, String propertyKey, boolean defaultVal) {
         final var toggleBtn = new CheckboxMenuItem(
                 languageBundle.getString(langBundleKey),
-                Boolean.parseBoolean(properties.getProperty(propertyKey, "true"))
+                Boolean.parseBoolean(properties.getProperty(propertyKey, String.valueOf(defaultVal)))
         );
 
         toggleBtn.addItemListener(e -> toggleProperty(propertyKey, !toggleBtn.getState()));
@@ -605,16 +605,19 @@ public final class Main {
         final Menu togglesMenu = new Menu(languageBundle.getString("AllowedBehaviours"), true);
 
         final var breedingToggle = getGenericToggleItem
-                ("BreedingCloning", "Breeding");
+                ("BreedingCloning", "Breeding", true);
 
         final var transformToggle = getGenericToggleItem
-                ("Transformation", "Transformation");
+                ("Transformation", "Transformation", true);
 
         final var windowThrowToggle = getGenericToggleItem
-                ("ThrowingWindows", "Throwing");
+                ("ThrowingWindows", "Throwing", true);
 
         final var multiscreenToggle = getGenericToggleItem
-                ("Multiscreen", "Multiscreen");
+                ("Multiscreen", "Multiscreen", true);
+
+        final var chooserAtStartToggle = getGenericToggleItem
+                ("AlwaysShowShimejiChooser", "AlwaysShowShimejiChooser", false);
 
         //this is slightly different from the rest so i didn't use the function
         final var soundToggle = new CheckboxMenuItem(
@@ -632,6 +635,7 @@ public final class Main {
         togglesMenu.add(windowThrowToggle);
         togglesMenu.add(soundToggle);
         togglesMenu.add(multiscreenToggle);
+        togglesMenu.add(chooserAtStartToggle);
 
         //----------------------//
 
