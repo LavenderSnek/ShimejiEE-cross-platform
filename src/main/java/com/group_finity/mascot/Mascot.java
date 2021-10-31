@@ -158,9 +158,13 @@ public class Mascot {
         final JMenuItem gatherMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("FollowCursor"));
         gatherMenu.addActionListener(event -> getManager().setBehaviorAll(Main.getInstance().getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet()));
 
-        // Reduce to One menu item
-        final JMenuItem oneMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissOthers"));
-        oneMenu.addActionListener(event -> getManager().remainOne(getImageSet()));
+        // Dismiss others of this image set
+        final JMenuItem remainOneSelf = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissOthers"));
+        remainOneSelf.addActionListener(event -> getManager().remainOne(getImageSet()));
+
+        // Dismiss all others
+        final JMenuItem remainOneAll = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissAllOthers"));
+        remainOneAll.addActionListener(event -> getManager().remainOne(this));
 
         // Restore IE! menu item
         final JMenuItem restoreMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("RestoreWindows"));
@@ -222,7 +226,8 @@ public class Mascot {
         popup.add(submenu);
         popup.add(new JSeparator());
         popup.add(disposeMenu);
-        popup.add(oneMenu);
+        popup.add(remainOneSelf);
+        popup.add(remainOneAll);
         popup.add(closeMenu);
 
         getWindow().asJWindow().requestFocus();

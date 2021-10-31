@@ -227,6 +227,17 @@ public class Manager {
         }
     }
 
+    public void remainOne(Mascot mascot) {
+        synchronized (this.getMascots()) {
+            int totalMascots = this.getMascots().size();
+            for (int i = totalMascots - 1; i >= 0; --i) {
+                if (!this.getMascots().get(i).equals(mascot)) {
+                    this.getMascots().get(i).dispose();
+                }
+            }
+        }
+    }
+
     public void remainOne(String imageSet) {
         synchronized (this.getMascots()) {
             int totalMascots = this.getMascots().size();
@@ -243,7 +254,7 @@ public class Manager {
     }
 
     /**
-     * Disposes all mascots made from the specified imageSet. NON-STANDARD, do not use in scripts!
+     * Disposes all mascots made from the specified imageSet.
      */
     public void remainNone(String imageSet) {
         synchronized (this.getMascots()) {
