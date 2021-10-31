@@ -1,16 +1,6 @@
 package com.group_finity.mascot.config;
 
 import com.group_finity.mascot.Main;
-
-import java.awt.Point;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.action.Action;
 import com.group_finity.mascot.behavior.Behavior;
@@ -21,8 +11,11 @@ import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.awt.Point;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Configuration {
 
@@ -141,13 +134,16 @@ public class Configuration {
         }
 
         if (totalFrequency == 0) {
-            mascot.setAnchor(new Point(
-                    (int) (Math.random() * (mascot.getEnvironment().getScreen().getRight()
-                            - mascot.getEnvironment()
-                            .getScreen().getLeft()))
-                            + mascot.getEnvironment().getScreen().getLeft(),
-                    mascot.getEnvironment().getScreen().getTop() - 256
-            ));
+            if (Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Multiscreen", "true"))) {
+                mascot.setAnchor(new Point(
+                        (int) (Math.random() * (mascot.getEnvironment().getScreen().getRight() - mascot.getEnvironment().getScreen().getLeft())) + mascot.getEnvironment().getScreen().getLeft(),
+                        mascot.getEnvironment().getScreen().getTop() - 256));
+            } else {
+                mascot.setAnchor(new Point(
+                        (int) (Math.random() * (mascot.getEnvironment().getWorkArea().getRight() - mascot.getEnvironment().getWorkArea().getLeft())) + mascot.getEnvironment().getWorkArea().getLeft(),
+                        mascot.getEnvironment().getWorkArea().getTop() - 256)
+                );
+            }
             return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL));
         }
 

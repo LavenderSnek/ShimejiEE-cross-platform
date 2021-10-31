@@ -11,8 +11,8 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -145,10 +145,17 @@ public class UserBehavior implements Behavior {
 
                     log.log(Level.INFO, "Out of the screen bounds({0},{1})", new Object[]{getMascot(), this});
 
-                    getMascot().setAnchor(
-                            new Point((int) (Math.random() * (getEnvironment().getScreen().getRight() - getEnvironment()
-                                    .getScreen().getLeft()))
-                                    + getEnvironment().getScreen().getLeft(), getEnvironment().getScreen().getTop() - 256));
+                    if (Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Multiscreen", "true"))) {
+                        getMascot().setAnchor(new Point(
+                                (int) (Math.random() * (getEnvironment().getScreen().getRight() - getEnvironment().getScreen().getLeft())) + getEnvironment().getScreen().getLeft(),
+                                getEnvironment().getScreen().getTop() - 256)
+                        );
+                    } else {
+                        getMascot().setAnchor(new Point(
+                                (int) (Math.random() * (getEnvironment().getWorkArea().getRight() - getEnvironment().getWorkArea().getLeft())) + getEnvironment().getWorkArea().getLeft(),
+                                getEnvironment().getWorkArea().getTop() - 256)
+                        );
+                    }
 
                     try {
                         getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_FALL)));
