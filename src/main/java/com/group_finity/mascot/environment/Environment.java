@@ -51,7 +51,7 @@ public abstract class Environment {
 		screenRect = virtualBounds;
 	}
 
-	private static Rectangle getScreenRect() {
+	protected static Rectangle getScreenRect() {
 		return screenRect;
 	}
 
