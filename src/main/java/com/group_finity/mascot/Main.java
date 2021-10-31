@@ -309,7 +309,7 @@ public final class Main {
 
             // error cleanup
             configurations.remove(imageSet);
-            ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[0]));
+            ImagePairs.removeAllFromImageSet(imageSet);
 
             Main.showError(languageBundle.getString("FailedLoadConfigErrorMessage") + "\n"
                     + e.getMessage() + "\n" + languageBundle.getString("SeeLogForDetails"));
@@ -364,7 +364,7 @@ public final class Main {
         imageSets.remove(imageSet);
         getManager().remainNone(imageSet);
         configurations.remove(imageSet);
-        ImagePairs.imagepairs.keySet().removeIf(k -> imageSet.equals(k.split("/")[0]));
+        ImagePairs.removeAllFromImageSet(imageSet);
     }
 
     private void addNewImageSet(String imageSet) {
@@ -432,7 +432,7 @@ public final class Main {
         getManager().disposeAll();
 
         // Wipe all loaded data
-        ImagePairs.imagepairs.clear();
+        ImagePairs.clear();
         configurations.clear();
 
         // Load settings
