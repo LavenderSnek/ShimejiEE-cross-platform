@@ -8,7 +8,6 @@ import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
-import java.awt.Point;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -17,12 +16,16 @@ public class Dragged extends ActionBase {
     private static final Logger log = Logger.getLogger(Dragged.class.getName());
 
     public static final String VARIABLE_FOOTX = "FootX";
-
     private double footX;
-
     private double footDx;
 
-	private int timeToRegist;
+    public static final String PARAMETER_OFFSETX = "OffsetX";
+    private static final int DEFAULT_OFFSETX = 0;
+
+    public static final String PARAMETER_OFFSETY = "OffsetY";
+    private static final int DEFAULT_OFFSETY = 120;
+
+    private int timeToRegist;
 
     private int scaling;
 
@@ -63,14 +66,17 @@ public class Dragged extends ActionBase {
 
         final int newX = cursor.getX();
 
-        this.setFootDx((this.getFootDx() + ((newX - this.getFootX()) * 0.1)) * 0.8);
-        this.setFootX(this.getFootX() + this.getFootDx());
+        setFootDx((getFootDx() + ((newX - getFootX()) * 0.1)) * 0.8);
+        setFootX(getFootX() + getFootDx());
 
-        putVariable(getSchema().getString(VARIABLE_FOOTX), this.getFootX());
+        putVariable(getSchema().getString(VARIABLE_FOOTX), getFootX());
 
         getAnimation().next(getMascot(), getTime());
 
-        getMascot().getAnchor().setLocation(cursor.getX(), cursor.getY() + 120 * scaling);
+        getMascot().getAnchor().setLocation(
+                cursor.getX() + getOffsetX() * scaling,
+                cursor.getY() + getOffsetY() * scaling
+        );
     }
 
     private void setFootX(final double footX) {
@@ -89,12 +95,20 @@ public class Dragged extends ActionBase {
         return this.footDx;
     }
 
-	public void setTimeToRegist(final int timeToRegist) {
-		this.timeToRegist = timeToRegist;
-	}
+    public void setTimeToRegist(final int timeToRegist) {
+        this.timeToRegist = timeToRegist;
+    }
 
-	private int getTimeToRegist() {
-		return this.timeToRegist;
-	}
+    private int getTimeToRegist() {
+        return this.timeToRegist;
+    }
+
+    private int getOffsetX() throws VariableException {
+        return eval(getSchema().getString(PARAMETER_OFFSETX), Number.class, DEFAULT_OFFSETX).intValue();
+    }
+
+    private int getOffsetY() throws VariableException {
+        return eval(getSchema().getString(PARAMETER_OFFSETY), Number.class, DEFAULT_OFFSETY).intValue();
+    }
 
 }
