@@ -206,6 +206,16 @@ class WindowsEnvironment extends Environment {
     }
 
     @Override
+    public String getActiveIETitle() {
+        final Pointer ie = findActiveIE( );
+
+        final char[] title = new char[ 1024 ];
+        final int titleLength = User32.INSTANCE.GetWindowTextW( ie, title, 1024 );
+
+        return new String( title, 0, titleLength );
+    }
+
+    @Override
     public void refreshCache() {
         ieCache.clear(); // will be repopulated next isIE call
         windowTitles = null;

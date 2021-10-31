@@ -41,6 +41,8 @@ public class DebugWindow extends javax.swing.JFrame {
         lblEnvironmentHeight = new javax.swing.JLabel();
         lblEnvironmentHeightValue = new javax.swing.JLabel();
         lblEnvironmentWidthValue = new javax.swing.JLabel();
+        lblActiveIE = new javax.swing.JLabel();
+        lblActiveIEValue = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -99,6 +101,11 @@ public class DebugWindow extends javax.swing.JFrame {
         lblEnvironmentWidthValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblEnvironmentWidthValue.setText("N/A");
 
+        lblActiveIE.setText("Active IE");
+
+        lblActiveIEValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblActiveIEValue.setText("N/A");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -108,15 +115,16 @@ public class DebugWindow extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(lblShimejiX)
                                         .addComponent(lblShimejiY)
+                                        .addComponent(lblBehaviour)
                                         .addComponent(lblWindowX)
                                         .addComponent(lblWindowY)
                                         .addComponent(lblWindowWidth)
                                         .addComponent(lblWindowHeight)
-                                        .addComponent(lblBehaviour)
                                         .addComponent(lblEnvironmentX)
                                         .addComponent(lblEnvironmentY)
                                         .addComponent(lblEnvironmentWidth)
-                                        .addComponent(lblEnvironmentHeight))
+                                        .addComponent(lblEnvironmentHeight)
+                                        .addComponent(lblActiveIE))
                                 .addGap(42, 42, 42)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(lblBehaviourValue, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
@@ -131,7 +139,8 @@ public class DebugWindow extends javax.swing.JFrame {
                                                         .addComponent(lblEnvironmentWidthValue)
                                                         .addComponent(lblWindowWidthValue)
                                                         .addComponent(lblEnvironmentXValue)
-                                                        .addComponent(lblEnvironmentYValue))
+                                                        .addComponent(lblEnvironmentYValue)
+                                                        .addComponent(lblActiveIEValue))
                                                 .addGap(0, 0, Short.MAX_VALUE)))
                                 .addContainerGap())
         );
@@ -152,6 +161,10 @@ public class DebugWindow extends javax.swing.JFrame {
                                         .addComponent(lblShimejiY))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblActiveIE)
+                                        .addComponent(lblActiveIEValue))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblWindowX)
                                         .addComponent(lblWindowXValue))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -159,13 +172,12 @@ public class DebugWindow extends javax.swing.JFrame {
                                         .addComponent(lblWindowY)
                                         .addComponent(lblWindowYValue))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblWindowWidth)
+                                        .addComponent(lblWindowWidthValue))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(lblWindowWidth)
-                                                        .addComponent(lblWindowWidthValue))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(lblWindowHeight))
+                                        .addComponent(lblWindowHeight)
                                         .addComponent(lblWindowHeightValue, javax.swing.GroupLayout.Alignment.TRAILING))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -199,6 +211,10 @@ public class DebugWindow extends javax.swing.JFrame {
 
     void setShimejiY(int y) {
         lblShimejiYValue.setText(String.format("%d", y));
+    }
+
+    void setWindowTitle(String title) {
+        lblActiveIEValue.setText(title);
     }
 
     void setWindowX(int x) {
@@ -239,6 +255,7 @@ public class DebugWindow extends javax.swing.JFrame {
             lblBehaviour.setText(Main.getInstance().getLanguageBundle().getString("Behaviour"));
             lblShimejiX.setText(Main.getInstance().getLanguageBundle().getString("ShimejiX"));
             lblShimejiY.setText(Main.getInstance().getLanguageBundle().getString("ShimejiY"));
+            lblActiveIE.setText(Main.getInstance().getLanguageBundle().getString("ActiveIE"));
             lblWindowX.setText(Main.getInstance().getLanguageBundle().getString("WindowX"));
             lblWindowY.setText(Main.getInstance().getLanguageBundle().getString("WindowY"));
             lblWindowWidth.setText(Main.getInstance().getLanguageBundle().getString("WindowWidth"));
@@ -266,6 +283,8 @@ public class DebugWindow extends javax.swing.JFrame {
     private javax.swing.JLabel lblShimejiXValue;
     private javax.swing.JLabel lblShimejiY;
     private javax.swing.JLabel lblShimejiYValue;
+    private javax.swing.JLabel lblActiveIE;
+    private javax.swing.JLabel lblActiveIEValue;
     private javax.swing.JLabel lblWindowHeight;
     private javax.swing.JLabel lblWindowHeightValue;
     private javax.swing.JLabel lblWindowWidth;

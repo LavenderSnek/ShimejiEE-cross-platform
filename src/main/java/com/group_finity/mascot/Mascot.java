@@ -257,6 +257,7 @@ public class Mascot {
                 debugWindow.setShimejiY(anchor.y);
 
                 Area activeWindow = environment.getActiveIE();
+                debugWindow.setWindowTitle(environment.getActiveIETitle());
                 debugWindow.setWindowX(activeWindow.getLeft());
                 debugWindow.setWindowY(activeWindow.getTop());
                 debugWindow.setWindowWidth(activeWindow.getWidth());

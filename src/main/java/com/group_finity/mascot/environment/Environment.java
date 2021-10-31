@@ -78,6 +78,8 @@ public abstract class Environment {
 
 	public abstract Area getActiveIE();
 
+    public abstract String getActiveIETitle();
+
 	public abstract void moveActiveIE(final Point point);
 
 	public abstract void restoreIE();

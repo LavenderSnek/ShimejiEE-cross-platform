@@ -32,6 +32,11 @@ class GenericEnvironment extends Environment {
     }
 
     @Override
+    public String getActiveIETitle() {
+        return null;
+    }
+
+    @Override
     public void refreshCache() {}
 
 }

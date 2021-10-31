@@ -200,8 +200,8 @@ class MacEnvironment extends Environment {
      * Returns min if x < min
      * Returns max if x> max
      */
-    private static double betweenOrLimit(double x, double min, double max) {
-        return Math.min(Math.max(x, min), max);
+    private static double betweenOrLimit(double n, double min, double max) {
+        return Math.min(Math.max(n, min), max);
     }
 
     /**
@@ -293,6 +293,11 @@ class MacEnvironment extends Environment {
     @Override
     public Area getActiveIE() {
         return activeIE;
+    }
+
+    @Override
+    public String getActiveIETitle() {
+        return null;
     }
 
     @Override
