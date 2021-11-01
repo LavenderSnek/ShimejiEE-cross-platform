@@ -50,7 +50,7 @@ class MacEnvironment extends Environment {
     /**
      * PID of the frontmost window's application
      */
-    private static long currentPID = myPID;
+    private static long frontMostAppPid = myPID;
 
     private static final HashSet<Long> touchedProcesses = new HashSet<>();
 
@@ -76,7 +76,12 @@ class MacEnvironment extends Environment {
 
     private static Rectangle getFrontmostAppRect() {
         Rectangle rect = null;
-        long pid = getCurrentPID();
+        long pid = getFrontMostAppPid();
+
+        // prevent crash from not running appkit on main thread
+        if (pid == myPID) {
+            return null;
+        }
 
         AXUIElementRef application = carbon.AXUIElementCreateApplication(pid);
 
@@ -124,7 +129,7 @@ class MacEnvironment extends Environment {
 
     private static void moveFrontmostWindow(final Point point) {
         AXUIElementRef application =
-                carbon.AXUIElementCreateApplication(currentPID);
+                carbon.AXUIElementCreateApplication(frontMostAppPid);
 
         PointerByReference windowp = new PointerByReference();
 
@@ -237,7 +242,7 @@ class MacEnvironment extends Environment {
 
     private static void updateFrontmostApp() {
         long newPID = getFrontmostAppsPID();
-        setCurrentPID(newPID);
+        setFrontMostAppPid(newPID);
     }
 
     @Override
@@ -304,15 +309,15 @@ class MacEnvironment extends Environment {
     public void refreshCache() {}
 
 
-    private static void setCurrentPID(long newPID) {
-        if (newPID != myPID) {
-            currentPID = newPID;
-            getTouchedProcesses().add(newPID);
+    private static void setFrontMostAppPid(long pid) {
+        if (pid != myPID) {
+            frontMostAppPid = pid;
+            getTouchedProcesses().add(pid);
         }
     }
 
-    private static long getCurrentPID() {
-        return currentPID;
+    private static long getFrontMostAppPid() {
+        return frontMostAppPid;
     }
 
     private static HashSet<Long> getTouchedProcesses() {
