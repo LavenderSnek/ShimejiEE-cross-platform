@@ -14,7 +14,10 @@ Installation
 - macOS:
   - Download the `mac-jre` version
   - Click the file named `ShimejiEE-launcher`. 
-  - If the OS doesn't let you open it because it's from an unidentified developer, right click it and click open and there should be an option to open it.
+  - If the OS doesn't let you open it because it's from an unidentified developer: 
+    - Go to System preferences → Security & privacy → General, and make sure `App Store and Identified developers` is selected in the "Allow apps downloaded from:" section
+    - Restart you computer, just to be safe
+    - Now right-click the launcher and click open. Ignore the warnings. 
   - If it still doesn't work, try re-downloading it directly from the GitHub releases page and make sure to unzip with Archiver.app
 
 - Linux:
