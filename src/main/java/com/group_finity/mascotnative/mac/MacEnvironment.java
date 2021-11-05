@@ -4,7 +4,8 @@ import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
 import com.group_finity.mascotnative.mac.jna.*;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.mac.CoreFoundation;
+import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
+import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -54,13 +55,13 @@ class MacEnvironment extends Environment {
 
     private static final HashSet<Long> touchedProcesses = new HashSet<>();
 
-    private static final CoreFoundation.CFStringRef kAXPosition = toCFString("AXPosition");
-    private static final CoreFoundation.CFStringRef kAXSize = toCFString("AXSize");
-    private static final CoreFoundation.CFStringRef kAXFocusedWindow = toCFString("AXFocusedWindow");
-    private static final CoreFoundation.CFStringRef kAXChildren = toCFString("AXChildren");
+    private static final CFStringRef kAXPosition = toCFString("AXPosition");
+    private static final CFStringRef kAXSize = toCFString("AXSize");
+    private static final CFStringRef kAXFocusedWindow = toCFString("AXFocusedWindow");
+    private static final CFStringRef kAXChildren = toCFString("AXChildren");
 
-    private static CoreFoundation.CFStringRef toCFString(String s) {
-        return CoreFoundation.CFStringRef.createCFString(s);
+    private static CFStringRef toCFString(String s) {
+        return CFStringRef.createCFString(s);
     }
 
     private static long getFrontmostAppsPID() {
@@ -173,7 +174,7 @@ class MacEnvironment extends Environment {
             return ret;
         }
 
-        var cfWindows = new CoreFoundation.CFArrayRef(axWindowsp.getValue());
+        var cfWindows = new CFArrayRef(axWindowsp.getValue());
 
         for (int i = 0, l = cfWindows.getCount(); i < l; ++i) {
             Pointer p = cfWindows.getValueAtIndex(i);
