@@ -32,6 +32,8 @@ class GenericTranslucentWindow extends JWindow implements TranslucentWindow {
             }
         };
         this.setContentPane(this.panel);
+
+        setAlwaysOnTop(true);
     }
 
     private void init() {

@@ -70,9 +70,6 @@ public class Mascot {
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
 
-        // Always show on top
-        getWindow().asJWindow().setAlwaysOnTop(true);
-
         // Register the mouse handler
         getWindow().asJWindow().addMouseListener(new MouseAdapter() {
             @Override

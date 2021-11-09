@@ -17,6 +17,11 @@ class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
 
     private static final long serialVersionUID = 1L;
 
+    WindowsTranslucentWindow() {
+        super();
+        setAlwaysOnTop(true);
+    }
+
     @Override
     public JWindow asJWindow() {
         return this;

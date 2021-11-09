@@ -42,14 +42,27 @@ public final class Main {
     // Action that matches the followCursor action
     static final String BEHAVIOR_GATHER = "ChaseMouse";
 
+    public static final Path JAR_PARENT_DIR;
+
     private static final Path SETTINGS_PATH;
 
     static {
 
         System.setProperty("java.util.PropertyResourceBundle.encoding", "UTF-8");
 
+        Path folder = null;
+        try {
+            folder = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        } catch (URISyntaxException e) {
+            log.log(Level.SEVERE, "Unable to find path to jar");
+            showError("Unable to find path to jar");
+            System.exit(1);
+        }
+        JAR_PARENT_DIR = folder;
+
+
         // sets up the logging + settings
-        Path trueConfDir = getJarParentFolder().resolve("conf");
+        Path trueConfDir = JAR_PARENT_DIR.resolve("conf");
         if (!Files.isDirectory(trueConfDir)) {
             showError(
                     """
@@ -59,7 +72,6 @@ public final class Main {
                     """);
             System.exit(1);
         }
-
         SETTINGS_PATH = trueConfDir.resolve("settings.properties");
 
         try (var ins = new FileInputStream(trueConfDir.resolve("logging.properties").toFile())){
@@ -125,18 +137,6 @@ public final class Main {
         return instance;
     }
 
-    private static Path getJarParentFolder() {
-        Path folder = null;
-        try {
-            folder = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (URISyntaxException e) {
-            log.log(Level.SEVERE, "Unable to find path to jar");
-            showError("Unable to find path to jar");
-            System.exit(1);
-        }
-        return folder;
-    }
-
     //-----------------Initialization--------------------//
 
     /**
@@ -155,7 +155,7 @@ public final class Main {
             if (argsMap.containsKey("--pf")) {
                 base = ShimejiProgramFolder.fromFolder(Path.of(argsMap.get("--pf")));
             } else {
-                base = ShimejiProgramFolder.fromFolder(getJarParentFolder());
+                base = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
             }
 
             Path altConfPath = argsMap.containsKey("--conf") ? Path.of(argsMap.get("--conf")): base.confPath();

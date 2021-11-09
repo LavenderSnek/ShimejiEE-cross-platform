@@ -41,6 +41,13 @@ class MacTranslucentWindow extends JWindow implements TranslucentWindow {
 
         // it gets rid of the 'flickering' when dragging,
         getRootPane().putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
+
+        try {
+            MacJni.setNSWindowLevel(this, MacJni.NSStatusWindowLevel);
+        } catch (Exception e) {
+            setAlwaysOnTop(true); // default to this if lib is unavailable
+        }
+
     }
 
     @Override
