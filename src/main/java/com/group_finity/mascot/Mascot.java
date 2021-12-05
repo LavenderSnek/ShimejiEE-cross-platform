@@ -274,21 +274,21 @@ public class Mascot {
             // Make sure there's an image
             if (getImage() != null) {
                 // Set the window region
-                getWindow().asJWindow().setBounds(getBounds());
+                getWindow().setBounds(getBounds());
 
                 // Set Images
                 getWindow().setImage(getImage().getImage());
 
                 // Display
-                if (!getWindow().asJWindow().isVisible()) {
-                    getWindow().asJWindow().setVisible(true);
+                if (!getWindow().isVisible()) {
+                    getWindow().setVisible(true);
                 }
 
                 // Redraw
                 getWindow().updateImage();
             } else {
-                if (getWindow().asJWindow().isVisible()) {
-                    getWindow().asJWindow().setVisible(false);
+                if (getWindow().isVisible()) {
+                    getWindow().setVisible(false);
                 }
             }
 
@@ -309,7 +309,7 @@ public class Mascot {
         }
 
         setAnimating(false);
-        getWindow().asJWindow().dispose();
+        getWindow().dispose();
         if (getManager() != null) {
             getManager().remove(Mascot.this);
         }
@@ -326,7 +326,7 @@ public class Mascot {
             return new Rectangle(left, top, getImage().getSize().width * scaling, getImage().getSize().height * scaling);
         } else {
             // as we have no image let's return what we were last frame
-            return getWindow().asJWindow().getBounds();
+            return getWindow().getBounds();
         }
     }
 
