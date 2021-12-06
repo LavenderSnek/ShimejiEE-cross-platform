@@ -11,10 +11,7 @@ import com.arcnor.hqx.Hqx_2x;
 import com.arcnor.hqx.Hqx_3x;
 import com.arcnor.hqx.Hqx_4x;
 
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
 
 /**
  * An alpha-valued image that can be used with {@link WindowsTranslucentWindow}.
@@ -32,12 +29,15 @@ class WindowsNativeImage implements NativeImage {
                 : OsArchitecture.x86;
     }
 
+    private final BufferedImage managedImage;
+    private final Pointer nativeHandle;
+
     /**
      * Creates the windows bitmap
      *
      * @param width  width of the bitmap.
      * @param height the height of the bitmap.
-     * @return the handle of a bitmap that you create.
+     * @return tThe pointer to the newly created bitmap
      */
     private static Pointer createNative(final int width, final int height) {
 
@@ -52,12 +52,13 @@ class WindowsNativeImage implements NativeImage {
     }
 
     /**
-     * Update the native bitmap to reflect the contents of {@link BufferedImage}.
+     * Fill a native windows bitmap with the specified pixel data
      *
      * @param nativeHandle bitmap handle.
-     * @param rgb          ARGB of the picture.
+     * @param rgb          unscaled ARGB pixels to transfer.
+     * @param scaling      amount of scaling to apply when transferring the image.
      */
-    private static void flushNative(final Pointer nativeHandle, final int[] rgb, final int scaling) {
+    private static void flushToNative(final Pointer nativeHandle, final int[] rgb, final int scaling) {
 
         final BITMAP bmp = new BITMAP();
         Gdi32.INSTANCE.GetObjectW(nativeHandle, ARCHITECTURE.getBitmapSize() + Native.POINTER_SIZE, bmp);
@@ -96,23 +97,12 @@ class WindowsNativeImage implements NativeImage {
     }
 
     /**
-     * Windows to open a bitmap.
-     *
-     * @param nativeHandle bitmap handle.
+     * Disposes native bitmap
+     * @param nativeHandle native bitmap to dispose.
      */
     private static void freeNative(final Pointer nativeHandle) {
         Gdi32.INSTANCE.DeleteObject(nativeHandle);
     }
-
-    /**
-     * Java Image object.
-     */
-    private final BufferedImage managedImage;
-
-    /**
-     * Windows bitmap handler.
-     */
-    private final Pointer nativeHandle;
 
     public WindowsNativeImage(final BufferedImage image) {
         int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
@@ -159,7 +149,7 @@ class WindowsNativeImage implements NativeImage {
             }
         }
 
-        flushNative(this.getNativeHandle(), rbgValues, effectiveScaling);
+        flushToNative(this.getNativeHandle(), rbgValues, effectiveScaling);
     }
 
     @Override
@@ -168,55 +158,12 @@ class WindowsNativeImage implements NativeImage {
         freeNative(this.getNativeHandle());
     }
 
-    /**
-     * Changes to be reflected in the Windows bitmap image.
-     */
-    public void update() {
-        // this isn't used
-    }
-
-    public void flush() {
-        this.getManagedImage().flush();
-    }
-
-    public Pointer getHandle() {
-        return this.getNativeHandle();
-    }
-
-    public Graphics getGraphics() {
-        return this.getManagedImage().createGraphics();
-    }
-
-    public int getHeight() {
-        return this.getManagedImage().getHeight();
-    }
-
-    public int getWidth() {
-        return this.getManagedImage().getWidth();
-    }
-
-    public int getHeight(final ImageObserver observer) {
-        return this.getManagedImage().getHeight(observer);
-    }
-
-    public Object getProperty(final String name, final ImageObserver observer) {
-        return this.getManagedImage().getProperty(name, observer);
-    }
-
-    public ImageProducer getSource() {
-        return this.getManagedImage().getSource();
-    }
-
-    public int getWidth(final ImageObserver observer) {
-        return this.getManagedImage().getWidth(observer);
+    Pointer getNativeHandle() {
+        return this.nativeHandle;
     }
 
     private BufferedImage getManagedImage() {
         return this.managedImage;
-    }
-
-    private Pointer getNativeHandle() {
-        return this.nativeHandle;
     }
 
 }

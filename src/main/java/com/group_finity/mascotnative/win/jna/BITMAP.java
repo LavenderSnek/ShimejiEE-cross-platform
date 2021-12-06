@@ -2,10 +2,9 @@ package com.group_finity.mascotnative.win.jna;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.Structure.FieldOrder;
 
-import java.util.Arrays;
-import java.util.List;
-
+@FieldOrder({"bmType", "bmWidth", "bmHeight", "bmWidthBytes", "bmPlanes", "bmBitsPixel", "bmBits"})
 public class BITMAP extends Structure {
 
     public int bmType;
@@ -15,10 +14,5 @@ public class BITMAP extends Structure {
     public short bmPlanes;
     public short bmBitsPixel;
     public Pointer bmBits;
-
-    @Override
-    protected List<String> getFieldOrder() {
-        return Arrays.asList("bmType", "bmWidth", "bmHeight", "bmWidthBytes", "bmPlanes", "bmBitsPixel", "bmBits");
-    }
 
 }

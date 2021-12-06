@@ -1,18 +1,12 @@
 package com.group_finity.mascotnative.win.jna;
 
 import com.sun.jna.Structure;
+import com.sun.jna.Structure.FieldOrder;
 
-import java.util.Arrays;
-import java.util.List;
-
+@FieldOrder({"x", "y"})
 public class POINT extends Structure {
 
     public int x;
     public int y;
-
-    @Override
-    protected List<String> getFieldOrder() {
-        return Arrays.asList("x", "y");
-    }
 
 }

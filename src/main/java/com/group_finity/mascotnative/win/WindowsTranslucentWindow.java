@@ -15,7 +15,12 @@ import java.awt.Graphics;
  */
 class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
 
-    private static final long serialVersionUID = 1L;
+    private final int OPAQUE = 255;
+
+    /**
+     * Image to display.
+     */
+    private WindowsNativeImage image;
 
     WindowsTranslucentWindow() {
         super();
@@ -23,17 +28,17 @@ class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
     }
 
     @Override
-    public JWindow asJWindow() {
-        return this;
+    public void paint(final Graphics g) {
+        if (image != null) {
+            paint(image.getNativeHandle());
+        }
     }
 
     /**
-     * Draw an image with an alpha value
-     *
-     * @param imageHandle bitmap handle.
-     * @param alpha       Opacity: 0 = not at all, 255 = full display.
+     * Natively draws the given image.
+     * @param imageHandle native bitmap handle.
      */
-    private void paint(final Pointer imageHandle, final int alpha) {
+    private void paint(final Pointer imageHandle) {
 
         //this.setSize( WIDTH, HEIGHT );
 
@@ -61,7 +66,7 @@ class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
             final BLENDFUNCTION bf = new BLENDFUNCTION();
             bf.BlendOp = BLENDFUNCTION.AC_SRC_OVER;
             bf.BlendFlags = 0;
-            bf.SourceConstantAlpha = (byte) alpha; // Level set
+            bf.SourceConstantAlpha = (byte) OPAQUE;
             bf.AlphaFormat = BLENDFUNCTION.AC_SRC_ALPHA;
 
             final POINT lt = new POINT();
@@ -82,51 +87,19 @@ class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
         }
     }
 
-    /**
-     * Image to display.
-     */
-    private WindowsNativeImage image;
-
-    /**
-     * Opacity of the window
-     */
-    private int alpha = 255;
-
     @Override
-    public String toString() {
-        return "LayeredWindow[hashCode=" + hashCode() + ",bounds=" + getBounds() + "]";
-    }
-
-    @Override
-    public void paint(final Graphics g) {
-        if (getImage() != null) {
-            // JNI with drawing images using the a value.
-            paint(getImage().getHandle(), getAlpha());
-        }
-    }
-
-    private WindowsNativeImage getImage() {
-        return this.image;
+    public JWindow asJWindow() {
+        return this;
     }
 
     public void setImage(final NativeImage image) {
         this.image = (WindowsNativeImage) image;
     }
 
-    public int getAlpha() {
-        return this.alpha;
-    }
-
-    /**
-     * @param alpha 0 = Do not display at all, 255 = Display completely.
-     */
-    public void setAlpha(final int alpha) {
-        this.alpha = alpha;
-    }
-
     @Override
     public void updateImage() {
         repaint();
     }
+
 
 }

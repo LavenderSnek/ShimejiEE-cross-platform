@@ -1,18 +1,12 @@
 package com.group_finity.mascotnative.win.jna;
 
 import com.sun.jna.Structure;
+import com.sun.jna.Structure.FieldOrder;
 
-import java.util.Arrays;
-import java.util.List;
-
+@FieldOrder({"cx", "cy"})
 public class SIZE extends Structure {
 
     public int cx;
     public int cy;
-
-    @Override
-    protected List<String> getFieldOrder() {
-        return Arrays.asList("cx", "cy");
-    }
 
 }

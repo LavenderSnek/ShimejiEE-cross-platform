@@ -1,10 +1,9 @@
 package com.group_finity.mascotnative.win.jna;
 
 import com.sun.jna.Structure;
+import com.sun.jna.Structure.FieldOrder;
 
-import java.util.Arrays;
-import java.util.List;
-
+@FieldOrder({"left", "top", "right", "bottom"})
 public class RECT extends Structure {
 
     public int left;
@@ -25,11 +24,6 @@ public class RECT extends Structure {
         this.right += dx;
         this.top += dy;
         this.bottom += dy;
-    }
-
-    @Override
-    protected List<String> getFieldOrder() {
-        return Arrays.asList("left", "top", "right", "bottom");
     }
 
 }

@@ -15,21 +15,27 @@ public abstract class NativeFactory {
 
     private static final NativeFactory instance;
 
+    private static final String NATIVE_PKG = "com.group_finity.mascotnative";
+
     static {
+        String chosenSubpkg = System.getProperty(NATIVE_PKG);
+
         String subpkg = "generic";
 
-        if (Platform.isWindows()) {
-            subpkg = "win";
-        } else if (Platform.isMac()) {
-            subpkg = "mac";
+        if (chosenSubpkg != null) {
+            subpkg = chosenSubpkg;
+        } else {
+            if (Platform.isWindows()) {
+                subpkg = "win";
+            } else if (Platform.isMac()) {
+                subpkg = "mac";
+            }
         }
-
-        String basepkg = "com.group_finity.mascotnative";
 
         try {
             @SuppressWarnings("unchecked")
             final Class<? extends NativeFactory> impl = (Class<? extends NativeFactory>) Class
-                    .forName(basepkg + "." + subpkg + ".NativeFactoryImpl");
+                    .forName(NATIVE_PKG + "." + subpkg + ".NativeFactoryImpl");
 
             instance = impl.getDeclaredConstructor().newInstance();
 
