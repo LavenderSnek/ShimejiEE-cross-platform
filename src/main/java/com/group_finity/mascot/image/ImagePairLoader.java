@@ -1,9 +1,11 @@
 package com.group_finity.mascot.image;
 
 import com.group_finity.mascot.Main;
+import com.group_finity.mascot.NativeFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -12,7 +14,7 @@ import java.nio.file.Path;
 public class ImagePairLoader {
 
     /**
-     * Loads a pair of images into {@link ImagePairs#imagepairs} if it isn't already loaded
+     * Loads a pair of images into {@link ImagePairs} if it isn't already loaded
      *
      * @param leftName      Path to the image
      * @param rightName Path to the right facing version of the image, flipped left image will be used if this is null
@@ -42,10 +44,18 @@ public class ImagePairLoader {
             rightImage = premultiply(ImageIO.read(rightImagePath.toFile()));
         }
 
-        ImagePair ip = new ImagePair(
-                new MascotImage(leftImage, new Point(anchor.x * scaling, anchor.y * scaling)),
-                new MascotImage(rightImage, new Point((rightImage.getWidth() - anchor.x) * scaling, anchor.y * scaling))
+        var leftMascotImage = new MascotImage(
+                NativeFactory.getInstance().newNativeImage(leftImage),
+                new Point(anchor.x * scaling, anchor.y * scaling),
+                new Dimension(leftImage.getWidth() * scaling, leftImage.getHeight() * scaling)
         );
+        var rightMascotImage = new MascotImage(
+                NativeFactory.getInstance().newNativeImage(rightImage),
+                new Point((rightImage.getWidth() - anchor.x) * scaling, anchor.y * scaling),
+                new Dimension(rightImage.getWidth() * scaling, rightImage.getHeight() * scaling)
+        );
+
+        ImagePair ip = new ImagePair(leftMascotImage, rightMascotImage);
 
         ImagePairs.load(identifier, ip);
 

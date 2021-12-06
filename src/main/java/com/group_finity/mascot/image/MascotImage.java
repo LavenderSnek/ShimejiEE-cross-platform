@@ -1,15 +1,13 @@
 package com.group_finity.mascot.image;
 
-import com.group_finity.mascot.NativeFactory;
-
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
 
+@SuppressWarnings("ClassCanBeRecord")
+// this class is exposed to scripting and making it a record might break it (I don't really know)
 public class MascotImage {
 
     private final NativeImage image;
-
     private final Point center;
     private final Dimension size;
 
@@ -19,21 +17,25 @@ public class MascotImage {
         this.size = size;
     }
 
-    public MascotImage(final BufferedImage image, final Point center) {
-        this(NativeFactory.getInstance().newNativeImage(image), center, new Dimension(image.getWidth(), image.getHeight()));
-    }
-
+    /**
+     * Opaque type containing the data for the native code to render the image.
+     */
     public NativeImage getImage() {
         return this.image;
     }
 
     /**
-     * Note that the center is actually the image anchor
-     * */
+     * The scaled image anchor, this is where the image touches the environment.
+     */
     public Point getCenter() {
         return this.center;
     }
 
+    /**
+     * The size of the image after the scaling has been applied.
+     * <p>
+     * This is value used when setBounds is called on {@link TranslucentWindow}
+     */
     public Dimension getSize() {
         return this.size;
     }

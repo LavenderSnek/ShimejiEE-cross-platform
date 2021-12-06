@@ -317,13 +317,10 @@ public class Mascot {
 
     public Rectangle getBounds() {
         if (getImage() != null) {
-            // Central area of the window find the image coordinates and ground coordinates. The centre has already been adjusted for scaling
             final int top = getAnchor().y - getImage().getCenter().y;
             final int left = getAnchor().x - getImage().getCenter().x;
 
-            final int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
-
-            return new Rectangle(left, top, getImage().getSize().width * scaling, getImage().getSize().height * scaling);
+            return new Rectangle(left, top, getImage().getSize().width, getImage().getSize().height);
         } else {
             // as we have no image let's return what we were last frame
             return getWindow().getBounds();
