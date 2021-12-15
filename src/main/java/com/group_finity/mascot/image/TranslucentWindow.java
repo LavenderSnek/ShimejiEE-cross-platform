@@ -1,18 +1,27 @@
 package com.group_finity.mascot.image;
 
-import javax.swing.JWindow;
+import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+
 import java.awt.Rectangle;
+import java.util.function.Supplier;
 
 public interface TranslucentWindow {
 
-    /**
-     * The window the shimeji is drawn on
-     */
-    JWindow asJWindow();
+    // event
+
+    void setLeftMousePressedAction(Runnable action);
+
+    void setLeftMouseReleasedAction(Runnable action);
+
+    void setPopupMenuSupplier(Supplier<TopLevelMenuRep> popupMenuSupplier);
+
+    // image
 
     void setImage(NativeImage image);
 
     void updateImage();
+
+    // window
 
     Rectangle getBounds();
 

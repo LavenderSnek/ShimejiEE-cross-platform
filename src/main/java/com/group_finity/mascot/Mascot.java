@@ -1,24 +1,22 @@
 package com.group_finity.mascot;
 
 import com.group_finity.mascot.behavior.Behavior;
-import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
+import com.group_finity.mascot.ui.contextmenu.MenuRep;
+import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.sound.Sounds;
+import com.group_finity.mascot.ui.debug.DebugUi;
+import com.group_finity.mascot.ui.debug.DebugWindow;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
+import javax.sound.sampled.Clip;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,7 +58,7 @@ public class Mascot {
 
     private String sound = null;
 
-    protected DebugWindow debugWindow = null;
+    protected DebugUi debugWindow = null;
 
     private ArrayList<String> affordances = new ArrayList<>(5);
 
@@ -68,21 +66,11 @@ public class Mascot {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
+        getWindow().setLeftMousePressedAction(this::leftMousePressed);
+        getWindow().setLeftMouseReleasedAction(this::leftMouseReleased);
+        getWindow().setPopupMenuSupplier(this::createPopupRep);
+
         log.log(Level.INFO, "Created a mascot ({0})", this);
-
-        // Register the mouse handler
-        getWindow().asJWindow().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(final MouseEvent e) {
-                Mascot.this.mousePressed(e);
-            }
-
-            @Override
-            public void mouseReleased(final MouseEvent e) {
-                Mascot.this.mouseReleased(e);
-            }
-        });
-
     }
 
     @Override
@@ -90,11 +78,11 @@ public class Mascot {
         return "mascot" + this.id;
     }
 
-    private void mousePressed(final MouseEvent event) {
+    private void leftMousePressed() {
         // Switch to drag the animation when the mouse is down
         if (getBehavior() != null) {
             try {
-                getBehavior().mousePressed(event);
+                getBehavior().mousePressed(null);
             } catch (final CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Error", e);
                 Main.showError(Main.getInstance().getLanguageBundle().getString("SevereShimejiErrorErrorMessage")
@@ -103,133 +91,71 @@ public class Mascot {
                 dispose();
             }
         }
-
     }
 
-    private void mouseReleased(final MouseEvent event) {
-
-        if (SwingUtilities.isRightMouseButton(event)) {
-            SwingUtilities.invokeLater(() -> showPopup(event.getX(), event.getY()));
-        } else {
-            if (getBehavior() != null) {
-                try {
-                    getBehavior().mouseReleased(event);
-                } catch (final CantBeAliveException e) {
-                    log.log(Level.SEVERE, "Fatal Error", e);
-                    Main.showError(Main.getInstance().getLanguageBundle().getString("SevereShimejiErrorErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
-                    dispose();
-                }
+    private void leftMouseReleased() {
+        if (getBehavior() != null) {
+            try {
+                getBehavior().mouseReleased(null);
+            } catch (final CantBeAliveException e) {
+                log.log(Level.SEVERE, "Fatal Error", e);
+                Main.showError(Main.getInstance().getLanguageBundle().getString("SevereShimejiErrorErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                dispose();
             }
         }
-
     }
 
-    private void showPopup(final int x, final int y) {
-        final JPopupMenu popup = new JPopupMenu();
-        popup.setLightWeightPopupEnabled(false);
+    private TopLevelMenuRep createPopupRep() {
+        var main = Main.getInstance();
+        var i18n = main.getLanguageBundle();
+        var config = Main.getInstance().getConfiguration(getImageSet());
 
-        popup.addPopupMenuListener(new PopupMenuListener() {
-            @Override
-            public void popupMenuCanceled(final PopupMenuEvent e) {}
-
-            @Override
-            public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
-                setAnimating(true);
-            }
-
-            @Override
-            public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {
-                setAnimating(false);
-            }
-        });
-
-        // Add menu item
-        final JMenuItem increaseMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("CallAnother"));
-        increaseMenu.addActionListener(event -> Main.getInstance().createMascot(getImageSet()));
-
-        // Dismiss menu item
-        final JMenuItem disposeMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("Dismiss"));
-        disposeMenu.addActionListener(e -> dispose());
-
-        // Chase mouse menu item
-        final JMenuItem gatherMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("FollowCursor"));
-        gatherMenu.addActionListener(event -> getManager().setBehaviorAll(Main.getInstance().getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet()));
-
-        // Dismiss others of this image set
-        final JMenuItem remainOneSelf = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissOthers"));
-        remainOneSelf.addActionListener(event -> getManager().remainOne(getImageSet()));
-
-        // Dismiss all others
-        final JMenuItem remainOneAll = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissAllOthers"));
-        remainOneAll.addActionListener(event -> getManager().remainOne(this));
-
-        // Restore IE! menu item
-        final JMenuItem restoreMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("RestoreWindows"));
-        restoreMenu.addActionListener(event -> NativeFactory.getInstance().getEnvironment().restoreIE());
-
-        // Debug menu item
-        final JMenuItem debugMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("RevealStatistics"));
-        debugMenu.addActionListener(event -> {
-            if (debugWindow == null) {
-                debugWindow = new DebugWindow();
-            }
-            debugWindow.setVisible(true);
-        });
-
-        // Quit menu item
-        final JMenuItem closeMenu = new JMenuItem(Main.getInstance().getLanguageBundle().getString("DismissAll"));
-        closeMenu.addActionListener(e -> Main.getInstance().exit());
-
-        // Add the Behaviors submenu.  Currently slightly buggy, sometimes the menu ghosts.
-        com.group_finity.mascot.menu.JLongMenu submenu = new com.group_finity.mascot.menu.JLongMenu(Main.getInstance().getLanguageBundle().getString("SetBehaviour"), 30);
-        // The MenuScroller would look better than the JLongMenu, but the initial positioning is not working correctly.
-        // MenuScroller.setScrollerFor(submenu, 30, 125);
-        submenu.setAutoscrolls(true);
-        JMenuItem item;
-        com.group_finity.mascot.config.Configuration config = Main.getInstance().getConfiguration(getImageSet());
+        List<MenuItemRep> behaviorItems = new ArrayList<MenuItemRep>();
         Behavior behaviour;
         for (String behaviorName : config.getBehaviorNames()) {
-
-            final String command = behaviorName;
             try {
-                behaviour = Main.getInstance().getConfiguration(getImageSet()).buildBehavior(command);
+                behaviour = config.buildBehavior(behaviorName);
                 if (!behaviour.isHidden()) {
-                    item = new JMenuItem(Main.getInstance().getLanguageBundle().containsKey(behaviorName) ?
-                            Main.getInstance().getLanguageBundle().getString(behaviorName) :
-                            behaviorName.replaceAll("([a-z])(IE)?([A-Z])", "$1 $2 $3").replaceAll("\\s+", " "));
-
-                    item.addActionListener(e -> {
+                    behaviorItems.add(new MenuItemRep(behaviorName, () -> {
                         try {
-                            setBehavior(Main.getInstance().getConfiguration(getImageSet()).buildBehavior(command));
+                            setBehavior(config.buildBehavior(behaviorName));
                         } catch (Exception err) {
-                            log.log(Level.SEVERE, "Error ({0})", e);
-                            Main.showError(Main.getInstance().getLanguageBundle().getString("CouldNotSetBehaviourErrorMessage") + "\n"
-                                    + err.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                            log.log(Level.SEVERE, "Error ({0})");
+                            Main.showError(i18n.getString("CouldNotSetBehaviourErrorMessage")
+                                    + "\n" + err.getMessage()
+                                    + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
                         }
-                    });
-                    submenu.add(item);
+                    }));
                 }
             } catch (Exception ignored) {
-                // just skip if something goes wrong
+                behaviorItems.add(new MenuItemRep(behaviorName, null, false));
             }
         }
 
-        popup.add(increaseMenu);
-        popup.add(new JSeparator());
-        popup.add(gatherMenu);
-        popup.add(restoreMenu);
-        popup.add(debugMenu);
-        popup.add(new JSeparator());
-        popup.add(submenu);
-        popup.add(new JSeparator());
-        popup.add(disposeMenu);
-        popup.add(remainOneSelf);
-        popup.add(remainOneAll);
-        popup.add(closeMenu);
+        TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
+                new MenuItemRep(i18n.getString("CallAnother"), () -> main.createMascot(getImageSet())),
+                MenuItemRep.SEPARATOR,
+                new MenuItemRep(i18n.getString("FollowCursor"), () ->
+                        getManager().setBehaviorAll(main.getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet())
+                ),
+                new MenuItemRep(i18n.getString("RestoreWindows"), () -> getEnvironment().restoreIE()),
+                new MenuItemRep(i18n.getString("RevealStatistics"), () -> {
+                        if (debugWindow == null) {debugWindow = new DebugWindow();}
+                        debugWindow.setVisible(true);
+                }),
+                MenuItemRep.SEPARATOR,
+                new MenuRep(i18n.getString("SetBehaviour"), behaviorItems.toArray(new MenuItemRep[0])),
+                MenuItemRep.SEPARATOR,
+                new MenuItemRep(i18n.getString("Dismiss"), this::dispose),
+                new MenuItemRep(i18n.getString("DismissOthers"), () -> getManager().remainOne(getImageSet())),
+                new MenuItemRep(i18n.getString("DismissAllOthers"), () -> getManager().remainOne(this)),
+                new MenuItemRep(i18n.getString("DismissAll"), main::exit)
+        );
 
-        getWindow().asJWindow().requestFocus();
+        mainMenu.setOnOpenAction(() -> this.setAnimating(false));
+        mainMenu.setOnCloseAction(() -> this.setAnimating(true));
 
-        popup.show(getWindow().asJWindow(), x, y);
+        return mainMenu;
     }
 
     void tick() {
@@ -247,24 +173,9 @@ public class Mascot {
             }
 
             if (debugWindow != null) {
-                debugWindow.setBehaviour(behavior.toString().substring(9, behavior.toString().length() - 1)
-                        .replaceAll("([a-z])(IE)?([A-Z])", "$1 $2 $3").replaceAll("\\s+", " "));
-
-                debugWindow.setShimejiX(anchor.x);
-                debugWindow.setShimejiY(anchor.y);
-
-                Area activeWindow = environment.getActiveIE();
-                debugWindow.setWindowTitle(environment.getActiveIETitle());
-                debugWindow.setWindowX(activeWindow.getLeft());
-                debugWindow.setWindowY(activeWindow.getTop());
-                debugWindow.setWindowWidth(activeWindow.getWidth());
-                debugWindow.setWindowHeight(activeWindow.getHeight());
-
-                Area workArea = environment.getWorkArea();
-                debugWindow.setEnvironmentX(workArea.getLeft());
-                debugWindow.setEnvironmentY(workArea.getTop());
-                debugWindow.setEnvironmentWidth(workArea.getWidth());
-                debugWindow.setEnvironmentHeight(workArea.getHeight());
+                debugWindow.setBehaviorName(behavior.toString().substring(9, behavior.toString().length() - 1));
+                debugWindow.setMascotAnchor(getAnchor());
+                debugWindow.setMascotEnvironment(getEnvironment());
             }
         }
     }
@@ -293,9 +204,12 @@ public class Mascot {
             }
 
             // play sound if requested
-            if (sound != null && !Sounds.getSound(sound).isRunning() && !Sounds.isMuted()) {
-                Sounds.getSound(sound).setMicrosecondPosition(0);
-                Sounds.getSound(sound).start();
+            if (sound != null && !Sounds.isMuted()) {
+                Clip clip = Sounds.getSound(sound);
+                if (clip != null && !clip.isRunning()) {
+                    clip.setMicrosecondPosition(0);
+                    clip.start();
+                }
             }
         }
     }
@@ -305,6 +219,7 @@ public class Mascot {
 
         if (debugWindow != null) {
             debugWindow.setVisible(false);
+            debugWindow.dispose();
             debugWindow = null;
         }
 

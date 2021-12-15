@@ -20,17 +20,21 @@ public interface Behavior {
 
     /**
      * Progresses the mascot to the next frame
-     * */
+     */
     void next() throws CantBeAliveException;
 
     /**
-     * Called when the mouse presses down on the mascot
-     * */
+     * Called when the left mouse presses down on the mascot.
+     *
+     * @param e left for compatibility, it is not used and can be left null
+     */
     void mousePressed(MouseEvent e) throws CantBeAliveException;
 
     /**
-     * Called when the mouse is released from the mascot
-     * */
+     * Called when the left mouse is released from the mascot.
+     *
+     * @param e left for compatibility, it is not used and can be left null
+     */
     void mouseReleased(MouseEvent e) throws CantBeAliveException;
 
     boolean isHidden();

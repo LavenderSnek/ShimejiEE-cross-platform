@@ -1,6 +1,10 @@
-package com.group_finity.mascot.imagesets.compact;
+package com.group_finity.mascot.ui.imagesets;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.SystemColor;

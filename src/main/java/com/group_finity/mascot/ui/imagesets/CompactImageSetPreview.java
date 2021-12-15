@@ -1,12 +1,15 @@
-package com.group_finity.mascot.imagesets.compact;
+package com.group_finity.mascot.ui.imagesets;
 
 import com.group_finity.mascot.Main;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.SystemColor;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;

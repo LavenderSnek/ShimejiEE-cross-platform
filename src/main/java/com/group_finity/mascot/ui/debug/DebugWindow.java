@@ -1,9 +1,15 @@
-package com.group_finity.mascot;
+package com.group_finity.mascot.ui.debug;
+
+import com.group_finity.mascot.Main;
+import com.group_finity.mascot.environment.Area;
+import com.group_finity.mascot.environment.MascotEnvironment;
+
+import java.awt.Point;
 
 /**
  * @author Kilkakon
  */
-public class DebugWindow extends javax.swing.JFrame {
+public class DebugWindow extends javax.swing.JFrame implements DebugUi {
 
     // TODO: 2021-05-01 add line contrast and possibly convert to jtable
     public DebugWindow() {
@@ -201,51 +207,78 @@ public class DebugWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    void setBehaviour(String text) {
+    @Override
+    public void setBehaviorName(String behaviorName) {
+        setBehaviour(behaviorName);
+    }
+
+    @Override
+    public void setMascotAnchor(Point anchor) {
+        setShimejiX(anchor.x);
+        setShimejiY(anchor.y);
+    }
+
+    @Override
+    public void setMascotEnvironment(MascotEnvironment environment) {
+        Area activeWindow = environment.getActiveIE();
+        setWindowTitle(environment.getActiveIETitle());
+        setWindowX(activeWindow.getLeft());
+        setWindowY(activeWindow.getTop());
+        setWindowWidth(activeWindow.getWidth());
+        setWindowHeight(activeWindow.getHeight());
+
+        Area workArea = environment.getWorkArea();
+        setEnvironmentX(workArea.getLeft());
+        setEnvironmentY(workArea.getTop());
+        setEnvironmentWidth(workArea.getWidth());
+        setEnvironmentHeight(workArea.getHeight());
+    }
+
+    private void setBehaviour(String text) {
         lblBehaviourValue.setText(text);
     }
 
-    void setShimejiX(int x) {
+    private void setShimejiX(int x) {
         lblShimejiXValue.setText(String.format("%d", x));
     }
 
-    void setShimejiY(int y) {
+    private void setShimejiY(int y) {
         lblShimejiYValue.setText(String.format("%d", y));
     }
 
-    void setWindowTitle(String title) {
+    private void setWindowTitle(String title) {
         lblActiveIEValue.setText(title);
     }
 
-    void setWindowX(int x) {
+    private void setWindowX(int x) {
         lblWindowXValue.setText(String.format("%d", x));
     }
 
-    void setWindowY(int y) {
+    private void setWindowY(int y) {
         lblWindowYValue.setText(String.format("%d", y));
     }
 
-    void setWindowWidth(int width) {
+    private void setWindowWidth(int width) {
         lblWindowWidthValue.setText(String.format("%d", width));
     }
 
-    void setWindowHeight(int height) {
+    private void setWindowHeight(int height) {
         lblWindowHeightValue.setText(String.format("%d", height));
     }
 
-    void setEnvironmentX(int x) {
+    private void setEnvironmentX(int x) {
         lblEnvironmentXValue.setText(String.format("%d", x));
     }
 
-    void setEnvironmentY(int y) {
+    private void setEnvironmentY(int y) {
         lblEnvironmentYValue.setText(String.format("%d", y));
     }
 
-    void setEnvironmentWidth(int width) {
+    private void setEnvironmentWidth(int width) {
         lblEnvironmentWidthValue.setText(String.format("%d", width));
     }
 
-    void setEnvironmentHeight(int height) {
+    private void setEnvironmentHeight(int height) {
         lblEnvironmentHeightValue.setText(String.format("%d", height));
     }
 

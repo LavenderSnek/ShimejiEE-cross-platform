@@ -3,9 +3,9 @@ package com.group_finity.mascot;
 import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.image.ImagePairs;
-import com.group_finity.mascot.imagesets.ImageSetUtils;
+import com.group_finity.mascot.ui.imagesets.ImageSetUtils;
 import com.group_finity.mascot.sound.Sounds;
-import com.group_finity.mascotnative.win.WindowsInteractiveWindowForm;
+import com.group_finity.mascot.ui.interactivewindows.InteractiveWindowForm;
 import com.group_finity.shimejiutils.ShimejiProgramFolder;
 import com.sun.jna.Platform;
 import org.w3c.dom.Document;
@@ -15,7 +15,17 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Taskbar;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -347,12 +357,12 @@ public final class Main {
         boolean isExit = getManager().isExitOnLastRemoved();
         getManager().setExitOnLastRemoved(false);
 
-        for (String r : toRemove) {
-            removeLoadedImageSet(r);
-        }
-
         for (String a : toAdd) {
             addNewImageSet(a);
+        }
+
+        for (String r : toRemove) {
+            removeLoadedImageSet(r);
         }
 
         getManager().setExitOnLastRemoved(isExit);
@@ -646,7 +656,7 @@ public final class Main {
         //interactive window chooser
         MenuItem interactiveMenu = new MenuItem(languageBundle.getString("ChooseInteractiveWindows"));
         interactiveMenu.addActionListener(e -> {
-            new WindowsInteractiveWindowForm(frame, true).display();
+            new InteractiveWindowForm(frame, true).display();
             NativeFactory.getInstance().getEnvironment().refreshCache();
             writeSettings();
         });

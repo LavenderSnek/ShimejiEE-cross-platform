@@ -1,46 +1,35 @@
 package com.group_finity.mascotnative.win;
 
-import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascotnative.shared.BaseTranslucentSwingWindow;
 import com.group_finity.mascotnative.win.jna.*;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
-import javax.swing.JWindow;
 import java.awt.Graphics;
 
-/**
- * Image window with alpha value.
- * Displays the {@link WindowsNativeImage} that has been set with {@link #setImage(NativeImage)}
- */
-class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
+class WindowsTranslucentWindow extends BaseTranslucentSwingWindow<WindowsNativeImage> implements TranslucentWindow {
 
-    private final int OPAQUE = 255;
+    private static final int OPAQUE = 255;
 
-    /**
-     * Image to display.
-     */
-    private WindowsNativeImage image;
-
-    WindowsTranslucentWindow() {
-        super();
+    @Override
+    protected void setUp() {
         setAlwaysOnTop(true);
     }
 
     @Override
     public void paint(final Graphics g) {
-        if (image != null) {
-            paint(image.getNativeHandle());
+        if (getImage() != null) {
+            paint(getImage().getNativeHandle());
         }
     }
 
     /**
      * Natively draws the given image.
+     *
      * @param imageHandle native bitmap handle.
      */
     private void paint(final Pointer imageHandle) {
-
-        //this.setSize( WIDTH, HEIGHT );
 
         final Pointer hWnd = Native.getComponentPointer(this);
 
@@ -88,18 +77,8 @@ class WindowsTranslucentWindow extends JWindow implements TranslucentWindow {
     }
 
     @Override
-    public JWindow asJWindow() {
-        return this;
-    }
-
-    public void setImage(final NativeImage image) {
-        this.image = (WindowsNativeImage) image;
-    }
-
-    @Override
     public void updateImage() {
         repaint();
     }
-
 
 }

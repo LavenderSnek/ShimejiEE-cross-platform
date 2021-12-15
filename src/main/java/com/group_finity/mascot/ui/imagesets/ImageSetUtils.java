@@ -1,7 +1,6 @@
-package com.group_finity.mascot.imagesets;
+package com.group_finity.mascot.ui.imagesets;
 
 import com.group_finity.mascot.Main;
-import com.group_finity.mascot.imagesets.compact.CompactChooser;
 
 import java.util.ArrayList;
 import java.util.Arrays;

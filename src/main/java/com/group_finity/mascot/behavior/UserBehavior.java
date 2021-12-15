@@ -11,7 +11,6 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 
-import javax.swing.SwingUtilities;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
@@ -74,56 +73,53 @@ public class UserBehavior implements Behavior {
 
 
     /**
-     * The mouse was pressed.
-     * If it is the left button, start dragging.
+     * Called when the left mouse is pressed.
+     * Starts dragging action, if the current action is draggable.
      */
     public synchronized void mousePressed(final MouseEvent event) throws CantBeAliveException {
 
-        if (SwingUtilities.isLeftMouseButton(event)) {
-            // check if this action has dragging disabled
-            boolean draggable = true;
-            if (action != null && action instanceof ActionBase) {
-                try {
-                    draggable = ((ActionBase) action).isDraggable();
-                } catch (VariableException ex) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), ex);
-                }
+        // check if this action has dragging disabled
+        boolean draggable = true;
+        if (action != null && action instanceof ActionBase) {
+            try {
+                draggable = ((ActionBase) action).isDraggable();
+            } catch (VariableException ex) {
+                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), ex);
             }
+        }
 
-            if (draggable) {
-                // Begin dragging
-                try {
-                    getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_DRAGGED)));
-                } catch (final BehaviorInstantiationException e) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), e);
-                }
+        if (draggable) {
+            // Begin dragging
+            try {
+                getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_DRAGGED)));
+            } catch (final BehaviorInstantiationException e) {
+                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), e);
             }
         }
     }
 
     /**
-     * The mouse has left.
-     * If it is the left button, end dragging.
+     * Called when the left mouse is released.
+     * Ends dragging.
      */
     public synchronized void mouseReleased(final MouseEvent event) throws CantBeAliveException {
-        if (SwingUtilities.isLeftMouseButton(event)) {
-            // check if this action has dragging disabled
-            boolean draggable = true;
-            if (action != null && action instanceof ActionBase) {
-                try {
-                    draggable = ((ActionBase) action).isDraggable();
-                } catch (VariableException ex) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), ex);
-                }
-            }
 
-            if (draggable) {
-                // Termination of drag
-                try {
-                    getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_THROWN)));
-                } catch (final BehaviorInstantiationException e) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), e);
-                }
+        // check if this action has dragging disabled
+        boolean draggable = true;
+        if (action != null && action instanceof ActionBase) {
+            try {
+                draggable = ((ActionBase) action).isDraggable();
+            } catch (VariableException ex) {
+                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), ex);
+            }
+        }
+
+        if (draggable) {
+            // Termination of drag
+            try {
+                getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_THROWN)));
+            } catch (final BehaviorInstantiationException e) {
+                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), e);
             }
         }
     }
