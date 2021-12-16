@@ -1,4 +1,4 @@
-package com.group_finity.mascotnative.mac;
+package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascot.Main;
 import com.sun.jdi.NativeMethodException;
@@ -6,16 +6,14 @@ import com.sun.jdi.NativeMethodException;
 import java.awt.Window;
 
 /**
- * A singular place to cram in any mac jni stuff.
- *
  * @author snek
  * */
-class MacJni {
+class MacSwingJni {
 
     private static final String LIB_FILENAME = "libShimejiMacNative.dylib";
     static boolean loaded;
 
-    private MacJni() {
+    private MacSwingJni() {
     }
 
     static {

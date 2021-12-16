@@ -1,4 +1,4 @@
-package com.group_finity.mascotnative.mac.jna;
+package com.group_finity.mascotnative.macclassic.jna;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

@@ -47,7 +47,7 @@
                 <configuration>
                     <compilerArgs>
                         <arg>-h</arg>
-                        <arg>src/main/objc/</arg>
+                        <arg>src/main/headers</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

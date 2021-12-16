@@ -1,4 +1,4 @@
-package com.group_finity.mascotnative.mac;
+package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.environment.Environment;

@@ -28,7 +28,7 @@ public abstract class NativeFactory {
             if (Platform.isWindows()) {
                 subpkg = "win";
             } else if (Platform.isMac()) {
-                subpkg = "mac";
+                subpkg = "macclassic";
             }
         }
 

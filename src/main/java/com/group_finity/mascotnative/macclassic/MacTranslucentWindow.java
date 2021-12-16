@@ -1,4 +1,4 @@
-package com.group_finity.mascotnative.mac;
+package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascotnative.shared.BaseTranslucentSwingWindow;
 
@@ -33,7 +33,7 @@ class MacTranslucentWindow extends BaseTranslucentSwingWindow<MacNativeImage> {
         getRootPane().putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
 
         try {
-            MacJni.setNSWindowLevel(this, MacJni.NSStatusWindowLevel);
+            MacSwingJni.setNSWindowLevel(this, MacSwingJni.NSStatusWindowLevel);
         } catch (Exception e) {
             setAlwaysOnTop(true); // default to this if lib is unavailable
         }

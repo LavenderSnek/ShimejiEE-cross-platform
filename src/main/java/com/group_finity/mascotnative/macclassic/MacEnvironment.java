@@ -1,8 +1,8 @@
-package com.group_finity.mascotnative.mac;
+package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
-import com.group_finity.mascotnative.mac.jna.*;
+import com.group_finity.mascotnative.macclassic.jna.*;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;

@@ -2,7 +2,7 @@
 #import <Cocoa/Cocoa.h>
 #import <jni.h>
 
-#include "com_group_finity_mascotnative_mac_MacJni.h"
+#include "com_group_finity_mascotnative_macclassic_MacSwingJni.h"
 
 // this whole thing has no error handling. If it breaks, it breaks
 
