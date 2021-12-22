@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -37,18 +38,12 @@ public abstract class BaseTranslucentSwingWindow<T extends NativeImage> extends 
 
     @Override
     public void setLeftMousePressedAction(Runnable leftMousePressedAction) {
-        if (leftMousePressedAction == null) {
-            return;
-        }
-        this.leftMousePressedAction = leftMousePressedAction;
+        this.leftMousePressedAction = Objects.requireNonNullElse(leftMousePressedAction, ()->{});
     }
 
     @Override
     public void setLeftMouseReleasedAction(Runnable leftMouseReleasedAction) {
-        if (leftMouseReleasedAction == null) {
-            return;
-        }
-        this.leftMouseReleasedAction = leftMouseReleasedAction;
+        this.leftMouseReleasedAction = Objects.requireNonNullElse(leftMouseReleasedAction, ()->{});
     }
 
     @Override

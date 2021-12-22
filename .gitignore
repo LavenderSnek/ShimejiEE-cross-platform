@@ -22,6 +22,10 @@ nbdist/
 nbactions.xml
 nb-configuration.xml
 
+# native
+*.xcodeproj/
+src/main/headers/
+
 # Windows
 Thumbs.db
 Thumbs.db:encryptable

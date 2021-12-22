@@ -10,7 +10,7 @@ import java.awt.Window;
  * */
 class MacSwingJni {
 
-    private static final String LIB_FILENAME = "libShimejiMacNative.dylib";
+    private static final String LIB_FILENAME = "libShimejiMacClassic.dylib";
     static boolean loaded;
 
     private MacSwingJni() {
