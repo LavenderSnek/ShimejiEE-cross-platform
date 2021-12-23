@@ -1,0 +1,25 @@
+# xcodegen project file
+
+name: ShimejiMacJni
+
+options:
+  xcodeVersion: 1200
+  groupSortPosition: top
+
+targets:
+  ShimejiMacJni:
+    platform: macOS
+    type: library.dynamic
+    deploymentTarget: '10.14'
+    sources:
+      - src
+      - ../../headers/
+    settings:
+      HEADER_SEARCH_PATHS:
+        - ${JAVA_HOME}/include
+        - ${JAVA_HOME}/include/darwin
+      CLANG_ENABLE_OBJC_ARC: false
+      EXECUTABLE_PREFIX: lib
+      SYMROOT: $(PROJECT_DIR)/build
+      OBJROOT: $(PROJECT_DIR)/build
+
