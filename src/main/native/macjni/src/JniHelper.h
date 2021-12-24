@@ -12,4 +12,6 @@
 
 @end
 
+NSString* jstringToNSString(JNIEnv *env, jstring str);
+
 

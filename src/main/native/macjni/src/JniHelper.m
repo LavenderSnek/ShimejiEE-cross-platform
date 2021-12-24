@@ -49,6 +49,21 @@ static JNIEnv* mainThreadEnv = NULL;
 
 @end
 
+NSString* jstringToNSString(JNIEnv *env, jstring str) {
+    if (str == NULL) {
+        return NULL;
+    }
+    
+    const jchar* characters = (*env)->GetStringChars(env, str, NULL);
+    
+    NSString* ret = [NSString stringWithCharacters:(UniChar*)characters
+                                            length:(*env)->GetStringLength(env, str)];
+    
+    (*env)->ReleaseStringChars(env, str, characters);
+    
+    return ret;
+}
+
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     
     jvm = vm;

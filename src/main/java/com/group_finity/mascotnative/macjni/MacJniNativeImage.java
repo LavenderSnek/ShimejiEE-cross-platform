@@ -11,9 +11,9 @@ public class MacJniNativeImage implements NativeImage {
     private final long ptr;
 
     MacJniNativeImage(BufferedImage image) {
-        var w = image.getWidth();
-        var h = image.getHeight();
-        var rgb = image.getRGB(0,0, w, h, null, 0, w);
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int[] rgb = image.getRGB(0,0, w, h, null, 0, w);
         this.ptr = createNSImageFromArray(rgb, w, h);
     }
 

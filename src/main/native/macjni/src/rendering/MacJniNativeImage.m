@@ -1,8 +1,4 @@
 
-
-#import <Cocoa/Cocoa.h>
-#import <jni.h>
-
 #import "com_group_finity_mascotnative_macjni_MacJniNativeImage.h"
 #import "JdkCode.h"
 

@@ -93,8 +93,6 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
 
 - (void)rightMouseUp:(NSEvent *)event {
     
-    // todo: autorealease pool for the menu
-
     __block jlong menuPtr = 0L;
 
     [JniHelper getEnvAndPerform:^(JNIEnv* env){
@@ -103,7 +101,11 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
     }];
 
     if (menuPtr) {
-        //show menu
+        NSMenu* menu = (NSMenu*)menuPtr;
+        [NSMenu popUpContextMenu:menu withEvent:event forView:self.contentView];
+        [menu.delegate release];
+        [menu release];
+        
     }
 }
 

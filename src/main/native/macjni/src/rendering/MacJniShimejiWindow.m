@@ -1,7 +1,4 @@
 
-#import <Cocoa/Cocoa.h>
-#import <jni.h>
-
 #import "com_group_finity_mascotnative_macjni_MacJniShimejiWindow.h"
 #import "ShimejiWindow.h"
 #import "JniHelper.h"

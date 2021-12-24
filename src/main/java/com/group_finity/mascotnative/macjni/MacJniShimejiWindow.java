@@ -3,6 +3,7 @@ package com.group_finity.mascotnative.macjni;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascotnative.macjni.menu.MacJniPopupUtil;
 
 import java.awt.Rectangle;
 import java.util.Objects;
@@ -14,19 +15,15 @@ class MacJniShimejiWindow implements TranslucentWindow {
 
     private static native void setImageForShimejiWindow(long shimejiWindowPtr, long nsImagePtr);
     private static native void repaintShimejiWindow(long shimejiWindowPtr);
-
     private static native void setJavaBoundsForNSWindow(long nsWindowPtr, int x, int y, int width, int height);
-    //private static native Rectangle getJavaBoundsForNSWindow(long nsWindowPtr);
-
     private static native void setVisibilityForNSWindow(long nsWindowPtr, boolean visible);
-    //private static native boolean getVisibilityForNSWindow(long nsWindowPtr);
-
     private static native void disposeShimejiWindow(long shimejiWindowPtr);
 
     //--- class ---//
 
     /**
      * Creates a native ShimejiWindow with this object as its callback object.
+     *
      * @return ShimejiWindow pointer
      */
     private native long createNativeShimejiWindow();
@@ -95,6 +92,7 @@ class MacJniShimejiWindow implements TranslucentWindow {
 
     @Override
     public void dispose() {
+        setVisible(false);
         disposeShimejiWindow(ptr);
     }
 
@@ -109,8 +107,10 @@ class MacJniShimejiWindow implements TranslucentWindow {
     }
 
     private long _getNSMenuPtrForPopup() {
-        // TODO: write native popups
-        return 0L;
+        if (popupMenuSupplier != null) {
+            return MacJniPopupUtil.createNSMenuFor(popupMenuSupplier.get());
+        }
+        return 0;
     }
 
 }
