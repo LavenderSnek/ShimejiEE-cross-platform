@@ -680,9 +680,7 @@ public final class Main {
         trayPopup.add(new MenuItem("-"));
 
         trayPopup.add(languageMenu);
-        if (Platform.isWindows()) {
-            trayPopup.add(scalingMenu);
-        }
+        trayPopup.add(scalingMenu);
         trayPopup.add(togglesMenu);
 
         trayPopup.add(new MenuItem("-"));

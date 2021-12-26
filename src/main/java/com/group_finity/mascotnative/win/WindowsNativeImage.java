@@ -7,9 +7,6 @@ import com.group_finity.mascotnative.win.jna.BITMAPINFOHEADER;
 import com.group_finity.mascotnative.win.jna.Gdi32;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.arcnor.hqx.Hqx_2x;
-import com.arcnor.hqx.Hqx_3x;
-import com.arcnor.hqx.Hqx_4x;
 
 import java.awt.image.BufferedImage;
 
@@ -106,50 +103,17 @@ class WindowsNativeImage implements NativeImage {
 
     public WindowsNativeImage(final BufferedImage image) {
         int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
-        boolean filter = scaling > 1 && Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Filter", "false"));
-        //scale>1 && filtering on
-        int effectiveScaling = filter ? 1 : scaling;
 
         this.managedImage = image;
-        this.nativeHandle = createNative(this.getManagedImage().getWidth() * scaling, this.getManagedImage().getHeight() * scaling);
+        int imageWidth = getManagedImage().getWidth();
+        int imageHeight = getManagedImage().getHeight();
 
-        int[] rbgValues = new int[this.getManagedImage().getWidth() * this.getManagedImage().getHeight() * effectiveScaling * effectiveScaling];
-        this.getManagedImage().getRGB(0, 0, this.getManagedImage().getWidth(), this.getManagedImage().getHeight(), rbgValues, 0, this.getManagedImage().getWidth());
+        this.nativeHandle = createNative(imageWidth * scaling, imageWidth * scaling);
 
-        // apply filter here
-        if (filter) {
-            int width = this.getManagedImage().getWidth();
-            int height = this.getManagedImage().getHeight();
-            int[] buffer;
+        int[] rbgValues = this.getManagedImage()
+                .getRGB(0, 0, imageWidth, imageHeight, null, 0, imageWidth);
 
-            if (scaling == 4 || scaling == 8) {
-                width *= 4;
-                height *= 4;
-                buffer = new int[width * height];
-                Hqx_4x.hq4x_32_rb(rbgValues, buffer, width / 4, height / 4);
-                rbgValues = buffer;
-            }
-            if (scaling == 3 || scaling == 6) {
-                width *= 3;
-                height *= 3;
-                buffer = new int[width * height];
-                Hqx_3x.hq3x_32_rb(rbgValues, buffer, width / 3, height / 3);
-                rbgValues = buffer;
-            }
-            if (scaling == 2) {
-                width *= 2;
-                height *= 2;
-                buffer = new int[width * height];
-                Hqx_2x.hq2x_32_rb(rbgValues, buffer, width / 2, height / 2);
-                rbgValues = buffer;
-            }
-
-            if (scaling > 4) {
-                effectiveScaling = 2;
-            }
-        }
-
-        flushToNative(this.getNativeHandle(), rbgValues, effectiveScaling);
+        flushToNative(this.getNativeHandle(), rbgValues, scaling);
     }
 
     @Override
