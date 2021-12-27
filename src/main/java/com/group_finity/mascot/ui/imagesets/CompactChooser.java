@@ -1,6 +1,7 @@
 package com.group_finity.mascot.ui.imagesets;
 
 import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -125,10 +126,10 @@ public class CompactChooser extends JFrame {
         pane.add(scPane, constraints);
 
         //--------buttons--------//
-        var buttonCancel = new JButton(Main.getInstance().getLanguageBundle().getString("Cancel"));
+        var buttonCancel = new JButton(Tr.tr("Cancel"));
         buttonCancel.addActionListener(e -> this.dispose());
 
-        var buttonOK = new JButton(Main.getInstance().getLanguageBundle().getString("UseSelected"));
+        var buttonOK = new JButton(Tr.tr("UseSelected"));
         buttonOK.addActionListener(e -> {
             this.dispose();
             onSelection.accept(getSelections());

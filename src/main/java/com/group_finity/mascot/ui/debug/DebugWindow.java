@@ -1,6 +1,6 @@
 package com.group_finity.mascot.ui.debug;
 
-import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.MascotEnvironment;
 
@@ -285,18 +285,18 @@ public class DebugWindow extends javax.swing.JFrame implements DebugUi {
     @Override
     public void setVisible(boolean b) {
         if (b) {
-            lblBehaviour.setText(Main.getInstance().getLanguageBundle().getString("Behaviour"));
-            lblShimejiX.setText(Main.getInstance().getLanguageBundle().getString("ShimejiX"));
-            lblShimejiY.setText(Main.getInstance().getLanguageBundle().getString("ShimejiY"));
-            lblActiveIE.setText(Main.getInstance().getLanguageBundle().getString("ActiveIE"));
-            lblWindowX.setText(Main.getInstance().getLanguageBundle().getString("WindowX"));
-            lblWindowY.setText(Main.getInstance().getLanguageBundle().getString("WindowY"));
-            lblWindowWidth.setText(Main.getInstance().getLanguageBundle().getString("WindowWidth"));
-            lblWindowHeight.setText(Main.getInstance().getLanguageBundle().getString("WindowHeight"));
-            lblEnvironmentX.setText(Main.getInstance().getLanguageBundle().getString("EnvironmentX"));
-            lblEnvironmentY.setText(Main.getInstance().getLanguageBundle().getString("EnvironmentY"));
-            lblEnvironmentWidth.setText(Main.getInstance().getLanguageBundle().getString("EnvironmentWidth"));
-            lblEnvironmentHeight.setText(Main.getInstance().getLanguageBundle().getString("EnvironmentHeight"));
+            lblBehaviour.setText(Tr.tr("Behaviour"));
+            lblShimejiX.setText(Tr.tr("ShimejiX"));
+            lblShimejiY.setText(Tr.tr("ShimejiY"));
+            lblActiveIE.setText(Tr.tr("ActiveIE"));
+            lblWindowX.setText(Tr.tr("WindowX"));
+            lblWindowY.setText(Tr.tr("WindowY"));
+            lblWindowWidth.setText(Tr.tr("WindowWidth"));
+            lblWindowHeight.setText(Tr.tr("WindowHeight"));
+            lblEnvironmentX.setText(Tr.tr("EnvironmentX"));
+            lblEnvironmentY.setText(Tr.tr("EnvironmentY"));
+            lblEnvironmentWidth.setText(Tr.tr("EnvironmentWidth"));
+            lblEnvironmentHeight.setText(Tr.tr("EnvironmentHeight"));
         }
         super.setVisible(b);
     }

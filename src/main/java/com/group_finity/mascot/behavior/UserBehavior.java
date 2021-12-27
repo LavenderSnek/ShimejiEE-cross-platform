@@ -2,6 +2,7 @@ package com.group_finity.mascot.behavior;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
 import com.group_finity.mascot.action.ActionBase;
 import com.group_finity.mascot.config.Configuration;
@@ -62,11 +63,11 @@ public class UserBehavior implements Behavior {
                 try {
                     mascot.setBehavior(this.getConfiguration().buildBehavior(getName(), mascot));
                 } catch (final BehaviorInstantiationException e) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedInitialiseFollowingBehaviourErrorMessage"), e);
+                    throw new CantBeAliveException(Tr.tr("FailedInitialiseFollowingBehaviourErrorMessage"), e);
                 }
             }
         } catch (final VariableException e) {
-            throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("VariableEvaluationErrorMessage"), e);
+            throw new CantBeAliveException(Tr.tr("VariableEvaluationErrorMessage"), e);
         }
 
     }
@@ -84,7 +85,7 @@ public class UserBehavior implements Behavior {
             try {
                 draggable = ((ActionBase) action).isDraggable();
             } catch (VariableException ex) {
-                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), ex);
+                throw new CantBeAliveException(Tr.tr("FailedDragActionInitialiseErrorMessage"), ex);
             }
         }
 
@@ -93,7 +94,7 @@ public class UserBehavior implements Behavior {
             try {
                 getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_DRAGGED)));
             } catch (final BehaviorInstantiationException e) {
-                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDragActionInitialiseErrorMessage"), e);
+                throw new CantBeAliveException(Tr.tr("FailedDragActionInitialiseErrorMessage"), e);
             }
         }
     }
@@ -110,7 +111,7 @@ public class UserBehavior implements Behavior {
             try {
                 draggable = ((ActionBase) action).isDraggable();
             } catch (VariableException ex) {
-                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), ex);
+                throw new CantBeAliveException(Tr.tr("FailedDropActionInitialiseErrorMessage"), ex);
             }
         }
 
@@ -119,7 +120,7 @@ public class UserBehavior implements Behavior {
             try {
                 getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_THROWN)));
             } catch (final BehaviorInstantiationException e) {
-                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedDropActionInitialiseErrorMessage"), e);
+                throw new CantBeAliveException(Tr.tr("FailedDropActionInitialiseErrorMessage"), e);
             }
         }
     }
@@ -156,7 +157,7 @@ public class UserBehavior implements Behavior {
                     try {
                         getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_FALL)));
                     } catch (final BehaviorInstantiationException e) {
-                        throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedFallingActionInitialiseErrorMessage"), e);
+                        throw new CantBeAliveException(Tr.tr("FailedFallingActionInitialiseErrorMessage"), e);
                     }
                 }
 
@@ -166,7 +167,7 @@ public class UserBehavior implements Behavior {
                 try {
                     getMascot().setBehavior(this.getConfiguration().buildBehavior(getName(), getMascot()));
                 } catch (final BehaviorInstantiationException e) {
-                    throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedInitialiseFollowingActionsErrorMessage"), e);
+                    throw new CantBeAliveException(Tr.tr("FailedInitialiseFollowingActionsErrorMessage"), e);
                 }
             }
         } catch (final LostGroundException e) {
@@ -175,10 +176,10 @@ public class UserBehavior implements Behavior {
             try {
                 getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_FALL)));
             } catch (final BehaviorInstantiationException ex) {
-                throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("FailedFallingActionInitialiseErrorMessage"), e);
+                throw new CantBeAliveException(Tr.tr("FailedFallingActionInitialiseErrorMessage"), e);
             }
         } catch (final VariableException e) {
-            throw new CantBeAliveException(Main.getInstance().getLanguageBundle().getString("VariableEvaluationErrorMessage"), e);
+            throw new CantBeAliveException(Tr.tr("VariableEvaluationErrorMessage"), e);
         }
 
     }

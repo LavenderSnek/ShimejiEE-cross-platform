@@ -1,6 +1,6 @@
 package com.group_finity.mascot.config;
 
-import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.behavior.UserBehavior;
 import com.group_finity.mascot.exception.ActionInstantiationException;
@@ -95,7 +95,7 @@ public class BehaviorBuilder {
     public void validate() throws ConfigurationException {
         if (!getConfiguration().getActionBuilders().containsKey(getActionName())) {
             log.log(Level.SEVERE, "There is no corresponding action(" + this + ")");
-            throw new ConfigurationException(Main.getInstance().getLanguageBundle().getString("NoActionFoundErrorMessage") + "(" + this + ")");
+            throw new ConfigurationException(Tr.tr("NoActionFoundErrorMessage") + "(" + this + ")");
         }
     }
 
@@ -106,7 +106,7 @@ public class BehaviorBuilder {
                             getParams()), getConfiguration(), isHidden());
         } catch (final ActionInstantiationException e) {
             log.log(Level.SEVERE, "Failed to initialize the corresponding action(" + this + ")");
-            throw new BehaviorInstantiationException(Main.getInstance().getLanguageBundle().getString("FailedInitialiseCorrespondingActionErrorMessage") + "(" + this + ")", e);
+            throw new BehaviorInstantiationException(Tr.tr("FailedInitialiseCorrespondingActionErrorMessage") + "(" + this + ")", e);
         }
     }
 

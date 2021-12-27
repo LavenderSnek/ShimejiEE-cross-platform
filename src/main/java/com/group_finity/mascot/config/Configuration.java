@@ -2,6 +2,7 @@ package com.group_finity.mascot.config;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
 import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.behavior.UserBehavior;
@@ -47,7 +48,7 @@ public class Configuration {
                 final ActionBuilder action = new ActionBuilder(this, node, imageSet);
 
                 if (getActionBuilders().containsKey(action.getName())) {
-                    throw new ConfigurationException(Main.getInstance().getLanguageBundle().getString("DuplicateActionErrorMessage") + ": " + action.getName());
+                    throw new ConfigurationException(Tr.tr("DuplicateActionErrorMessage") + ": " + action.getName());
                 }
 
                 getActionBuilders().put(action.getName(), action);
@@ -81,7 +82,7 @@ public class Configuration {
 
         final ActionBuilder factory = this.actionBuilders.get(name);
         if (factory == null) {
-            throw new ActionInstantiationException(Main.getInstance().getLanguageBundle().getString("NoCorrespondingActionFoundErrorMessage") + ": " + name);
+            throw new ActionInstantiationException(Tr.tr("NoCorrespondingActionFoundErrorMessage") + ": " + name);
         }
 
         return factory.buildAction(params);

@@ -182,16 +182,11 @@ public class Manager {
                     mascot.setBehavior(conf.buildBehavior(conf.getSchema().getString(name)));
                 } catch (final BehaviorInstantiationException e) {
                     log.log(Level.SEVERE, "Failed to initialize the following actions", e);
-                    Main.showError(Main.getInstance().getLanguageBundle()
-                            .getString("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage()
-                            + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
                     mascot.dispose();
                 } catch (final CantBeAliveException e) {
                     log.log(Level.SEVERE, "Fatal Error", e);
-                    Main.showError(Main.getInstance().getLanguageBundle()
-                            .getString("FailedSetBehaviourErrorMessage") + "\n"
-                            + e.getMessage()
-                            + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
                     mascot.dispose();
                 }
             }
@@ -207,11 +202,11 @@ public class Manager {
                     }
                 } catch (final BehaviorInstantiationException e) {
                     log.log(Level.SEVERE, "Failed to initialize the following actions", e);
-                    Main.showError(Main.getInstance().getLanguageBundle().getString("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
                     mascot.dispose();
                 } catch (final CantBeAliveException e) {
                     log.log(Level.SEVERE, "Fatal Error", e);
-                    Main.showError(Main.getInstance().getLanguageBundle().getString("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
                     mascot.dispose();
                 }
             }

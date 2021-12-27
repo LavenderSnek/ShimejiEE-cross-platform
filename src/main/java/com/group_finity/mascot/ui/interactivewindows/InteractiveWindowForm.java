@@ -1,6 +1,7 @@
 package com.group_finity.mascot.ui.interactivewindows;
 
 import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -34,10 +35,10 @@ public class InteractiveWindowForm extends JDialog {
     }
 
     public void display() {
-        setTitle(Main.getInstance().getLanguageBundle().getString("InteractiveWindows"));
-        btnAdd.setText(Main.getInstance().getLanguageBundle().getString("Add"));
-        btnDone.setText(Main.getInstance().getLanguageBundle().getString("Done"));
-        btnRemove.setText(Main.getInstance().getLanguageBundle().getString("Remove"));
+        setTitle(Tr.tr("InteractiveWindows"));
+        btnAdd.setText(Tr.tr("Add"));
+        btnDone.setText(Tr.tr("Done"));
+        btnRemove.setText(Tr.tr("Remove"));
         setVisible(true);
     }
 
@@ -107,8 +108,8 @@ public class InteractiveWindowForm extends JDialog {
         // add button
         String inputValue = JOptionPane.showInputDialog(
                 rootPane,
-                Main.getInstance().getLanguageBundle().getString("InteractiveWindowHintMessage"),
-                Main.getInstance().getLanguageBundle().getString("AddInteractiveWindow"),
+                Tr.tr("InteractiveWindowHintMessage"),
+                Tr.tr("AddInteractiveWindow"),
                 JOptionPane.QUESTION_MESSAGE
                 ).trim();
 

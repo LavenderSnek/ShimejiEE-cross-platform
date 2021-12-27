@@ -1,6 +1,6 @@
 package com.group_finity.mascot.script;
 
-import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.exception.VariableException;
 
 import javax.script.Bindings;
@@ -64,7 +64,7 @@ public class VariableMap extends AbstractMap<String, Object> implements Bindings
 
                         @Override
                         public Object setValue(final Object value) {
-                            throw new UnsupportedOperationException(Main.getInstance().getLanguageBundle().getString("SetValueNotSupportedErrorMessage"));
+                            throw new UnsupportedOperationException(Tr.tr("SetValueNotSupportedErrorMessage"));
                         }
 
                     };

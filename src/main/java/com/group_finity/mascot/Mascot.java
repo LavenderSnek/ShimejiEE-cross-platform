@@ -85,9 +85,9 @@ public class Mascot {
                 getBehavior().mousePressed(null);
             } catch (final CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Error", e);
-                Main.showError(Main.getInstance().getLanguageBundle().getString("SevereShimejiErrorErrorMessage")
-                        + "\n" + e.getMessage() + "\n"
-                        + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
+                        + "\n" + e.getMessage()
+                        + "\n" + Tr.tr("SeeLogForDetails"));
                 dispose();
             }
         }
@@ -99,7 +99,9 @@ public class Mascot {
                 getBehavior().mouseReleased(null);
             } catch (final CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Error", e);
-                Main.showError(Main.getInstance().getLanguageBundle().getString("SevereShimejiErrorErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
+                        + "\n" + e.getMessage()
+                        + "\n" + Tr.tr("SeeLogForDetails"));
                 dispose();
             }
         }
@@ -107,17 +109,13 @@ public class Mascot {
 
     private TopLevelMenuRep createPopupRep() {
         var main = Main.getInstance();
-        var i18n = main.getLanguageBundle();
         var config = Main.getInstance().getConfiguration(getImageSet());
         boolean translateNames = Boolean.parseBoolean(main.getProperties().getProperty("TranslateBehaviorNames", "false"));
 
         List<MenuItemRep> behaviorItems = new ArrayList<MenuItemRep>();
         Behavior behaviour;
         for (String behaviorName : config.getBehaviorNames()) {
-            String lblName = behaviorName;
-            if (translateNames && main.getBehaviorNamesBundle().containsKey(behaviorName)) {
-                lblName = main.getBehaviorNamesBundle().getString(behaviorName);
-            }
+            String lblName = translateNames ? Tr.trBv(behaviorName) : behaviorName;
             try {
                 behaviour = config.buildBehavior(behaviorName);
                 if (!behaviour.isHidden()) {
@@ -126,9 +124,9 @@ public class Mascot {
                             setBehavior(config.buildBehavior(behaviorName));
                         } catch (Exception err) {
                             log.log(Level.SEVERE, "Error ({0})");
-                            Main.showError(i18n.getString("CouldNotSetBehaviourErrorMessage")
+                            Main.showError(Tr.tr("CouldNotSetBehaviourErrorMessage")
                                     + "\n" + err.getMessage()
-                                    + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                                    + "\n" + Tr.tr("SeeLogForDetails"));
                         }
                     }));
                 }
@@ -138,23 +136,25 @@ public class Mascot {
         }
 
         TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
-                new MenuItemRep(i18n.getString("CallAnother"), () -> main.createMascot(getImageSet())),
+                new MenuItemRep(Tr.tr("CallAnother"), () -> main.createMascot(getImageSet())),
                 MenuItemRep.SEPARATOR,
-                new MenuItemRep(i18n.getString("FollowCursor"), () ->
+                new MenuItemRep(Tr.tr("FollowCursor"), () ->
                         getManager().setBehaviorAll(main.getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet())
                 ),
-                new MenuItemRep(i18n.getString("RestoreWindows"), () -> getEnvironment().restoreIE()),
-                new MenuItemRep(i18n.getString("RevealStatistics"), () -> {
-                        if (debugWindow == null) {debugWindow = new DebugWindow();}
-                        debugWindow.setVisible(true);
+                new MenuItemRep(Tr.tr("RestoreWindows"), () -> getEnvironment().restoreIE()),
+                new MenuItemRep(Tr.tr("RevealStatistics"), () -> {
+                    if (debugWindow == null) {
+                        debugWindow = new DebugWindow();
+                    }
+                    debugWindow.setVisible(true);
                 }),
                 MenuItemRep.SEPARATOR,
-                new MenuRep(i18n.getString("SetBehaviour"), behaviorItems.toArray(new MenuItemRep[0])),
+                new MenuRep(Tr.tr("SetBehaviour"), behaviorItems.toArray(new MenuItemRep[0])),
                 MenuItemRep.SEPARATOR,
-                new MenuItemRep(i18n.getString("Dismiss"), this::dispose),
-                new MenuItemRep(i18n.getString("DismissOthers"), () -> getManager().remainOne(getImageSet())),
-                new MenuItemRep(i18n.getString("DismissAllOthers"), () -> getManager().remainOne(this)),
-                new MenuItemRep(i18n.getString("DismissAll"), main::exit)
+                new MenuItemRep(Tr.tr("Dismiss"), this::dispose),
+                new MenuItemRep(Tr.tr("DismissOthers"), () -> getManager().remainOne(getImageSet())),
+                new MenuItemRep(Tr.tr("DismissAllOthers"), () -> getManager().remainOne(this)),
+                new MenuItemRep(Tr.tr("DismissAll"), main::exit)
         );
 
         mainMenu.setOnOpenAction(() -> this.setAnimating(false));
@@ -170,7 +170,9 @@ public class Mascot {
                     getBehavior().next();
                 } catch (final CantBeAliveException e) {
                     log.log(Level.SEVERE, "Fatal Error.", e);
-                    Main.showError(Main.getInstance().getLanguageBundle().getString("CouldNotGetNextBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails"));
+                    Main.showError(Tr.tr("CouldNotGetNextBehaviourErrorMessage")
+                            + "\n" + e.getMessage()
+                            + "\n" + Tr.tr("SeeLogForDetails"));
                     dispose();
                 }
 

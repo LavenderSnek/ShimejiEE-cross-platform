@@ -130,11 +130,11 @@ public final class Main {
         return properties;
     }
 
-    public ResourceBundle getLanguageBundle() {
+    ResourceBundle getLanguageBundle() {
         return languageBundle;
     }
 
-    public ResourceBundle getBehaviorNamesBundle() {
+    ResourceBundle getBehaviorNamesBundle() {
         return behaviorNamesBundle;
     }
 
@@ -325,8 +325,9 @@ public final class Main {
             configurations.remove(imageSet);
             ImagePairs.removeAllFromImageSet(imageSet);
 
-            Main.showError(languageBundle.getString("FailedLoadConfigErrorMessage") + "\n"
-                    + e.getMessage() + "\n" + languageBundle.getString("SeeLogForDetails"));
+            Main.showError(Tr.tr("FailedLoadConfigErrorMessage")
+                    + "\n" + e.getMessage()
+                    + "\n" + Tr.tr("SeeLogForDetails"));
         }
 
         return false;
@@ -424,8 +425,8 @@ public final class Main {
 
             e.printStackTrace();
             log.log(Level.SEVERE, imageSet + " fatal error, can not be started.", e);
-            Main.showError(languageBundle.getString("CouldNotCreateShimejiErrorMessage") + " " + imageSet +
-                    ".\n" + e.getMessage() + "\n" + languageBundle.getString("SeeLogForDetails"));
+            Main.showError(Tr.tr("CouldNotCreateShimejiErrorMessage") + " " + imageSet +
+                    ".\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
             mascot.dispose();
 
         }
@@ -536,7 +537,7 @@ public final class Main {
 
     private CheckboxMenuItem getGenericToggleItem(String langBundleKey, String propertyKey, boolean defaultVal) {
         final var toggleBtn = new CheckboxMenuItem(
-                languageBundle.getString(langBundleKey),
+                Tr.tr(langBundleKey),
                 Boolean.parseBoolean(properties.getProperty(propertyKey, String.valueOf(defaultVal)))
         );
 
@@ -580,25 +581,25 @@ public final class Main {
         //------------------------------------//
 
         // create shimeji
-        final MenuItem callShimeji = new MenuItem(languageBundle.getString("CallShimeji"));
+        final MenuItem callShimeji = new MenuItem(Tr.tr("CallShimeji"));
         callShimeji.addActionListener(event -> createMascot());
 
         // chase mouse
-        final MenuItem followCursor = new MenuItem(languageBundle.getString("FollowCursor"));
+        final MenuItem followCursor = new MenuItem(Tr.tr("FollowCursor"));
         followCursor.addActionListener(event -> getManager().setBehaviorAll(BEHAVIOR_GATHER));
 
         // Reduce to One
-        final MenuItem reduceToOne = new MenuItem(languageBundle.getString("ReduceToOne"));
+        final MenuItem reduceToOne = new MenuItem(Tr.tr("ReduceToOne"));
         reduceToOne.addActionListener(event -> getManager().remainOne());
 
         // Undo window interaction
-        final MenuItem restoreWindows = new MenuItem(languageBundle.getString("RestoreWindows"));
+        final MenuItem restoreWindows = new MenuItem(Tr.tr("RestoreWindows"));
         restoreWindows.addActionListener(event -> NativeFactory.getInstance().getEnvironment().restoreIE());
 
         //--------------//
 
         //--languages submenu
-        final Menu languageMenu = new Menu(languageBundle.getString("Language"));
+        final Menu languageMenu = new Menu(Tr.tr("Language"));
         for (String[] lang : languageTable) {
             final var langName = lang[0];
             final var langCode = lang[1];
@@ -608,7 +609,7 @@ public final class Main {
         }
 
         //--scaling submenu
-        final Menu scalingMenu = new Menu(languageBundle.getString("Scaling"));
+        final Menu scalingMenu = new Menu(Tr.tr("Scaling"));
         for (String opt : scalingOptions) {
             final var scaleBtn = new MenuItem(opt);
             scaleBtn.addActionListener(e -> setScaling(opt));
@@ -616,7 +617,7 @@ public final class Main {
         }
 
         //--behaviour toggles submenu
-        final Menu togglesMenu = new Menu(languageBundle.getString("AllowedBehaviours"), true);
+        final Menu togglesMenu = new Menu(Tr.tr("AllowedBehaviours"), true);
 
         final var breedingToggle = getGenericToggleItem
                 ("BreedingCloning", "Breeding", true);
@@ -638,7 +639,7 @@ public final class Main {
 
         //this is slightly different from the rest so i didn't use the function
         final var soundToggle = new CheckboxMenuItem(
-                languageBundle.getString("SoundEffects"),
+                Tr.tr("SoundEffects"),
                 Boolean.parseBoolean(properties.getProperty("Sounds", "true"))
         );
         soundToggle.addItemListener(e -> {
@@ -658,11 +659,11 @@ public final class Main {
         //----------------------//
 
         //image set chooser
-        final MenuItem chooseShimeji = new MenuItem(languageBundle.getString("ChooseShimeji"));
+        final MenuItem chooseShimeji = new MenuItem(Tr.tr("ChooseShimeji"));
         chooseShimeji.addActionListener(e -> ImageSetUtils.askUserForSelection(this::setActiveImageSets));
 
         //interactive window chooser
-        MenuItem interactiveMenu = new MenuItem(languageBundle.getString("ChooseInteractiveWindows"));
+        MenuItem interactiveMenu = new MenuItem(Tr.tr("ChooseInteractiveWindows"));
         interactiveMenu.addActionListener(e -> {
             new InteractiveWindowForm(frame, true).display();
             NativeFactory.getInstance().getEnvironment().refreshCache();
@@ -670,11 +671,11 @@ public final class Main {
         });
 
         //reload button
-        final MenuItem reloadMascot = new MenuItem(languageBundle.getString("ReloadMascots"));
+        final MenuItem reloadMascot = new MenuItem(Tr.tr("ReloadMascots"));
         reloadMascot.addActionListener(e -> reloadMascots());
 
         // Quit Button
-        final MenuItem dismissAll = new MenuItem(languageBundle.getString("DismissAll"));
+        final MenuItem dismissAll = new MenuItem(Tr.tr("DismissAll"));
         dismissAll.addActionListener(e -> exit());
 
         //----Create pop-up menu-----//

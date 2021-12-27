@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ResourceBundle;
 
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.animation.Pose;
 import com.group_finity.mascot.exception.AnimationInstantiationException;
@@ -79,7 +80,7 @@ public class AnimationBuilder {
                     error = " [Image: "+imageText+", ImageRight: "+imageRightText+"]";
                 }
                 log.log(Level.SEVERE, "Failed to load image: " + error);
-                throw new IOException(Main.getInstance().getLanguageBundle().getString("FailedLoadImageErrorMessage") + " " + error);
+                throw new IOException(Tr.tr("FailedLoadImageErrorMessage") + " " + error);
             }
         }
 
@@ -94,7 +95,7 @@ public class AnimationBuilder {
                 soundIdentifier = SoundLoader.load(imageSet, soundText, volume);
             } catch (Exception e) {
                 log.log(Level.SEVERE, "Failed to load sound: " + soundText);
-                throw new IOException(Main.getInstance().getLanguageBundle().getString("FailedLoadSoundErrorMessage") + soundText);
+                throw new IOException(Tr.tr("FailedLoadSoundErrorMessage") + soundText);
             }
         }
 
@@ -109,7 +110,7 @@ public class AnimationBuilder {
         try {
             return new Animation(Variable.parse(this.getCondition()), this.getPoses().toArray(new Pose[0]));
         } catch (final VariableException e) {
-            throw new AnimationInstantiationException(Main.getInstance().getLanguageBundle().getString("FailedConditionEvaluationErrorMessage"), e);
+            throw new AnimationInstantiationException(Tr.tr("FailedConditionEvaluationErrorMessage"), e);
         }
     }
 

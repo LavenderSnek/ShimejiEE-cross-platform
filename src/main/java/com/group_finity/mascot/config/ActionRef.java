@@ -1,6 +1,6 @@
 package com.group_finity.mascot.config;
 
-import com.group_finity.mascot.Main;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
 import com.group_finity.mascot.exception.ActionInstantiationException;
 import com.group_finity.mascot.exception.ConfigurationException;
@@ -44,7 +44,7 @@ public class ActionRef implements IActionBuilder {
 	public void validate() throws ConfigurationException {
 		if (!getConfiguration().getActionBuilders().containsKey(getName())) {
 			log.log(Level.SEVERE, "There is no corresponding behavior(" + this + ")");
-			throw new ConfigurationException(Main.getInstance().getLanguageBundle().getString("NoBehaviourFoundErrorMessage") + "(" + this + ")");
+			throw new ConfigurationException(Tr.tr("NoBehaviourFoundErrorMessage") + "(" + this + ")");
 		}
 	}
 

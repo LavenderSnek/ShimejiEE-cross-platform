@@ -2,6 +2,7 @@ package com.group_finity.mascot.action;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.exception.BehaviorInstantiationException;
 import com.group_finity.mascot.exception.CantBeAliveException;
@@ -103,9 +104,9 @@ public class ScanMove extends BorderedAction {
             } catch (final NullPointerException | BehaviorInstantiationException | CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Exception", e);
                 Main.showError(
-                        Main.getInstance().getLanguageBundle().getString("FailedSetBehaviourErrorMessage")
+                        Tr.tr("FailedSetBehaviourErrorMessage")
                                 + "\n" + e.getMessage()
-                                + "\n" + Main.getInstance().getLanguageBundle().getString("SeeLogForDetails")
+                                + "\n" + Tr.tr("SeeLogForDetails")
                 );
             }
         }
