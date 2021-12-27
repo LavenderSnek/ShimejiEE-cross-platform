@@ -109,14 +109,19 @@ public class Mascot {
         var main = Main.getInstance();
         var i18n = main.getLanguageBundle();
         var config = Main.getInstance().getConfiguration(getImageSet());
+        boolean translateNames = Boolean.parseBoolean(main.getProperties().getProperty("TranslateBehaviorNames", "false"));
 
         List<MenuItemRep> behaviorItems = new ArrayList<MenuItemRep>();
         Behavior behaviour;
         for (String behaviorName : config.getBehaviorNames()) {
+            String lblName = behaviorName;
+            if (translateNames && main.getBehaviorNamesBundle().containsKey(behaviorName)) {
+                lblName = main.getBehaviorNamesBundle().getString(behaviorName);
+            }
             try {
                 behaviour = config.buildBehavior(behaviorName);
                 if (!behaviour.isHidden()) {
-                    behaviorItems.add(new MenuItemRep(behaviorName, () -> {
+                    behaviorItems.add(new MenuItemRep(lblName, () -> {
                         try {
                             setBehavior(config.buildBehavior(behaviorName));
                         } catch (Exception err) {
@@ -128,7 +133,7 @@ public class Mascot {
                     }));
                 }
             } catch (Exception ignored) {
-                behaviorItems.add(new MenuItemRep(behaviorName, null, false));
+                behaviorItems.add(new MenuItemRep(lblName, null, false));
             }
         }
 

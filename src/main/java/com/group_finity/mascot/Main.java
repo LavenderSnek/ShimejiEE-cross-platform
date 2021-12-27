@@ -93,6 +93,7 @@ public final class Main {
     }
 
     private ResourceBundle languageBundle;
+    private ResourceBundle behaviorNamesBundle;
 
     private ShimejiProgramFolder programFolder;
 
@@ -131,6 +132,10 @@ public final class Main {
 
     public ResourceBundle getLanguageBundle() {
         return languageBundle;
+    }
+
+    public ResourceBundle getBehaviorNamesBundle() {
+        return behaviorNamesBundle;
     }
 
     public ShimejiProgramFolder getProgramFolder() {
@@ -190,10 +195,9 @@ public final class Main {
 
     private void loadChosenLanguage() {
         try {
-            languageBundle = ResourceBundle.getBundle(
-                    "language",
-                    Locale.forLanguageTag(properties.getProperty("Language", "en-GB"))
-            );
+            Locale locale = Locale.forLanguageTag(properties.getProperty("Language", "en-GB"));
+            languageBundle = ResourceBundle.getBundle("language", locale);
+            behaviorNamesBundle = ResourceBundle.getBundle("behaviornames", locale);
         } catch (Exception ex) {
             Main.showError("The language files could not be loaded. Make sure java is set up properly");
             exit();
@@ -629,6 +633,9 @@ public final class Main {
         final var chooserAtStartToggle = getGenericToggleItem
                 ("AlwaysShowShimejiChooser", "AlwaysShowShimejiChooser", false);
 
+        final var behaviorNameTranslationToggle = getGenericToggleItem
+                ("TranslateBehaviorNames", "TranslateBehaviorNames", false);
+
         //this is slightly different from the rest so i didn't use the function
         final var soundToggle = new CheckboxMenuItem(
                 languageBundle.getString("SoundEffects"),
@@ -646,6 +653,7 @@ public final class Main {
         togglesMenu.add(soundToggle);
         togglesMenu.add(multiscreenToggle);
         togglesMenu.add(chooserAtStartToggle);
+        togglesMenu.add(behaviorNameTranslationToggle);
 
         //----------------------//
 
