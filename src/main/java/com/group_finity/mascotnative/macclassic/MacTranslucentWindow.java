@@ -18,7 +18,14 @@ class MacTranslucentWindow extends BaseTranslucentSwingWindow<MacNativeImage> {
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(final Graphics g) {
-                g.drawImage(getImage().getManagedImage(), 0, 0, null);
+                int imgWidth = getImage().getManagedImage().getWidth();
+                int imgHeight = getImage().getManagedImage().getHeight();
+                g.drawImage(
+                        getImage().getManagedImage(),
+                        0, 0, getWidth(), getHeight(),
+                        0, 0, imgWidth, imgHeight,
+                        null
+                );
             }
         };
 
@@ -32,13 +39,9 @@ class MacTranslucentWindow extends BaseTranslucentSwingWindow<MacNativeImage> {
         // it gets rid of the 'flickering' when dragging,
         getRootPane().putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
 
-        try {
-            MacSwingJni.setNSWindowLevel(this, MacSwingJni.NSStatusWindowLevel);
-        } catch (Exception e) {
-            setAlwaysOnTop(true); // default to this if lib is unavailable
-        }
-    }
 
+        setAlwaysOnTop(true);
+    }
 
     @Override
     public void updateImage() {

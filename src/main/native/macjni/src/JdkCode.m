@@ -54,7 +54,7 @@ NSBitmapImageRep* CImage_CreateImageRep
                                                                      samplesPerPixel:4
                                                                             hasAlpha:YES
                                                                             isPlanar:NO
-                                                                      colorSpaceName:NSCalibratedRGBColorSpace
+                                                                      colorSpaceName:NSDeviceRGBColorSpace
                                                                         bitmapFormat:NSBitmapFormatAlphaFirst
                                                                          bytesPerRow:width*4
                                                                         bitsPerPixel:32] autorelease];
