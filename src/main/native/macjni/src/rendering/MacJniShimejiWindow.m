@@ -12,25 +12,12 @@
 JNIEXPORT void JNICALL Java_com_group_1finity_mascotnative_macjni_MacJniShimejiWindow_setImageForShimejiWindow
 (JNIEnv *env, jclass cls, jlong shimejiWindowPtr, jlong nsImagePtr) {
     
-    [JniHelper runOnMainQueueAsync:^{
-        [(ShimejiWindow*)shimejiWindowPtr setImage:(NSImage*)nsImagePtr];
-    }];
-}
-
-/*
- * Class:     com_group_finity_mascotnative_macjni_MacJniShimejiWindow
- * Method:    repaintShimejiWindow
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_com_group_1finity_mascotnative_macjni_MacJniShimejiWindow_repaintShimejiWindow
-(JNIEnv *env, jclass cls, jlong shimejiWindowPtr) {
+    ShimejiWindow* sw = (ShimejiWindow*)shimejiWindowPtr;
     
     [JniHelper runOnMainQueueAsync:^{
-        ShimejiWindow* sw = (ShimejiWindow*)shimejiWindowPtr;
-        [sw.contentView setNeedsDisplay:YES];
+        [sw setImage:(NSImage*)nsImagePtr];
         [sw displayIfNeeded];
     }];
-    
 }
 
 

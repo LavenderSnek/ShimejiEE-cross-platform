@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 class MacJniShimejiWindow implements TranslucentWindow {
 
     private static native void setImageForShimejiWindow(long shimejiWindowPtr, long nsImagePtr);
-    private static native void repaintShimejiWindow(long shimejiWindowPtr);
     private static native void setJavaBoundsForNSWindow(long nsWindowPtr, int x, int y, int width, int height);
     private static native void setVisibilityForNSWindow(long nsWindowPtr, boolean visible);
     private static native void disposeShimejiWindow(long shimejiWindowPtr);
@@ -59,13 +58,14 @@ class MacJniShimejiWindow implements TranslucentWindow {
 
     @Override
     public void setImage(NativeImage image) {
-        currentImage = (MacJniNativeImage) image;
-        setImageForShimejiWindow(ptr, currentImage.getNsImagePtr());
+        if (image != null) {
+            currentImage = (MacJniNativeImage) image;
+        }
     }
 
     @Override
     public void updateImage() {
-        repaintShimejiWindow(ptr);
+        setImageForShimejiWindow(ptr, currentImage.getNsImagePtr());
     }
 
     @Override

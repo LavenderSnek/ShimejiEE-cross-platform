@@ -13,8 +13,10 @@
 }
 
 - (void)setImage:(NSImage *)image {
-    self->image = image;
-    // doesn't set needsDisplay since the update gets done later.
+    if (self->image != image) {
+        self->image = image;
+        [self setNeedsDisplay:YES];
+    }
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -22,6 +24,11 @@
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationNone];
         [image drawInRect:dirtyRect];
     }
+}
+
+- (void)dealloc {
+    image = nil;
+    [super dealloc];
 }
 
 @end
