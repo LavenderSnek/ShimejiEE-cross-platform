@@ -20,7 +20,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -28,9 +30,9 @@ public class CompactChooser extends JFrame {
 
     private JList<CompactImageSetPreview> imageSetJlist;
 
-    Consumer<ArrayList<String>> onSelection;
+    Consumer<Collection<String>> onSelection;
 
-    public CompactChooser(Consumer<ArrayList<String>> onSelection) {
+    public CompactChooser(Consumer<Collection<String>> onSelection) {
         this.onSelection = onSelection;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
@@ -79,9 +81,9 @@ public class CompactChooser extends JFrame {
             return;
         }
 
-        ArrayList<String> selected = ImageSetUtils.getImageSetsFromSettings();
+        Collection<String> selected = Main.getInstance().getSelectedImageSetsFromSettings();
 
-        ArrayList<CompactImageSetPreview> data = new ArrayList<>(allImageSets.length);
+        Collection<CompactImageSetPreview> data = new ArrayList<>(allImageSets.length);
         for (String imgSet : allImageSets) {
             data.add(new CompactImageSetPreview(imgSet));
         }

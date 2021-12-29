@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,9 +93,6 @@ public final class Main {
 
     }
 
-    private ResourceBundle languageBundle;
-    private ResourceBundle behaviorNamesBundle;
-
     private ShimejiProgramFolder programFolder;
 
     private static final JFrame frame = new javax.swing.JFrame();
@@ -112,9 +110,6 @@ public final class Main {
      */
     private final ArrayList<String> imageSets = new ArrayList<>();
 
-    /**
-     * The global settings
-     */
     private Properties properties = new Properties();
 
     private static final Main instance = new Main();
@@ -126,23 +121,49 @@ public final class Main {
         return this.manager;
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
-
-    ResourceBundle getLanguageBundle() {
-        return languageBundle;
-    }
-
-    ResourceBundle getBehaviorNamesBundle() {
-        return behaviorNamesBundle;
-    }
-
     public ShimejiProgramFolder getProgramFolder() {
         return programFolder;
     }
 
-    //-----------------------------------//
+    //-------------temporary properties getters-----------------//
+
+    public Collection<String> getInteractiveWindowAllowlist() {
+        return new ArrayList<>(1);
+    }
+
+    public Locale getLocale() {
+        return Locale.forLanguageTag(properties.getProperty("Language", "en-GB"));
+    }
+
+    public int getScaling() {
+        return Integer.parseInt(properties.getProperty("Scaling", "1"));
+    }
+
+    public boolean isBreedingAllowed() {return getBoolProp("Breeding", true);}
+    public boolean isTransformationAllowed() {return getBoolProp("Transformation", true);}
+    public boolean isIEMovementAllowed() {return getBoolProp("Throwing", true);}
+    public boolean isSoundAllowed() {return getBoolProp("Sounds", true);}
+    public boolean isMultiscreenAllowed() {return getBoolProp("Multiscreen", true);}
+    public boolean shouldShowChooserAtStart() {return getBoolProp("AlwaysShowShimejiChooser", false);}
+    public boolean shouldTranslateBehaviorNames() {return getBoolProp("TranslateBehaviorNames", false);}
+
+    public Collection<String> getSelectedImageSetsFromSettings() {
+        if (getProgramFolder().isMonoImageSet()) {
+            return new HashSet<>(Set.of(""));
+        }
+        Set<String> ret = new HashSet<>(Set.of(properties.getProperty("ActiveShimeji", "").split("/")));
+        ret.remove("");
+        return ret;
+    }
+
+    private boolean getBoolProp(String key, boolean defaultVal) {
+        if (properties.containsKey(key)) {
+            return Boolean.parseBoolean(properties.getProperty(key));
+        }
+        return defaultVal;
+    }
+
+    //----------getters----------//
 
     public Configuration getConfiguration(String imageSet) {
         return configurations.get(imageSet);
@@ -193,17 +214,6 @@ public final class Main {
         }
     }
 
-    private void loadChosenLanguage() {
-        try {
-            Locale locale = Locale.forLanguageTag(properties.getProperty("Language", "en-GB"));
-            languageBundle = ResourceBundle.getBundle("language", locale);
-            behaviorNamesBundle = ResourceBundle.getBundle("behaviornames", locale);
-        } catch (Exception ex) {
-            Main.showError("The language files could not be loaded. Make sure java is set up properly");
-            exit();
-        }
-    }
-
     public void run() {
 
         // Dock icon on platforms that support it
@@ -222,20 +232,20 @@ public final class Main {
 
         // load settings.properties
         properties = new Properties();
-        try (FileInputStream input = new FileInputStream(SETTINGS_PATH.toFile())) {
+        try (var input = new InputStreamReader(new FileInputStream(SETTINGS_PATH.toFile()))) {
             properties.load(input);
         } catch (IOException ignored) {
         }
 
-        loadChosenLanguage();
+        Tr.loadLanguage();
 
         //because the chooser is async
         boolean isExit = getManager().isExitOnLastRemoved();
         getManager().setExitOnLastRemoved(false);
 
         //image choosing at startup
-        boolean chooseAtStart = Boolean.parseBoolean(properties.getProperty("AlwaysShowShimejiChooser", "false"));
-        ArrayList<String> selection = ImageSetUtils.getImageSetsFromSettings();
+        boolean chooseAtStart = shouldShowChooserAtStart();
+        Collection<String> selection = getSelectedImageSetsFromSettings();
 
         // the policy is basically that the user should see the chooser or a mascot atleast once
         if (chooseAtStart || selection.isEmpty()) {
@@ -343,12 +353,11 @@ public final class Main {
      *
      * @param newImageSets All the imageSets that should now be active
      */
-    private void setActiveImageSets(ArrayList<String> newImageSets) {
+    private void setActiveImageSets(Collection<String> newImageSets) {
         if (newImageSets == null) {
             return;
         }
 
-        //Not worth using a HashSet
         var toRemove = new ArrayList<>(imageSets);
         toRemove.removeAll(newImageSets);
 
@@ -497,16 +506,16 @@ public final class Main {
 
     //-----------other settings------------//
 
-    private void setLanguage(String newLangCode) {
-        if (!properties.getProperty("Language", "en-GB").equals(newLangCode)) {
-            properties.setProperty("Language", newLangCode);
+    private void setLanguage(Locale locale) {
+        if (!getLocale().equals(locale)) {
+            properties.setProperty("Language", locale.toLanguageTag());
             refreshLanguage();
         }
         writeSettings();
     }
 
     private void refreshLanguage() {
-        loadChosenLanguage();
+        Tr.loadLanguage();
         //reload tray icon if it exists
         if (SystemTray.isSupported()) {
             SystemTray.getSystemTray().remove(SystemTray.getSystemTray().getTrayIcons()[0]);
@@ -515,8 +524,8 @@ public final class Main {
     }
 
 
-    private void setScaling(String scaling) {
-        properties.setProperty("Scaling", scaling);
+    private void setScaling(int scaling) {
+        properties.setProperty("Scaling", String.valueOf(scaling));
         writeSettings();
         // need to reload the shimeji as the images have rescaled
         reloadMascots();
@@ -536,16 +545,10 @@ public final class Main {
 //--------------v-UI RELATED CODE IS BELOW-v-------------//
 
     private CheckboxMenuItem getGenericToggleItem(String langBundleKey, String propertyKey, boolean defaultVal) {
-        final var toggleBtn = new CheckboxMenuItem(
-                Tr.tr(langBundleKey),
-                Boolean.parseBoolean(properties.getProperty(propertyKey, String.valueOf(defaultVal)))
-        );
-
+        final var toggleBtn = new CheckboxMenuItem(Tr.tr(langBundleKey), getBoolProp(propertyKey, defaultVal));
         toggleBtn.addItemListener(e -> toggleProperty(propertyKey, !toggleBtn.getState()));
-
         return toggleBtn;
     }
-
 
     private void createTrayIcon() {
         if (!SystemTray.isSupported()) {
@@ -602,9 +605,9 @@ public final class Main {
         final Menu languageMenu = new Menu(Tr.tr("Language"));
         for (String[] lang : languageTable) {
             final var langName = lang[0];
-            final var langCode = lang[1];
+            final var locale = Locale.forLanguageTag(lang[1]);
             final var langBtn = new MenuItem(langName);
-            langBtn.addActionListener(e -> setLanguage(langCode));
+            langBtn.addActionListener(e -> setLanguage(locale));
             languageMenu.add(langBtn);
         }
 
@@ -612,7 +615,7 @@ public final class Main {
         final Menu scalingMenu = new Menu(Tr.tr("Scaling"));
         for (String opt : scalingOptions) {
             final var scaleBtn = new MenuItem(opt);
-            scaleBtn.addActionListener(e -> setScaling(opt));
+            scaleBtn.addActionListener(e -> setScaling(Integer.parseInt(opt)));
             scalingMenu.add(scaleBtn);
         }
 
@@ -638,10 +641,7 @@ public final class Main {
                 ("TranslateBehaviorNames", "TranslateBehaviorNames", false);
 
         //this is slightly different from the rest so i didn't use the function
-        final var soundToggle = new CheckboxMenuItem(
-                Tr.tr("SoundEffects"),
-                Boolean.parseBoolean(properties.getProperty("Sounds", "true"))
-        );
+        final var soundToggle = new CheckboxMenuItem(Tr.tr("SoundEffects"), isSoundAllowed());
         soundToggle.addItemListener(e -> {
             final boolean initiallyTrue = !soundToggle.getState();
             toggleProperty("Sounds", initiallyTrue);
@@ -696,10 +696,7 @@ public final class Main {
 
         trayPopup.add(chooseShimeji);
         trayPopup.add(reloadMascot);
-        // selective window interaction is only available on windows for now
-        if (Platform.isWindows()) {
-            trayPopup.add(interactiveMenu);
-        }
+        trayPopup.add(interactiveMenu);
         trayPopup.add(dismissAll);
 
         try {

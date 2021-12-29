@@ -31,7 +31,7 @@ public class Transform extends Animate {
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
 
-        if (getTime() == getAnimation().getDuration() - 1 && Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Transformation", "true"))) {
+        if (getTime() == getAnimation().getDuration() - 1 && Main.getInstance().isTransformationAllowed()) {
             transform();
         }
     }

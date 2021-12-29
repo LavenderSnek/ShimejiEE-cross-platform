@@ -63,7 +63,7 @@ public class Sounds {
     }
 
     public static boolean isMuted() {
-        return !Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Sounds", "true"));
+        return !Main.getInstance().isSoundAllowed();
     }
 
     public static void setMuted(boolean mutedFlag) {

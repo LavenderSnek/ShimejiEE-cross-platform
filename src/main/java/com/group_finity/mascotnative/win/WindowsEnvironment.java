@@ -57,7 +57,7 @@ class WindowsEnvironment extends Environment {
         }
 
         if (windowTitles == null) {
-            windowTitles = Main.getInstance().getProperties().getProperty("InteractiveWindows", "").split("/");
+            windowTitles = Main.getInstance().getInteractiveWindowAllowlist().toArray(new String[0]);
         }
 
         for (String windowTitle : windowTitles) {

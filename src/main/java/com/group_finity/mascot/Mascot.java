@@ -110,7 +110,7 @@ public class Mascot {
     private TopLevelMenuRep createPopupRep() {
         var main = Main.getInstance();
         var config = Main.getInstance().getConfiguration(getImageSet());
-        boolean translateNames = Boolean.parseBoolean(main.getProperties().getProperty("TranslateBehaviorNames", "false"));
+        boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
 
         List<MenuItemRep> behaviorItems = new ArrayList<MenuItemRep>();
         Behavior behaviour;

@@ -21,6 +21,7 @@ import java.util.Arrays;
 /**
  * @author Kilkakon
  */
+@Deprecated
 public class InteractiveWindowForm extends JDialog {
 
     ArrayList<String> listData = new ArrayList<String>();
@@ -30,7 +31,7 @@ public class InteractiveWindowForm extends JDialog {
         initComponents();
         setLocationRelativeTo(null);
 
-        listData.addAll(Arrays.asList(Main.getInstance().getProperties().getProperty("InteractiveWindows", "").split("/")));
+        listData.addAll(Main.getInstance().getInteractiveWindowAllowlist());
         jList1.setListData(listData.toArray(new String[0]));
     }
 
@@ -134,7 +135,8 @@ public class InteractiveWindowForm extends JDialog {
             for (String s : listData) {
                 serializedProperty.append(s);
             }
-            Main.getInstance().getProperties().setProperty("InteractiveWindows", serializedProperty.toString());
+            // TODO: 2021-12-28 fix this!!!!
+            //Main.getInstance().getProperties().setProperty("InteractiveWindows", serializedProperty.toString());
         } catch (Exception ignored) {
             // Doesn't matter at all
         }

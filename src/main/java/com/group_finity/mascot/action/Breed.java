@@ -58,14 +58,14 @@ public class Breed extends Animate {
     public void init(final Mascot mascot) throws VariableException {
         super.init(mascot);
 
-        scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
+        scaling = Main.getInstance().getScaling();
     }
 
     @Override
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
 
-        if (getTime() == getAnimation().getDuration() - 1 && Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Breeding", "true"))) {
+        if (getTime() == getAnimation().getDuration() - 1 && Main.getInstance().isBreedingAllowed()) {
             breed();
         }
     }

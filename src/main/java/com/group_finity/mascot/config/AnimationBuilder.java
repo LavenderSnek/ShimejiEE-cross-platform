@@ -62,7 +62,7 @@ public class AnimationBuilder {
         //optional
         final String soundText = frameNode.getAttribute(schema.getString("Sound"));
         final String volumeText = frameNode.getAttribute(schema.getString("Volume")) != null ? frameNode.getAttribute(schema.getString("Volume")) : "0";
-        final int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
+        final int scaling = Main.getInstance().getScaling();
 
         String imagePairIdentifier = null;
         if (imageText != null) { // if you don't have anchor text defined as well you're going to have a bad time

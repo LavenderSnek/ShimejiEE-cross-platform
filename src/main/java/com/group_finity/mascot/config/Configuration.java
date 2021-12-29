@@ -135,7 +135,7 @@ public class Configuration {
         }
 
         if (totalFrequency == 0) {
-            if (Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Multiscreen", "true"))) {
+            if (Main.getInstance().isMultiscreenAllowed()) {
                 mascot.setAnchor(new Point(
                         (int) (Math.random() * (mascot.getEnvironment().getScreen().getRight() - mascot.getEnvironment().getScreen().getLeft())) + mascot.getEnvironment().getScreen().getLeft(),
                         mascot.getEnvironment().getScreen().getTop() - 256));

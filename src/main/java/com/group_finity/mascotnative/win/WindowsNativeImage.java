@@ -102,7 +102,7 @@ class WindowsNativeImage implements NativeImage {
     }
 
     public WindowsNativeImage(final BufferedImage image) {
-        int scaling = Integer.parseInt(Main.getInstance().getProperties().getProperty("Scaling", "1"));
+        int scaling = Main.getInstance().getScaling();
 
         this.managedImage = image;
         int imageWidth = getManagedImage().getWidth();

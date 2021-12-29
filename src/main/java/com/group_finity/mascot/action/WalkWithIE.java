@@ -39,7 +39,7 @@ public class WalkWithIE extends Move {
 
     @Override
     public boolean hasNext() throws VariableException {
-        if (!Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Throwing", "true"))) {
+        if (!Main.getInstance().isIEMovementAllowed()) {
 			return false;
 		}
 

@@ -142,7 +142,7 @@ public class UserBehavior implements Behavior {
 
                     log.log(Level.INFO, "Out of the screen bounds({0},{1})", new Object[]{getMascot(), this});
 
-                    if (Boolean.parseBoolean(Main.getInstance().getProperties().getProperty("Multiscreen", "true"))) {
+                    if (Main.getInstance().isMultiscreenAllowed()) {
                         getMascot().setAnchor(new Point(
                                 (int) (Math.random() * (getEnvironment().getScreen().getRight() - getEnvironment().getScreen().getLeft())) + getEnvironment().getScreen().getLeft(),
                                 getEnvironment().getScreen().getTop() - 256)
