@@ -3,8 +3,8 @@ package com.group_finity.mascot;
 import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.image.ImagePairs;
-import com.group_finity.mascot.ui.imagesets.ImageSetUtils;
 import com.group_finity.mascot.sound.Sounds;
+import com.group_finity.mascot.ui.imagesets.ImageSetUtils;
 import com.group_finity.mascot.ui.interactivewindows.InteractiveWindowForm;
 import com.group_finity.shimejiutils.ShimejiProgramFolder;
 import com.sun.jna.Platform;
@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
@@ -33,10 +34,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -125,7 +138,15 @@ public final class Main {
         return programFolder;
     }
 
-    //-------------temporary properties getters-----------------//
+    public Configuration getConfiguration(String imageSet) {
+        return configurations.get(imageSet);
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+
+    //------------properties getters-----------------//
 
     public Collection<String> getInteractiveWindowAllowlist() {
         return new ArrayList<>(1);
@@ -134,19 +155,44 @@ public final class Main {
     public Locale getLocale() {
         return Locale.forLanguageTag(properties.getProperty("Language", "en-GB"));
     }
+    private void setLocale(Locale locale) {
+        if (!getLocale().equals(locale)) {
+            properties.setProperty("Language", locale.toLanguageTag());
+            Tr.loadLanguage();
+            //reload tray icon if it exists
+            if (SystemTray.isSupported()) {
+                SystemTray.getSystemTray().remove(SystemTray.getSystemTray().getTrayIcons()[0]);
+                createTrayIcon();
+            }
+        }
+    }
+
 
     public int getScaling() {
         return Integer.parseInt(properties.getProperty("Scaling", "1"));
     }
+    private void setScaling(int scaling) {
+        properties.setProperty("Scaling", String.valueOf(scaling));
+        reloadMascots();
+    }
 
     public boolean isBreedingAllowed() {return getBoolProp("Breeding", true);}
+    private void setBreedingAllowed(boolean allowed) {properties.put("Breeding", String.valueOf(allowed));}
     public boolean isTransformationAllowed() {return getBoolProp("Transformation", true);}
+    private void setTransformationAllowed(boolean allowed) {properties.put("Transformation", String.valueOf(allowed));}
     public boolean isIEMovementAllowed() {return getBoolProp("Throwing", true);}
+    private void setIEMovementAllowed(boolean allowed) {properties.put("Throwing", String.valueOf(allowed));}
     public boolean isSoundAllowed() {return getBoolProp("Sounds", true);}
+    private void setSoundAllowed(boolean allowed) {
+        properties.put("Sounds", String.valueOf(allowed));
+        Sounds.setMuted(!allowed);
+    }
     public boolean isMultiscreenAllowed() {return getBoolProp("Multiscreen", true);}
+    private void setMultiscreenAllowed(boolean allowed) {properties.put("Multiscreen", String.valueOf(allowed));}
     public boolean shouldShowChooserAtStart() {return getBoolProp("AlwaysShowShimejiChooser", false);}
+    private void setShouldShowChooserAtStart(boolean b) {properties.put("AlwaysShowShimejiChooser", String.valueOf(b));}
     public boolean shouldTranslateBehaviorNames() {return getBoolProp("TranslateBehaviorNames", false);}
-
+    private void setShouldTranslateBehaviorNames(boolean b) {properties.put("TranslateBehaviorNames", String.valueOf(b));}
     public Collection<String> getSelectedImageSetsFromSettings() {
         if (getProgramFolder().isMonoImageSet()) {
             return new HashSet<>(Set.of(""));
@@ -155,22 +201,11 @@ public final class Main {
         ret.remove("");
         return ret;
     }
-
     private boolean getBoolProp(String key, boolean defaultVal) {
         if (properties.containsKey(key)) {
             return Boolean.parseBoolean(properties.getProperty(key));
         }
         return defaultVal;
-    }
-
-    //----------getters----------//
-
-    public Configuration getConfiguration(String imageSet) {
-        return configurations.get(imageSet);
-    }
-
-    public static Main getInstance() {
-        return instance;
     }
 
     //-----------------Initialization--------------------//
@@ -232,7 +267,7 @@ public final class Main {
 
         // load settings.properties
         properties = new Properties();
-        try (var input = new InputStreamReader(new FileInputStream(SETTINGS_PATH.toFile()))) {
+        try (var input = new InputStreamReader(new FileInputStream(SETTINGS_PATH.toFile()), StandardCharsets.UTF_8)) {
             properties.load(input);
         } catch (IOException ignored) {
         }
@@ -280,7 +315,6 @@ public final class Main {
         getManager().start();
     }
 
-
     /**
      * @return true if the imageSet was successfully loaded
      */
@@ -288,24 +322,22 @@ public final class Main {
 
         try {
             Configuration configuration = new Configuration();
+            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
             //--actions.xml--/
             Path actionsFilePath = getProgramFolder().getActionConfPath(imageSet);
 
             log.log(Level.INFO, imageSet + " Read Action File ({0})", actionsFilePath);
 
-            final Document actions = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(actionsFilePath.toFile());
+            final Document actions = docBuilder.parse(actionsFilePath.toFile());
             configuration.load(new Entry(actions.getDocumentElement()), imageSet);
-
 
             //--behaviors.xml--//
             Path behaviorsFilePath = getProgramFolder().getBehaviorConfPath(imageSet);
 
             log.log(Level.INFO, imageSet + " Read Behavior File ({0})", behaviorsFilePath);
 
-            final Document behaviors = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(behaviorsFilePath.toFile());
+            final Document behaviors = docBuilder.parse(behaviorsFilePath.toFile());
             configuration.load(new Entry(behaviors.getDocumentElement()), imageSet);
 
 
@@ -444,6 +476,7 @@ public final class Main {
     //--------------Utilities-------------//
 
     public void exit() {
+        writeSettings();
         this.getManager().disposeAll();
         this.getManager().stop();
 
@@ -476,7 +509,6 @@ public final class Main {
         JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-
     /**
      * Serializes and writes current imageSets into
      * the `ActiveShimeji` property in settings.properties
@@ -493,60 +525,24 @@ public final class Main {
     }
 
     /**
-     * writes the current {@link #properties} to `settings.properties`
-     * @see #serializeImageSetSettings() for imageSetSettings
+     * writes the current {@link #properties} to settings
      */
     private void writeSettings() {
-        try (FileOutputStream output = new FileOutputStream(SETTINGS_PATH.toFile())) {
-            properties.store(output, "Shimeji-ee Configuration Options");
+        try (var out = new OutputStreamWriter(new FileOutputStream(SETTINGS_PATH.toFile()), StandardCharsets.UTF_8)) {
+            properties.store(out, "ShimejiEE preferences");
         } catch (Exception e) {
             log.log(Level.WARNING, "Unable to write to settings.properties", e);
         }
     }
 
-    //-----------other settings------------//
-
-    private void setLanguage(Locale locale) {
-        if (!getLocale().equals(locale)) {
-            properties.setProperty("Language", locale.toLanguageTag());
-            refreshLanguage();
-        }
-        writeSettings();
-    }
-
-    private void refreshLanguage() {
-        Tr.loadLanguage();
-        //reload tray icon if it exists
-        if (SystemTray.isSupported()) {
-            SystemTray.getSystemTray().remove(SystemTray.getSystemTray().getTrayIcons()[0]);
-            createTrayIcon();
-        }
-    }
-
-
-    private void setScaling(int scaling) {
-        properties.setProperty("Scaling", String.valueOf(scaling));
-        writeSettings();
-        // need to reload the shimeji as the images have rescaled
-        reloadMascots();
-    }
-
-    //--Toggling--//
-    private void toggleProperty(String propertyKey, boolean initiallyTrue) {
-        if (initiallyTrue) {
-            properties.setProperty(propertyKey, "false");
-        } else {
-            properties.setProperty(propertyKey, "true");
-        }
-
-        writeSettings();
-    }
-
 //--------------v-UI RELATED CODE IS BELOW-v-------------//
 
-    private CheckboxMenuItem getGenericToggleItem(String langBundleKey, String propertyKey, boolean defaultVal) {
-        final var toggleBtn = new CheckboxMenuItem(Tr.tr(langBundleKey), getBoolProp(propertyKey, defaultVal));
-        toggleBtn.addItemListener(e -> toggleProperty(propertyKey, !toggleBtn.getState()));
+    private CheckboxMenuItem getToggleItem(String langBundleKey, BooleanSupplier getter, Consumer<Boolean> setter) {
+        final var toggleBtn = new CheckboxMenuItem(Tr.tr(langBundleKey), getter.getAsBoolean());
+        toggleBtn.addActionListener(e -> {
+            setter.accept(!getter.getAsBoolean());
+            toggleBtn.setState(getter.getAsBoolean());
+        });
         return toggleBtn;
     }
 
@@ -607,7 +603,7 @@ public final class Main {
             final var langName = lang[0];
             final var locale = Locale.forLanguageTag(lang[1]);
             final var langBtn = new MenuItem(langName);
-            langBtn.addActionListener(e -> setLanguage(locale));
+            langBtn.addActionListener(e -> setLocale(locale));
             languageMenu.add(langBtn);
         }
 
@@ -620,33 +616,15 @@ public final class Main {
         }
 
         //--behaviour toggles submenu
-        final Menu togglesMenu = new Menu(Tr.tr("AllowedBehaviours"), true);
+        final Menu togglesMenu = new Menu(Tr.tr("AllowedBehaviours"));
 
-        final var breedingToggle = getGenericToggleItem
-                ("BreedingCloning", "Breeding", true);
-
-        final var transformToggle = getGenericToggleItem
-                ("Transformation", "Transformation", true);
-
-        final var windowThrowToggle = getGenericToggleItem
-                ("ThrowingWindows", "Throwing", true);
-
-        final var multiscreenToggle = getGenericToggleItem
-                ("Multiscreen", "Multiscreen", true);
-
-        final var chooserAtStartToggle = getGenericToggleItem
-                ("AlwaysShowShimejiChooser", "AlwaysShowShimejiChooser", false);
-
-        final var behaviorNameTranslationToggle = getGenericToggleItem
-                ("TranslateBehaviorNames", "TranslateBehaviorNames", false);
-
-        //this is slightly different from the rest so i didn't use the function
-        final var soundToggle = new CheckboxMenuItem(Tr.tr("SoundEffects"), isSoundAllowed());
-        soundToggle.addItemListener(e -> {
-            final boolean initiallyTrue = !soundToggle.getState();
-            toggleProperty("Sounds", initiallyTrue);
-            Sounds.setMuted(initiallyTrue);
-        });
+        final var breedingToggle = getToggleItem("BreedingCloning", this::isBreedingAllowed, this::setBreedingAllowed);
+        final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
+        final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
+        final var multiscreenToggle = getToggleItem("Multiscreen", this::isMultiscreenAllowed, this::setMultiscreenAllowed);
+        final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
+        final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviorNames, this::setShouldTranslateBehaviorNames);
+        final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
 
         togglesMenu.add(breedingToggle);
         togglesMenu.add(transformToggle);
@@ -654,7 +632,7 @@ public final class Main {
         togglesMenu.add(soundToggle);
         togglesMenu.add(multiscreenToggle);
         togglesMenu.add(chooserAtStartToggle);
-        togglesMenu.add(behaviorNameTranslationToggle);
+        togglesMenu.add(behaviorTranslationToggle);
 
         //----------------------//
 
@@ -667,7 +645,6 @@ public final class Main {
         interactiveMenu.addActionListener(e -> {
             new InteractiveWindowForm(frame, true).display();
             NativeFactory.getInstance().getEnvironment().refreshCache();
-            writeSettings();
         });
 
         //reload button
