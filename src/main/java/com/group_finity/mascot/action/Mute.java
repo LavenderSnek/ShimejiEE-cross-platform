@@ -1,5 +1,6 @@
 package com.group_finity.mascot.action;
 
+import com.group_finity.mascot.Main;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 import com.group_finity.mascot.sound.Sounds;
@@ -26,11 +27,8 @@ public class Mute extends InstantAction {
         String soundName = getSound();
         if (soundName != null) {
             Sounds.muteSpecifiedSound(getMascot().getImageSet(), soundName);
-        } else {
-            if (!Sounds.isMuted()) {
-                Sounds.setMuted(true);
-                Sounds.setMuted(false);
-            }
+        } else if (Main.getInstance().isSoundAllowed()) {
+            Sounds.muteAll();
         }
     }
 

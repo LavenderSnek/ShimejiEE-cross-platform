@@ -3,6 +3,7 @@ package com.group_finity.mascot.sound;
 import com.group_finity.mascot.Main;
 
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -16,12 +17,16 @@ import java.util.Hashtable;
  */
 public class Sounds {
 
-    private final static Hashtable<String, Clip> SOUNDS = new Hashtable<String, Clip>();
+    private final static Hashtable<String, Clip> SOUNDS = new Hashtable<>();
 
     public static void load(final String filename, final Clip clip) {
         if (!SOUNDS.containsKey(filename)) {
             SOUNDS.put(filename, clip);
         }
+    }
+
+    public static void clear() {
+        SOUNDS.clear();
     }
 
     public static boolean contains(String identifier) {
@@ -62,17 +67,8 @@ public class Sounds {
         }
     }
 
-    public static boolean isMuted() {
-        return !Main.getInstance().isSoundAllowed();
-    }
-
-    public static void setMuted(boolean mutedFlag) {
-        if (mutedFlag) {
-            // mute everything
-            for (Clip clip : SOUNDS.values()) {
-                clip.stop();
-            }
-        }
+    public static void muteAll() {
+        SOUNDS.values().forEach(Clip::stop);
     }
 
 }
