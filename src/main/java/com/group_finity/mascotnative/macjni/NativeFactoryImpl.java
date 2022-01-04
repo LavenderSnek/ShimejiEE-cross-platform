@@ -6,13 +6,17 @@ import com.group_finity.mascot.environment.Environment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+@SuppressWarnings("unused")
 public class NativeFactoryImpl extends NativeFactory {
 
     private static final String LIB_FILENAME = "libShimejiMacJni.dylib";
 
     static {
+        // Native code crashes if the toolkit hasn't been loaded first
+        Toolkit.getDefaultToolkit();
         try {
             System.load(Main.JAR_PARENT_DIR.resolve("lib").resolve(LIB_FILENAME).toAbsolutePath().toString());
         } catch (UnsatisfiedLinkError error) {
