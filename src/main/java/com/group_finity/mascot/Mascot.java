@@ -108,7 +108,6 @@ public class Mascot {
     }
 
     private TopLevelMenuRep createPopupRep() {
-        var main = Main.getInstance();
         var config = Main.getInstance().getConfiguration(getImageSet());
         boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
 
@@ -136,10 +135,10 @@ public class Mascot {
         }
 
         TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
-                new MenuItemRep(Tr.tr("CallAnother"), () -> main.createMascot(getImageSet())),
+                new MenuItemRep(Tr.tr("CallAnother"), () -> Main.getInstance().createMascot(getImageSet())),
                 MenuItemRep.SEPARATOR,
                 new MenuItemRep(Tr.tr("FollowCursor"), () ->
-                        getManager().setBehaviorAll(main.getConfiguration(getImageSet()), Main.BEHAVIOR_GATHER, getImageSet())
+                        getManager().setBehaviorAll(config, Main.BEHAVIOR_GATHER, getImageSet())
                 ),
                 new MenuItemRep(Tr.tr("RestoreWindows"), () -> getEnvironment().restoreIE()),
                 new MenuItemRep(Tr.tr("RevealStatistics"), () -> {
@@ -154,7 +153,7 @@ public class Mascot {
                 new MenuItemRep(Tr.tr("Dismiss"), this::dispose),
                 new MenuItemRep(Tr.tr("DismissOthers"), () -> getManager().remainOne(getImageSet())),
                 new MenuItemRep(Tr.tr("DismissAllOthers"), () -> getManager().remainOne(this)),
-                new MenuItemRep(Tr.tr("DismissAll"), main::exit)
+                new MenuItemRep(Tr.tr("DismissAll"), () -> System.exit(0))
         );
 
         mainMenu.setOnOpenAction(() -> this.setAnimating(false));

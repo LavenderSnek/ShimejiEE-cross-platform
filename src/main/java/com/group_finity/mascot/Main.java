@@ -5,10 +5,8 @@ import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.image.ImagePairs;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascot.ui.imagesets.ImageSetUtils;
-import com.group_finity.mascot.ui.interactivewindows.InteractiveWindowForm;
 import com.group_finity.shimejiutils.ShimejiProgramFolder;
 import com.sun.jna.Platform;
-import org.w3c.dom.Document;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -16,38 +14,17 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.AWTException;
-import java.awt.CheckboxMenuItem;
-import java.awt.Image;
-import java.awt.Menu;
-import java.awt.MenuItem;
-import java.awt.Point;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.Taskbar;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URISyntaxException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -66,9 +43,9 @@ public final class Main {
     // Action that matches the followCursor action
     static final String BEHAVIOR_GATHER = "ChaseMouse";
 
-    public static final Path JAR_PARENT_DIR;
+    private static final String SP_PREFIX = "com.group_finity.mascot.prefs.";
 
-    private static final Path SETTINGS_PATH;
+    public static final Path JAR_PARENT_DIR;
 
     static {
 
@@ -77,28 +54,13 @@ public final class Main {
         Path folder = null;
         try {
             folder = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (URISyntaxException e) {
-            log.log(Level.SEVERE, "Unable to find path to jar");
+        } catch (Exception e) {
             showError("Unable to find path to jar");
             System.exit(1);
         }
         JAR_PARENT_DIR = folder;
 
-
-        // sets up the logging + settings
-        Path trueConfDir = JAR_PARENT_DIR.resolve("conf");
-        if (!Files.isDirectory(trueConfDir)) {
-            showError(
-                    """
-                    unable find conf dir!
-                    The original conf directory containing settings + logging properties\s
-                    needs to exist in the jar's parent folder even if all folders were specified manually
-                    """);
-            System.exit(1);
-        }
-        SETTINGS_PATH = trueConfDir.resolve("settings.properties");
-
-        try (var ins = new FileInputStream(trueConfDir.resolve("logging.properties").toFile())){
+        try (var ins = new FileInputStream(JAR_PARENT_DIR.resolve(Path.of("conf","logging.properties")).toFile())) {
             LogManager.getLogManager().readConfiguration(ins);
         } catch (final SecurityException | IOException e) {
             e.printStackTrace();
@@ -106,29 +68,37 @@ public final class Main {
 
     }
 
-    private ShimejiProgramFolder programFolder;
+    //--------//
 
-    private static final JFrame frame = new javax.swing.JFrame();
+    private ShimejiProgramFolder programFolder;
+    {
+        try {
+            programFolder = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private final ConcurrentMap<String, Configuration> configurations = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Set<String>> dependencies = new ConcurrentHashMap<>();
+    private final List<String> activeImageSets = new ArrayList<>();
+
+    private Locale locale = Locale.ENGLISH;
+    private int scaling = 1;
+    private Set<String> interactiveWindowAllowlist = new HashSet<>(List.of("*", "a", "e", "o", "u"));
+    private final ConcurrentMap<String, Boolean> userSwitches = new ConcurrentHashMap<>();
 
     private final Manager manager = new Manager();
-
-    /**
-     * Key: An imageSet name
-     * <p>Value: Configuration associated with the imageSet
-     */
-    private final Hashtable<String, Configuration> configurations = new Hashtable<>();
-
-    /**
-     * A list of the active imageSets
-     */
-    private final ArrayList<String> imageSets = new ArrayList<>();
-
-    private Properties properties = new Properties();
-
     private static final Main instance = new Main();
 
+    private Main() {
+    }
 
-    //--------------Simple Getters--------------//
+    //------------Getters/Setters-------------//
+
+    public static Main getInstance() {
+        return instance;
+    }
 
     private Manager getManager() {
         return this.manager;
@@ -142,22 +112,16 @@ public final class Main {
         return configurations.get(imageSet);
     }
 
-    public static Main getInstance() {
-        return instance;
+    public Set<String> getInteractiveWindowAllowlist() {return interactiveWindowAllowlist;}
+    private void setInteractiveWindowAllowlist(Set<String> allowlist) {
+        this.interactiveWindowAllowlist = allowlist;
+        NativeFactory.getInstance().getEnvironment().refreshCache();
     }
 
-    //------------properties getters-----------------//
-
-    public Collection<String> getInteractiveWindowAllowlist() {
-        return new ArrayList<>(1);
-    }
-
-    public Locale getLocale() {
-        return Locale.forLanguageTag(properties.getProperty("Language", "en-GB"));
-    }
+    public Locale getLocale() {return locale;}
     private void setLocale(Locale locale) {
         if (!getLocale().equals(locale)) {
-            properties.setProperty("Language", locale.toLanguageTag());
+            this.locale = locale;
             Tr.loadLanguage();
             //reload tray icon if it exists
             if (SystemTray.isSupported()) {
@@ -167,158 +131,97 @@ public final class Main {
         }
     }
 
-
-    public int getScaling() {
-        return Integer.parseInt(properties.getProperty("Scaling", "1"));
-    }
+    public int getScaling() {return scaling;}
     private void setScaling(int scaling) {
-        properties.setProperty("Scaling", String.valueOf(scaling));
-        reloadMascots();
+        this.scaling = scaling > 0 ? scaling : 1;
+        reloadImageSets();
     }
 
-    public boolean isBreedingAllowed() {return getBoolProp("Breeding", true);}
-    private void setBreedingAllowed(boolean allowed) {properties.put("Breeding", String.valueOf(allowed));}
-    public boolean isTransformationAllowed() {return getBoolProp("Transformation", true);}
-    private void setTransformationAllowed(boolean allowed) {properties.put("Transformation", String.valueOf(allowed));}
-    public boolean isIEMovementAllowed() {return getBoolProp("Throwing", true);}
-    private void setIEMovementAllowed(boolean allowed) {properties.put("Throwing", String.valueOf(allowed));}
-    public boolean isSoundAllowed() {return getBoolProp("Sounds", true);}
-    private void setSoundAllowed(boolean allowed) {
-        properties.put("Sounds", String.valueOf(allowed));
-        Sounds.setMuted(!allowed);
-    }
-    public boolean isMultiscreenAllowed() {return getBoolProp("Multiscreen", true);}
-    private void setMultiscreenAllowed(boolean allowed) {properties.put("Multiscreen", String.valueOf(allowed));}
-    public boolean shouldShowChooserAtStart() {return getBoolProp("AlwaysShowShimejiChooser", false);}
-    private void setShouldShowChooserAtStart(boolean b) {properties.put("AlwaysShowShimejiChooser", String.valueOf(b));}
-    public boolean shouldTranslateBehaviorNames() {return getBoolProp("TranslateBehaviorNames", false);}
-    private void setShouldTranslateBehaviorNames(boolean b) {properties.put("TranslateBehaviorNames", String.valueOf(b));}
-    public Collection<String> getSelectedImageSetsFromSettings() {
-        if (getProgramFolder().isMonoImageSet()) {
-            return new HashSet<>(Set.of(""));
-        }
-        Set<String> ret = new HashSet<>(Set.of(properties.getProperty("ActiveShimeji", "").split("/")));
-        ret.remove("");
-        return ret;
-    }
-    private boolean getBoolProp(String key, boolean defaultVal) {
-        if (properties.containsKey(key)) {
-            return Boolean.parseBoolean(properties.getProperty(key));
-        }
-        return defaultVal;
-    }
+    public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
+    private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
+    public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
+    private void setTransformationAllowed(boolean allowed) {userSwitches.put("Transformation", allowed);}
 
-    //-----------------Initialization--------------------//
+    public boolean isIEMovementAllowed() {return userSwitches.getOrDefault("Throwing", true);}
+    private void setIEMovementAllowed(boolean allowed) {userSwitches.put("Throwing", allowed);}
+
+    public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
+    private void setSoundAllowed(boolean allowed) {userSwitches.put("Sounds", allowed);}
+
+    public boolean isMultiscreenAllowed() {return userSwitches.getOrDefault("Multiscreen", true);}
+    private void setMultiscreenAllowed(boolean allowed) {userSwitches.put("Multiscreen", allowed);}
+
+    private boolean shouldShowChooserAtStart() {return userSwitches.getOrDefault("AlwaysShowShimejiChooser", false);}
+    private void setShouldShowChooserAtStart(boolean b) {userSwitches.put("AlwaysShowShimejiChooser", b);}
+
+    public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", false);}
+    private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
+
+    //-------------------------------------//
 
     /**
      * Program entry point
      */
     public static void main(final String[] args) {
         try {
-            // not ideal, but too few people will use the command line for a proper lib to be worth it
-            Map<String, String> argsMap = new HashMap<>();
-            for (String arg: args) {
-                String[] parts = arg.split("=",2);
-                argsMap.put(parts[0], parts[1]);
-            }
-
-            ShimejiProgramFolder base;
-            if (argsMap.containsKey("--pf")) {
-                base = ShimejiProgramFolder.fromFolder(Path.of(argsMap.get("--pf")));
-            } else {
-                base = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
-            }
-
-            Path altConfPath = argsMap.containsKey("--conf") ? Path.of(argsMap.get("--conf")): base.confPath();
-            Path altImgPath= argsMap.containsKey("--img") ? Path.of(argsMap.get("--img")) : base.imgPath();
-            Path altSoundPath = argsMap.containsKey("--sound") ? Path.of(argsMap.get("--sound")) : base.soundPath();
-            boolean altMono = argsMap.containsKey("--mono") ? Boolean.parseBoolean(argsMap.get("--mono")) : base.isMonoImageSet();
-
-            getInstance().programFolder = new ShimejiProgramFolder(altConfPath, altImgPath, altSoundPath, altMono);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             getInstance().run();
         } catch (OutOfMemoryError error) {
-            final String msg = "Out of Memory.";
-            log.log(Level.SEVERE, msg, error);
-            Main.showError(msg);
+            log.log(Level.SEVERE, "Out of Memory.", error);
+            Main.showError("Out of Memory.");
             System.exit(0);
         }
     }
 
     public void run() {
+        String settingsPathProp = System.getProperty(SP_PREFIX + "SettingsPath");
+        final Path SETTINGS_PATH = settingsPathProp != null
+                ? Path.of(settingsPathProp)
+                : JAR_PARENT_DIR.resolve(Path.of("conf","settings.properties"));
 
-        // Dock icon on platforms that support it
-        // https://stackoverflow.com/questions/6006173/
-        final Path imageResource = getProgramFolder().getDockIconPath();
-        if (imageResource != null) {
-            try {
-                final Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
-                final Image image = defaultToolkit.getImage(imageResource.toString());
-
-                final Taskbar taskbar = Taskbar.getTaskbar();
-                taskbar.setIconImage(image);
-            } catch (final UnsupportedOperationException | SecurityException ignored) {
-            }
-        }
-
-        // load settings.properties
-        properties = new Properties();
-        try (var input = new InputStreamReader(new FileInputStream(SETTINGS_PATH.toFile()), StandardCharsets.UTF_8)) {
-            properties.load(input);
-        } catch (IOException ignored) {
-        }
-
+        loadAllSettings(SETTINGS_PATH);
         Tr.loadLanguage();
+
+        // optional
+        createTrayIcon();
 
         //because the chooser is async
         boolean isExit = getManager().isExitOnLastRemoved();
         getManager().setExitOnLastRemoved(false);
 
-        //image choosing at startup
-        boolean chooseAtStart = shouldShowChooserAtStart();
-        Collection<String> selection = getSelectedImageSetsFromSettings();
+        Set<String> selections = getActiveImageSets();
 
-        // the policy is basically that the user should see the chooser or a mascot atleast once
-        if (chooseAtStart || selection.isEmpty()) {
-            ImageSetUtils.askUserForSelection(newImageSets -> {
-                setActiveImageSets(newImageSets);
+        if (selections.isEmpty() || shouldShowChooserAtStart()) {
+            ImageSetUtils.askUserForSelection(c -> {
+                setActiveImageSets(c);
                 getManager().setExitOnLastRemoved(isExit);
             });
+        } else {
+            selections.forEach(this::addActiveImageSet);
+            getManager().setExitOnLastRemoved(isExit);
         }
-        else {
-            // keeps only existent setting selections to avoid unnecessary errors
-            try {
-                selection.retainAll(getProgramFolder().getImageSetNames());
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "unable to load imageSets", e);
-                showError("unable to load imageSets");
-                exit();
-            }
-            setActiveImageSets(selection);
-
-            if (imageSets.isEmpty()) {
-                ImageSetUtils.askUserForSelection(newImageSets -> {
-                    setActiveImageSets(newImageSets);
-                    getManager().setExitOnLastRemoved(isExit);
-                });
-            } else {
-                getManager().setExitOnLastRemoved(isExit);
-            }
-        }
-
-        createTrayIcon();
 
         getManager().start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> writeAllSettings(SETTINGS_PATH)));
     }
 
+    private static final JFrame frame = new JFrame();
+    public static void showError(String message) {
+        JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    //--------imageSet management---------//
+
     /**
+     * Loads resources for the specified image set.
+     * <p>
+     * If the image sets depends on other image sets, those image sets are also loaded.
+     * This function only loads the image set. It does not add it to the list of selected image sets,
+     * nor does it create a mascot.
+     *
      * @return true if the imageSet was successfully loaded
      */
-    private boolean loadConfiguration(final String imageSet) {
+    private boolean loadImageSet(final String imageSet) {
 
         try {
             Configuration configuration = new Configuration();
@@ -326,36 +229,42 @@ public final class Main {
 
             //--actions.xml--/
             Path actionsFilePath = getProgramFolder().getActionConfPath(imageSet);
-
-            log.log(Level.INFO, imageSet + " Read Action File ({0})", actionsFilePath);
-
-            final Document actions = docBuilder.parse(actionsFilePath.toFile());
-            configuration.load(new Entry(actions.getDocumentElement()), imageSet);
+            Entry actionDocEntry = new Entry(docBuilder.parse(actionsFilePath.toFile()).getDocumentElement());
+            configuration.load(actionDocEntry, imageSet);
 
             //--behaviors.xml--//
             Path behaviorsFilePath = getProgramFolder().getBehaviorConfPath(imageSet);
-
-            log.log(Level.INFO, imageSet + " Read Behavior File ({0})", behaviorsFilePath);
-
-            final Document behaviors = docBuilder.parse(behaviorsFilePath.toFile());
-            configuration.load(new Entry(behaviors.getDocumentElement()), imageSet);
-
+            Entry behaviorDocEntry = new Entry(docBuilder.parse(behaviorsFilePath.toFile()).getDocumentElement());
+            configuration.load(behaviorDocEntry, imageSet);
 
             //---validate and set config---//
             configuration.validate();
             configurations.put(imageSet, configuration);
 
-            // Initial action: BornMascot
-            for (final Entry list : new Entry(actions.getDocumentElement()).selectChildren("ActionList")) {
-                for (final Entry node : list.selectChildren("Action")) {
-                    if (node.getAttributes().containsKey("BornMascot") && !configurations.containsKey(node.getAttribute("BornMascot"))) {
-                        loadConfiguration(node.getAttribute("BornMascot"));
+            // loading dependencies
+            Set<String> deps = new HashSet<>();
+
+            for (final Entry actionList : actionDocEntry.selectChildren("ActionList")) {
+                for (final Entry actionNode : actionList.selectChildren("Action")) {
+                    if (actionNode.getAttributes().containsKey("BornMascot")) {
+                        deps.add(actionNode.getAttribute("BornMascot"));
                     }
-                    if (node.getAttributes().containsKey("TransformMascot") && !configurations.containsKey(node.getAttribute("TransformMascot"))) {
-                        loadConfiguration(node.getAttribute("TransformMascot"));
+                    if (actionNode.getAttributes().containsKey("TransformMascot")) {
+                        deps.add(actionNode.getAttribute("TransformMascot"));
                     }
                 }
             }
+
+            for (String dep : deps) {
+                if (!configurations.containsKey(dep)) {
+                    boolean loaded = loadImageSet(dep);
+                    if (!loaded) {
+                        deps.remove(dep);
+                    }
+                }
+            }
+
+            dependencies.put(imageSet, deps);
 
             return true;
 
@@ -364,8 +273,7 @@ public final class Main {
             e.printStackTrace();
 
             // error cleanup
-            configurations.remove(imageSet);
-            ImagePairs.removeAllFromImageSet(imageSet);
+            unloadImageSet(imageSet);
 
             Main.showError(Tr.tr("FailedLoadConfigErrorMessage")
                     + "\n" + e.getMessage()
@@ -375,13 +283,43 @@ public final class Main {
         return false;
     }
 
+    /**
+     * Clears all loaded resources for the specified image set.
+     * <p>
+     * If the image sets is a selected image set, it is removed from selections
+     * and all mascots of that image set are disposed.
+     * <p>
+     * Image sets that depend on this image set are not changed.
+     */
+    private void unloadImageSet(String imageSet) {
+        activeImageSets.remove(imageSet);
+        getManager().remainNone(imageSet);
+        configurations.remove(imageSet);
+        dependencies.remove(imageSet);
+        ImagePairs.removeAllFromImageSet(imageSet);
+        // the sounds just leak since they can be shared between imgSets
+    }
 
-    //--------imageSet management---------//
+    /**
+     * The image sets that have been selected by the user
+     * <p>
+     * This collection does not contain image sets that have been loaded purely as
+     * dependencies for other sets.
+     *
+     * @return A copy of the selected image sets collection
+     */
+    public Set<String> getActiveImageSets() {
+        if (getProgramFolder().isMonoImageSet()) {
+            return new HashSet<>(Set.of(""));
+        }
+        Set<String> ret = new HashSet<>(activeImageSets);
+        ret.remove("");
+        return ret;
+    }
 
     /**
      * Replaces the current set of active imageSets without modifying
-     * valid imageSets that are already active. does nothing if newImageSets are null
-     * <p>Writes end result to settings. Invalid sets excluded.
+     * valid imageSets that are already active. does nothing if newImageSets is null
      *
      * @param newImageSets All the imageSets that should now be active
      */
@@ -390,12 +328,12 @@ public final class Main {
             return;
         }
 
-        var toRemove = new ArrayList<>(imageSets);
+        var toRemove = getActiveImageSets();
         toRemove.removeAll(newImageSets);
 
         var toAdd = new ArrayList<String>();
         for (String set : newImageSets) {
-            if (!configurations.containsKey(set)) {
+            if (!configurations.containsKey(set) || !activeImageSets.contains(set)) {
                 toAdd.add(set);
             }
         }
@@ -403,50 +341,86 @@ public final class Main {
         boolean isExit = getManager().isExitOnLastRemoved();
         getManager().setExitOnLastRemoved(false);
 
-        for (String a : toAdd) {
-            addNewImageSet(a);
+        toAdd.forEach(this::addActiveImageSet);
+
+        // done after loading so that new deps are reflected
+        for (String set : newImageSets) {
+            if (dependencies.containsKey(set)) {
+                toRemove.removeAll(dependencies.get(set));
+            }
         }
 
-        for (String r : toRemove) {
-            removeLoadedImageSet(r);
-        }
+        toRemove.forEach(this::unloadImageSet);
 
         getManager().setExitOnLastRemoved(isExit);
-
-        serializeImageSetSettings();
     }
 
-    private void removeLoadedImageSet(String imageSet) {
-        imageSets.remove(imageSet);
-        getManager().remainNone(imageSet);
-        configurations.remove(imageSet);
-        ImagePairs.removeAllFromImageSet(imageSet);
-    }
+    /**
+     * Adds a new image set to the list of selected image sets.
+     * <p>
+     * Loads the image set if it has not been loaded yet. If the image set is successfully
+     * loaded (or was already loaded), it adds it to the selected image sets and creates a
+     * mascot using the image set.
+     * <p>
+     * Image sets that have already been added to selections aren't re-added,
+     * but a mascot is still created.
+     */
+    private void addActiveImageSet(String imageSet) {
+        boolean loaded = configurations.containsKey(imageSet);
+        if (!loaded){
+            loaded = loadImageSet(imageSet);
+        }
 
-    private void addNewImageSet(String imageSet) {
-        if (loadConfiguration(imageSet)) {
-            imageSets.add(imageSet);
+        if (loaded) {
+            if (!activeImageSets.contains(imageSet)) {
+                activeImageSets.add(imageSet);
+            }
             createMascot(imageSet);
         }
+    }
+
+    /**
+     * Clears all image set data and reloads all selected image sets
+     */
+    private void reloadImageSets() {
+        boolean isExit = getManager().isExitOnLastRemoved();
+        getManager().setExitOnLastRemoved(false);
+
+        getManager().disposeAll();
+
+        // Wipe all loaded data
+        configurations.clear();
+        dependencies.clear();
+        ImagePairs.clear();
+        Sounds.clear();
+
+        // re-add
+        getActiveImageSets().forEach(this::addActiveImageSet);
+
+        getManager().setExitOnLastRemoved(isExit);
     }
 
     //----------mascot creation-----------//
 
     /**
-     * Randomly picks from {@link #imageSets} creates a mascot
+     * Randomly picks an image set from {@link #activeImageSets} and creates a mascot
      */
     public void createMascot() {
-        int length = imageSets.size();
-        int random = (int) (length * Math.random());
-        createMascot(imageSets.get(random));
+        if (getProgramFolder().isMonoImageSet()) {
+            createMascot("");
+        } else {
+            int length = activeImageSets.size();
+            int random = (int) (length * Math.random());
+            createMascot(activeImageSets.get(random));
+        }
     }
 
     /**
-     * Creates a mascot from the specified imageSet name.
-     * <p>The imageSet's configuration has to be loaded first or it shows an error
+     * Creates a mascot from the specified imageSet.
+     * <p>
+     * Fails if the image set has not been loaded.
      */
     public void createMascot(String imageSet) {
-        log.log(Level.INFO, "create a mascot");
 
         // Create one mascot
         final Mascot mascot = new Mascot(imageSet);
@@ -458,88 +432,161 @@ public final class Main {
         mascot.setLookRight(Math.random() < 0.5);
 
         try {
-
             mascot.setBehavior(getConfiguration(imageSet).buildBehavior(null, mascot));
-            this.getManager().add(mascot);
-
+            getManager().add(mascot);
         } catch (Exception e) {
-
-            e.printStackTrace();
             log.log(Level.SEVERE, imageSet + " fatal error, can not be started.", e);
-            Main.showError(Tr.tr("CouldNotCreateShimejiErrorMessage") + " " + imageSet +
-                    ".\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
+            Main.showError(
+                    Tr.tr("CouldNotCreateShimejiErrorMessage") + ": " + imageSet +
+                    ".\n" + e.getMessage()
+                    + "\n" + Tr.tr("SeeLogForDetails"));
             mascot.dispose();
-
         }
     }
 
-    //--------------Utilities-------------//
+///=======v This class ends here, everything below is meant to be easily deletable v========//
 
-    public void exit() {
-        writeSettings();
-        this.getManager().disposeAll();
-        this.getManager().stop();
+    //---------Setting storage/extraction------------//
 
-        System.exit(0);
+    private final String[] USER_SWITCH_KEYS = {
+            "Breeding",
+            "Transformation",
+            "Throwing",
+            "Sounds",
+            "Multiscreen",
+            "AlwaysShowShimejiChooser",
+            "TranslateBehaviorNames"
+    };
+
+    private final String[] OTHER_PREF_KEYS = {
+            "Language",
+            "Scaling",
+            "ActiveShimeji",
+            "InteractiveWindows",
+            // ↓ cli only options
+            "ProgramFolder",
+            "ProgramFolder.conf",
+            "ProgramFolder.img",
+            "ProgramFolder.sound",
+            "ProgramFolder.mono",
+    };
+
+    private static String getSetting(Properties defaultValues, String key) {
+        var sp = System.getProperty(SP_PREFIX + key);
+        if (sp != null) {
+            return sp;
+        } else if (defaultValues != null) {
+            return defaultValues.getProperty(key);
+        }
+        return null;
     }
 
-    private void reloadMascots() {
-        boolean isExit = getManager().isExitOnLastRemoved();
-        getManager().setExitOnLastRemoved(false);
-        getManager().disposeAll();
-
-        // Wipe all loaded data
-        ImagePairs.clear();
-        configurations.clear();
-
-        // Load settings
-        for (String imageSet : imageSets) {
-            loadConfiguration(imageSet);
+    private void loadAllSettings(Path inputFilePath) {
+        var props = new Properties();
+        try (var input = new InputStreamReader(new FileInputStream(inputFilePath.toFile()), StandardCharsets.UTF_8)) {
+            props.load(input);
+        } catch (Exception ignored) {
         }
 
-        // Create the first mascot
-        for (String imageSet : imageSets) {
-            createMascot(imageSet);
+        for (String key : USER_SWITCH_KEYS) {
+            var s = getSetting(props, key);
+            if (s != null) {
+                userSwitches.put(key, Boolean.parseBoolean(s));
+            }
         }
 
-        getManager().setExitOnLastRemoved(isExit);
-    }
-
-    public static void showError(String message) {
-        JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    /**
-     * Serializes and writes current imageSets into
-     * the `ActiveShimeji` property in settings.properties
-     */
-    private void serializeImageSetSettings() {
-        StringBuilder builder = new StringBuilder();
-        HashSet<String> uniqueImgSets = new HashSet<>(imageSets); // makes sure its all unique
-        for (String imgSet : uniqueImgSets) {
-            builder.append(imgSet).append('/');
+        var localeProp = getSetting(props, "Language");
+        if (localeProp != null) {
+            locale = Locale.forLanguageTag(localeProp);
         }
 
-        properties.setProperty("ActiveShimeji", String.valueOf(builder));
-        writeSettings();
+        var scaleProp = getSetting(props, "Scaling");
+        if (scaleProp != null) {
+            scaling = Integer.parseInt(scaleProp);
+        }
+
+        var pfProp = getSetting(props, "ProgramFolder");
+        ShimejiProgramFolder basePf = programFolder;
+        if (pfProp != null) {
+            try {
+                basePf = ShimejiProgramFolder.fromFolder(Path.of(pfProp));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+
+        var altConfSp = getSetting(props, "ProgramFolder.conf");
+        var altImgSp = getSetting(props, "ProgramFolder.img");
+        var altSoundSp = getSetting(props, "ProgramFolder.sound");
+        var altMonoSp = getSetting(props, "ProgramFolder.mono");
+
+        programFolder = new ShimejiProgramFolder(
+                altConfSp != null ? Path.of(altConfSp) : basePf.confPath(),
+                altImgSp != null ? Path.of(altImgSp) : basePf.imgPath(),
+                altSoundSp != null ? Path.of(altSoundSp) : basePf.soundPath(),
+                altMonoSp != null ? Boolean.parseBoolean(altMonoSp) : basePf.isMonoImageSet());
+
+        var selectionsProp = getSetting(props, "ActiveShimeji");
+        if (selectionsProp != null && !programFolder.isMonoImageSet()) {
+            var ims = new HashSet<>(List.of(selectionsProp.split("/")));
+            ims.remove("");
+            try {
+                ims.retainAll(programFolder.getImageSetNames());
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            activeImageSets.addAll(ims);
+        }
+
+        var winListProp = getSetting(props, "InteractiveWindows");
+        if (winListProp != null) {
+            interactiveWindowAllowlist.addAll(List.of(winListProp.split("/")));
+            interactiveWindowAllowlist.remove("");
+        }
     }
 
-    /**
-     * writes the current {@link #properties} to settings
-     */
-    private void writeSettings() {
-        try (var out = new OutputStreamWriter(new FileOutputStream(SETTINGS_PATH.toFile()), StandardCharsets.UTF_8)) {
-            properties.store(out, "ShimejiEE preferences");
+    private void writeAllSettings(Path outputFilePath) {
+        var props = new Properties();
+
+        userSwitches.forEach((k,v) -> props.setProperty(k, String.valueOf(v)));
+        if (getScaling() != 1) {
+            props.setProperty("Scaling", String.valueOf(getScaling()));
+        }
+        if (!getLocale().equals(Locale.ENGLISH)) {
+            props.setProperty("Language", getLocale().toLanguageTag());
+        }
+
+        var sb = new StringBuilder();
+        for (String set : getActiveImageSets()) {
+            sb.append(set).append('/');
+        }
+        props.setProperty("ActiveShimeji", sb.toString());
+
+        var winList = getInteractiveWindowAllowlist();
+        if (winList != null) {
+            var sb2 = new StringBuilder();
+            for (String win : winList) {
+                sb2.append(win).append('/');
+            }
+            props.setProperty("InteractiveWindows", sb2.toString());
+        }
+
+        // program folder excluded on purpose since there's not going to be a gui for it
+
+        try (var out = new OutputStreamWriter(new FileOutputStream(outputFilePath.toFile()), StandardCharsets.UTF_8)) {
+            props.store(out, "ShimejiEE preferences");
         } catch (Exception e) {
-            log.log(Level.WARNING, "Unable to write to settings.properties", e);
+            log.log(Level.WARNING, "Unable to write settings:" + outputFilePath, e);
         }
     }
 
-//--------------v-UI RELATED CODE IS BELOW-v-------------//
+    //----------Tray Icon------------//
 
     private CheckboxMenuItem getToggleItem(String langBundleKey, BooleanSupplier getter, Consumer<Boolean> setter) {
         final var toggleBtn = new CheckboxMenuItem(Tr.tr(langBundleKey), getter.getAsBoolean());
-        toggleBtn.addActionListener(e -> {
+        toggleBtn.addItemListener(e -> {
             setter.accept(!getter.getAsBoolean());
             toggleBtn.setState(getter.getAsBoolean());
         });
@@ -575,7 +622,7 @@ public final class Main {
                         {"繁體中文", "zh-TW"},//Chinese(traditional)
                         {"한국어", "ko-KR"}};//Korean
 
-        final String[] scalingOptions = {"1", "2", "3", "6", "8"};
+        final int[] scalingOptions = {1, 2, 3, 4, 5, 6, 7, 8};
 
         //------------------------------------//
 
@@ -585,7 +632,7 @@ public final class Main {
 
         // chase mouse
         final MenuItem followCursor = new MenuItem(Tr.tr("FollowCursor"));
-        followCursor.addActionListener(event -> getManager().setBehaviorAll(BEHAVIOR_GATHER));
+        followCursor.addActionListener(event -> getManager().setBehaviorAll(Main.BEHAVIOR_GATHER));
 
         // Reduce to One
         final MenuItem reduceToOne = new MenuItem(Tr.tr("ReduceToOne"));
@@ -609,9 +656,9 @@ public final class Main {
 
         //--scaling submenu
         final Menu scalingMenu = new Menu(Tr.tr("Scaling"));
-        for (String opt : scalingOptions) {
-            final var scaleBtn = new MenuItem(opt);
-            scaleBtn.addActionListener(e -> setScaling(Integer.parseInt(opt)));
+        for (int opt : scalingOptions) {
+            final var scaleBtn = new MenuItem(String.valueOf(opt));
+            scaleBtn.addActionListener(e -> setScaling(opt));
             scalingMenu.add(scaleBtn);
         }
 
@@ -642,18 +689,15 @@ public final class Main {
 
         //interactive window chooser
         MenuItem interactiveMenu = new MenuItem(Tr.tr("ChooseInteractiveWindows"));
-        interactiveMenu.addActionListener(e -> {
-            new InteractiveWindowForm(frame, true).display();
-            NativeFactory.getInstance().getEnvironment().refreshCache();
-        });
+        interactiveMenu.setEnabled(false);
 
         //reload button
         final MenuItem reloadMascot = new MenuItem(Tr.tr("ReloadMascots"));
-        reloadMascot.addActionListener(e -> reloadMascots());
+        reloadMascot.addActionListener(e -> reloadImageSets());
 
         // Quit Button
         final MenuItem dismissAll = new MenuItem(Tr.tr("DismissAll"));
-        dismissAll.addActionListener(e -> exit());
+        dismissAll.addActionListener(e -> System.exit(0));
 
         //----Create pop-up menu-----//
         final PopupMenu trayPopup = new PopupMenu();
@@ -679,17 +723,16 @@ public final class Main {
         try {
             //adding the tray icon
             Path trayIconPath = getProgramFolder().getIconPath();
-            Image trayIcon;
+            Image trayIconImg;
             if (trayIconPath != null) {
-                trayIcon = ImageIO.read(trayIconPath.toFile());
+                trayIconImg = ImageIO.read(trayIconPath.toFile());
             } else {
-                trayIcon = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+                trayIconImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
             }
-            final TrayIcon icon = new TrayIcon(trayIcon, "ShimejiEE", trayPopup);
+            final TrayIcon trayIcon = new TrayIcon(trayIconImg, "ShimejiEE", trayPopup);
 
-            // Flip the click required to create mascot on non-windows
             if (Platform.isWindows()) {
-                icon.addMouseListener(new MouseAdapter() {
+                trayIcon.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(final MouseEvent e) {
                         if (SwingUtilities.isRightMouseButton(e)) {
@@ -697,23 +740,14 @@ public final class Main {
                         }
                     }
                 });
-            } else {
-                icon.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(final MouseEvent e) {
-                        if (SwingUtilities.isLeftMouseButton(e)) {
-                            createMascot();
-                        }
-                    }
-                });
             }
 
             // show tray icon
-            SystemTray.getSystemTray().add(icon);
+            SystemTray.getSystemTray().add(trayIcon);
 
         } catch (final IOException | AWTException e) {
             log.log(Level.SEVERE, "Failed to create tray icon", e);
-            exit();
+            System.exit(1);
         }
     }
 

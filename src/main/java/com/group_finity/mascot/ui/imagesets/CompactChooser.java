@@ -19,10 +19,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -81,7 +78,7 @@ public class CompactChooser extends JFrame {
             return;
         }
 
-        Collection<String> selected = Main.getInstance().getSelectedImageSetsFromSettings();
+        Set<String> selected = Main.getInstance().getActiveImageSets();
 
         Collection<CompactImageSetPreview> data = new ArrayList<>(allImageSets.length);
         for (String imgSet : allImageSets) {
@@ -91,14 +88,11 @@ public class CompactChooser extends JFrame {
 
         imageSetJlist = new CompactImageSetList(listModel);
 
-        //yes, i know this is horribly inefficient, im just hoping it wont be called enough to matter
         var selectedIndices = new ArrayList<Integer>();
 
-        for (String str : selected) {
-            for (int j = 0; j < allImageSets.length; j++) {
-                if (allImageSets[j].equals(str)) {
-                    selectedIndices.add(j);
-                }
+        for (int j = 0; j < allImageSets.length; j++) {
+            if (selected.contains(allImageSets[j])) {
+                selectedIndices.add(j);
             }
         }
 

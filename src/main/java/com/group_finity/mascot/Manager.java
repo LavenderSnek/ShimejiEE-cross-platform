@@ -149,13 +149,13 @@ public class Manager {
             for (final Mascot mascot : this.getMascots()) {
                 mascot.apply();
             }
-        }
 
-        if (isExitOnLastRemoved()) {
-            if (this.getMascots().size() == 0) {
-                Main.getInstance().exit();
+            // exit if needed
+            if (isExitOnLastRemoved() && this.getMascots().isEmpty()) {
+                System.exit(0); // stop() ?
             }
         }
+
     }
 
     public void add(final Mascot mascot) {
