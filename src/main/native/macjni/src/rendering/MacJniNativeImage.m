@@ -1,5 +1,6 @@
 
 #import "com_group_finity_mascotnative_macjni_MacJniNativeImage.h"
+#import "JniHelper.h"
 #import "JdkCode.h"
 
 /*
@@ -25,5 +26,14 @@ JNIEXPORT jlong JNICALL Java_com_group_1finity_mascotnative_macjni_MacJniNativeI
     }
 
     return result;
+
+}
+
+JNIEXPORT void JNICALL Java_com_group_1finity_mascotnative_macjni_MacJniNativeImage_disposeNsImage
+(JNIEnv *env, jclass cls, jlong nsImagePtr) {
+    
+    [JniHelper runOnMainQueueAsync:^{
+        [(NSImage*)nsImagePtr release];
+    }];
 
 }

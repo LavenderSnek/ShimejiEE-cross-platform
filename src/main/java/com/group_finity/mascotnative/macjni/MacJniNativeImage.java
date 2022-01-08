@@ -4,9 +4,10 @@ import com.group_finity.mascot.image.NativeImage;
 
 import java.awt.image.BufferedImage;
 
-public class MacJniNativeImage implements NativeImage {
+class MacJniNativeImage implements NativeImage {
 
-    public static native long createNSImageFromArray(int[] pixels, int width, int height);
+    private static native long createNSImageFromArray(int[] pixels, int width, int height);
+    private static native void disposeNsImage(long nsImagePtr);
 
     private final long ptr;
 
@@ -17,8 +18,19 @@ public class MacJniNativeImage implements NativeImage {
         this.ptr = createNSImageFromArray(rgb, w, h);
     }
 
-    public long getNsImagePtr() {
+    long getNsImagePtr() {
         return ptr;
+    }
+
+    void dispose() {
+        disposeNsImage(ptr);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    protected final void finalize() throws Throwable {
+        super.finalize();
+        dispose();
     }
 
 }
