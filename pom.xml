@@ -20,13 +20,6 @@
 
     <dependencies>
         <dependency>
-            <!--   Not sure about the version but it compiles + i plan to remove it eventually    -->
-            <groupId>org.netbeans.external</groupId>
-            <artifactId>AbsoluteLayout</artifactId>
-            <version>RELEASE90</version>
-        </dependency>
-        <!--    ...    -->
-        <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
             <version>5.9.0</version>
