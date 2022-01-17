@@ -12,6 +12,15 @@
     NSImage* image;
 }
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        [self setCanDrawConcurrently:YES];
+    }
+    return self;
+}
+
 - (void)setImage:(NSImage *)image {
     if (self->image != image) {
         self->image = image;
