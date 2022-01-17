@@ -140,7 +140,7 @@ public class Mascot {
                 new MenuItemRep(Tr.tr("FollowCursor"), () ->
                         getManager().setBehaviorAll(config, Main.BEHAVIOR_GATHER, getImageSet())
                 ),
-                new MenuItemRep(Tr.tr("RestoreWindows"), () -> getEnvironment().restoreIE()),
+                new MenuItemRep(Tr.tr("RestoreWindows"), () -> NativeFactory.getInstance().getEnvironment().restoreIE()),
                 new MenuItemRep(Tr.tr("RevealStatistics"), () -> {
                     if (debugWindow == null) {
                         debugWindow = new DebugWindow();

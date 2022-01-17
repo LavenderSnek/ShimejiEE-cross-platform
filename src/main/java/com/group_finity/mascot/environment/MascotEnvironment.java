@@ -8,9 +8,9 @@ import java.awt.Point;
 
 public class MascotEnvironment {
 
-    private Environment impl = NativeFactory.getInstance().getEnvironment();
+    private final Environment impl = NativeFactory.getInstance().getEnvironment();
 
-    private Mascot mascot;
+    private final Mascot mascot;
 
     private Area currentWorkArea;
 
@@ -115,26 +115,15 @@ public class MascotEnvironment {
     }
 
     public Border getWall(boolean ignoreSeparator) {
-        if (mascot.isLookRight()) {
-            if (getActiveIE().getLeftBorder().isOn(mascot.getAnchor())) {
-                return getActiveIE().getLeftBorder();
-            }
+        Border ieWall = mascot.isLookRight() ? getActiveIE().getLeftBorder() : getActiveIE().getRightBorder();
+        if (ieWall.isOn(mascot.getAnchor())) {
+            return ieWall;
+        }
 
-            if (getWorkArea().getRightBorder().isOn(mascot.getAnchor())) {
-                if (!ignoreSeparator || isScreenLeftRight()) {
-                    return getWorkArea().getRightBorder();
-                }
-            }
-
-        } else {
-            if (getActiveIE().getRightBorder().isOn(mascot.getAnchor())) {
-                return getActiveIE().getRightBorder();
-            }
-
-            if (getWorkArea().getLeftBorder().isOn(mascot.getAnchor())) {
-                if (!ignoreSeparator || isScreenLeftRight()) {
-                    return getWorkArea().getLeftBorder();
-                }
+        Border screenWall = mascot.isLookRight() ? getWorkArea().getRightBorder() : getWorkArea().getLeftBorder();
+        if (screenWall.isOn(mascot.getAnchor())) {
+            if (!ignoreSeparator || isScreenLeftRight()) {
+                return screenWall;
             }
         }
 
@@ -145,13 +134,18 @@ public class MascotEnvironment {
         impl.moveActiveIE(point);
     }
 
-    public void restoreIE() {
-        impl.restoreIE();
-    }
 
-    public void refreshWorkArea() {
-        getWorkArea(true);
-    }
+    /**
+     * Doesn't do anything. Left for script compatibility.
+     */
+    @Deprecated
+    public void restoreIE() {}
+
+    /**
+     * Doesn't do anything. Left for script compatibility
+     */
+    @Deprecated
+    public void refreshWorkArea() {}
 
     private boolean isScreenTopBottom() {
         return impl.isScreenTopBottom(mascot.getAnchor());

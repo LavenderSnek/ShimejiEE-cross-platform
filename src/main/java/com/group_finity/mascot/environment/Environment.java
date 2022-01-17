@@ -60,9 +60,11 @@ public abstract class Environment {
 		return info != null ? info.getLocation() : new Point(0, 0);
 	}
 
-	public Area screen = new Area();
-	public ComplexArea complexScreen = new ComplexArea();
-	public Location cursor = new Location();
+    //---
+
+	private final Area screen = new Area();
+	private final ComplexArea complexScreen = new ComplexArea();
+	private final Location cursor = new Location();
 
     protected Environment() {
         tick();

@@ -56,7 +56,6 @@ public class Dragged extends ActionBase {
     @Override
     protected void tick() throws LostGroundException, VariableException {
         getMascot().setLookRight(false);
-        getEnvironment().refreshWorkArea();
 
         final Location cursor = getEnvironment().getCursor();
 
