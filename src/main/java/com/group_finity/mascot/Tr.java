@@ -3,6 +3,7 @@ package com.group_finity.mascot;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -23,7 +24,7 @@ public class Tr {
     static {
         Path userBehaviorNamesFp = Main.getInstance().getProgramFolder().confPath().resolve(USER_BEHAVIORNAMES_FILE);
         if (Files.isRegularFile(userBehaviorNamesFp)) {
-            try (var ins = new InputStreamReader(new FileInputStream(userBehaviorNamesFp.toString()))) {
+            try (var ins = new InputStreamReader(new FileInputStream(userBehaviorNamesFp.toString()), StandardCharsets.UTF_8)) {
                 userBehaviorNames.load(ins);
             } catch (IOException ignored) {
             }
