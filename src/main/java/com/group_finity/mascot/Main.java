@@ -731,17 +731,6 @@ public final class Main {
             }
             final TrayIcon trayIcon = new TrayIcon(trayIconImg, "ShimejiEE", trayPopup);
 
-            if (Platform.isWindows()) {
-                trayIcon.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(final MouseEvent e) {
-                        if (SwingUtilities.isRightMouseButton(e)) {
-                            createMascot();
-                        }
-                    }
-                });
-            }
-
             // show tray icon
             SystemTray.getSystemTray().add(trayIcon);
 
