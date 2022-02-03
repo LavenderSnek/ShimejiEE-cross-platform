@@ -40,7 +40,6 @@ public record ShimejiProgramFolder(
 
     private static final String UNUSED_DIR = "unused";
     private static final String ICON_NAME = "icon.png";
-    private static final String DOCK_ICON_NAME = "dock-icon.png";
     private static final String SHIME_1 = "shime1.png";
 
     /**
@@ -133,18 +132,6 @@ public record ShimejiProgramFolder(
             return iconPath;
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Path to dock icon, {@link #getIconPath()} is used as a fallback
-     */
-    public Path getDockIconPath() {
-        Path dockIconPath = imgPath.resolve(DOCK_ICON_NAME);
-        if (Files.isRegularFile(dockIconPath)) {
-            return dockIconPath;
-        } else {
-            return getIconPath();
         }
     }
 
