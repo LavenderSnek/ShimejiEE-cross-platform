@@ -108,7 +108,7 @@ class WindowsNativeImage implements NativeImage {
         int imageWidth = getManagedImage().getWidth();
         int imageHeight = getManagedImage().getHeight();
 
-        this.nativeHandle = createNative(imageWidth * scaling, imageWidth * scaling);
+        this.nativeHandle = createNative(imageWidth * scaling, imageHeight * scaling);
 
         int[] rbgValues = this.getManagedImage()
                 .getRGB(0, 0, imageWidth, imageHeight, null, 0, imageWidth);
