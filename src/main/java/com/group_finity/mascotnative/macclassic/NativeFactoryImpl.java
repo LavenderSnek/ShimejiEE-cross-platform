@@ -1,7 +1,7 @@
 package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascot.NativeFactory;
-import com.group_finity.mascot.environment.Environment;
+import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 
@@ -13,10 +13,10 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("unused")
 public class NativeFactoryImpl extends NativeFactory {
 
-    private final Environment environment = new MacEnvironment();
+    private final NativeEnvironment environment = new MacEnvironment();
 
     @Override
-    public Environment getEnvironment() {
+    public NativeEnvironment getEnvironment() {
         return this.environment;
     }
 

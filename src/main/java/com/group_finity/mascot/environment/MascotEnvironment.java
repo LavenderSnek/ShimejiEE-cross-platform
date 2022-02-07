@@ -8,11 +8,9 @@ import java.awt.Point;
 
 public class MascotEnvironment {
 
-    private final Environment impl = NativeFactory.getInstance().getEnvironment();
+    private final NativeEnvironment impl = NativeFactory.getInstance().getEnvironment();
 
     private final Mascot mascot;
-
-    private Area currentWorkArea;
 
     public MascotEnvironment(Mascot mascot) {
         this.mascot = mascot;
@@ -23,39 +21,7 @@ public class MascotEnvironment {
     }
 
     public Area getWorkArea(Boolean ignoreSettings) {
-        if (currentWorkArea != null) {
-            if (ignoreSettings || Main.getInstance().isMultiscreenAllowed()) {
-                // NOTE Windows
-                if (currentWorkArea != impl.getWorkArea() && currentWorkArea.toRectangle().contains(impl.getWorkArea().toRectangle())) {
-                    if (impl.getWorkArea().contains(mascot.getAnchor().x, mascot.getAnchor().y)) {
-                        currentWorkArea = impl.getWorkArea();
-                        return currentWorkArea;
-                    }
-                }
-
-                // NOTE
-                if (currentWorkArea.contains(mascot.getAnchor().x, mascot.getAnchor().y)) {
-                    return currentWorkArea;
-                }
-            } else {
-                return currentWorkArea;
-            }
-        }
-
-        if (impl.getWorkArea().contains(mascot.getAnchor().x, mascot.getAnchor().y)) {
-            currentWorkArea = impl.getWorkArea();
-            return currentWorkArea;
-        }
-
-        for (Area area : impl.getScreens()) {
-            if (area.contains(mascot.getAnchor().x, mascot.getAnchor().y)) {
-                currentWorkArea = area;
-                return currentWorkArea;
-            }
-        }
-
-        currentWorkArea = impl.getWorkArea();
-        return currentWorkArea;
+        return impl.getWorkAreaAt(mascot.getAnchor());
     }
 
     public Area getActiveIE() {
@@ -98,6 +64,7 @@ public class MascotEnvironment {
         if (getActiveIE().getTopBorder().isOn(mascot.getAnchor())) {
             return getActiveIE().getTopBorder();
         }
+
         if (getWorkArea().getBottomBorder().isOn(mascot.getAnchor())) {
             if (!ignoreSeparator || isScreenTopBottom()) {
                 return getWorkArea().getBottomBorder();
@@ -134,15 +101,16 @@ public class MascotEnvironment {
         impl.moveActiveIE(point);
     }
 
+    // TODO: add proper logging
 
     /**
-     * Doesn't do anything. Left for script compatibility.
+     * Doesn't do anything here. Left for script compatibility.
      */
     @Deprecated
     public void restoreIE() {}
 
     /**
-     * Doesn't do anything. Left for script compatibility
+     * Doesn't do anything. Left for script compatibility.
      */
     @Deprecated
     public void refreshWorkArea() {}

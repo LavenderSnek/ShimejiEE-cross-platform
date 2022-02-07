@@ -11,13 +11,13 @@ import java.util.Map;
  * <p>
  * Subclasses provide platform specific info that is difficult to obtain using pure java
  */
-public abstract class Environment {
+public abstract class Environment implements NativeEnvironment {
 
     private static Rectangle screenRect = new Rectangle(new Point(0, 0), Toolkit.getDefaultToolkit().getScreenSize());
     private static Map<String, Rectangle> screenRects = new HashMap<String, Rectangle>();
 
     static {
-        // updates the windows + screen rect every n milliseconds
+        // updates the screen rect every n milliseconds
         final Thread thread = new Thread(() -> {
             try {
                 while (true) {
@@ -78,7 +78,19 @@ public abstract class Environment {
 
 	protected abstract Area getWorkArea();
 
-	public abstract Area getActiveIE();
+    @Override
+    public Area getWorkAreaAt(Point point) {
+
+        for (Area area : getScreens()) {
+            if (area.contains(point.x, point.y)) {
+                return area;
+            }
+        }
+
+        return getWorkArea();
+    }
+
+    public abstract Area getActiveIE();
 
     public abstract String getActiveIETitle();
 

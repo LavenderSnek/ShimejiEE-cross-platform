@@ -1,6 +1,6 @@
 package com.group_finity.mascot;
 
-import com.group_finity.mascot.environment.Environment;
+import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 import com.sun.jna.Platform;
@@ -49,7 +49,7 @@ public abstract class NativeFactory {
         return instance;
     }
 
-    public abstract Environment getEnvironment();
+    public abstract NativeEnvironment getEnvironment();
 
     public abstract NativeImage newNativeImage(BufferedImage src);
 

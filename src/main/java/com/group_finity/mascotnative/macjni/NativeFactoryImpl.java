@@ -2,7 +2,7 @@ package com.group_finity.mascotnative.macjni;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.NativeFactory;
-import com.group_finity.mascot.environment.Environment;
+import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.image.TranslucentWindow;
 
@@ -29,10 +29,10 @@ public class NativeFactoryImpl extends NativeFactory {
         }
     }
 
-    private final Environment environment = new MacJniEnvironment();
+    private final NativeEnvironment environment = new MacJniEnvironment();
 
     @Override
-    public Environment getEnvironment() {
+    public NativeEnvironment getEnvironment() {
         return environment;
     }
 
