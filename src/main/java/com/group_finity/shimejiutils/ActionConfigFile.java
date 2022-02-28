@@ -36,17 +36,4 @@ public class ActionConfigFile extends AbstractConfigFile {
         }
     }
 
-    public void forEachPoseElement(Consumer<Element> poseConsumer) {
-        // there's no schema key for it, so it's just any child of an animation element
-        // the program actually only loads elements that are inside action elements (but this is good enough)
-        forEachElementWithTagName("Animation", animElement -> {
-            NodeList poseNodes = animElement.getChildNodes();
-            for (int i = 0; i < poseNodes.getLength(); i++) {
-                if (poseNodes.item(i) instanceof Element poseElement) {
-                    poseConsumer.accept(poseElement);
-                }
-            }
-        });
-    }
-
 }
