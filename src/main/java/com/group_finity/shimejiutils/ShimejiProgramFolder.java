@@ -87,7 +87,7 @@ public record ShimejiProgramFolder(
      *                     value ignored if {@link #isMonoImageSet()} is true.
      */
     public Path getBehaviorConfPath(String imageSetName) throws FileNotFoundException {
-        return getConfFilePath(imageSetName, BehaviorConfigFile.POSSIBLE_FILENAMES);
+        return getConfFilePath(imageSetName, BehaviorConfUtils.POSSIBLE_FILENAMES);
     }
 
     /**
@@ -95,7 +95,7 @@ public record ShimejiProgramFolder(
      *                     value ignored if {@link #isMonoImageSet()} is true.
      */
     public Path getActionConfPath(String imageSetName) throws FileNotFoundException {
-        return getConfFilePath(imageSetName, ActionConfigFile.POSSIBLE_FILENAMES);
+        return getConfFilePath(imageSetName, ActionConfUtils.POSSIBLE_FILENAMES);
     }
 
     /**
