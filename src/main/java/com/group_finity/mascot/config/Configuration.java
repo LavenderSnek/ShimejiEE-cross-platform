@@ -135,16 +135,13 @@ public class Configuration {
         }
 
         if (totalFrequency == 0) {
-            if (Main.getInstance().isMultiscreenAllowed()) {
-                mascot.setAnchor(new Point(
-                        (int) (Math.random() * (mascot.getEnvironment().getScreen().getRight() - mascot.getEnvironment().getScreen().getLeft())) + mascot.getEnvironment().getScreen().getLeft(),
-                        mascot.getEnvironment().getScreen().getTop() - 256));
-            } else {
-                mascot.setAnchor(new Point(
-                        (int) (Math.random() * (mascot.getEnvironment().getWorkArea().getRight() - mascot.getEnvironment().getWorkArea().getLeft())) + mascot.getEnvironment().getWorkArea().getLeft(),
-                        mascot.getEnvironment().getWorkArea().getTop() - 256)
-                );
-            }
+            int waRight = mascot.getEnvironment().getWorkArea().getRight();
+            int waLeft = mascot.getEnvironment().getWorkArea().getLeft();
+
+            mascot.setAnchor(new Point(
+                    (int) (Math.random() * (waRight - waLeft)) + waLeft,
+                    mascot.getEnvironment().getWorkArea().getTop() - 256)
+            );
             return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL));
         }
 

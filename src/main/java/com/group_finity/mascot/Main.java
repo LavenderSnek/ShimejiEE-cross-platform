@@ -139,6 +139,7 @@ public final class Main {
 
     public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
     private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
+
     public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
     private void setTransformationAllowed(boolean allowed) {userSwitches.put("Transformation", allowed);}
 
@@ -147,9 +148,6 @@ public final class Main {
 
     public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
     private void setSoundAllowed(boolean allowed) {userSwitches.put("Sounds", allowed);}
-
-    public boolean isMultiscreenAllowed() {return userSwitches.getOrDefault("Multiscreen", true);}
-    private void setMultiscreenAllowed(boolean allowed) {userSwitches.put("Multiscreen", allowed);}
 
     private boolean shouldShowChooserAtStart() {return userSwitches.getOrDefault("AlwaysShowShimejiChooser", false);}
     private void setShouldShowChooserAtStart(boolean b) {userSwitches.put("AlwaysShowShimejiChooser", b);}
@@ -668,7 +666,6 @@ public final class Main {
         final var breedingToggle = getToggleItem("BreedingCloning", this::isBreedingAllowed, this::setBreedingAllowed);
         final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
         final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
-        final var multiscreenToggle = getToggleItem("Multiscreen", this::isMultiscreenAllowed, this::setMultiscreenAllowed);
         final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
         final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviorNames, this::setShouldTranslateBehaviorNames);
         final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
@@ -677,7 +674,6 @@ public final class Main {
         togglesMenu.add(transformToggle);
         togglesMenu.add(windowThrowToggle);
         togglesMenu.add(soundToggle);
-        togglesMenu.add(multiscreenToggle);
         togglesMenu.add(chooserAtStartToggle);
         togglesMenu.add(behaviorTranslationToggle);
 

@@ -142,17 +142,13 @@ public class UserBehavior implements Behavior {
 
                     log.log(Level.INFO, "Out of the screen bounds({0},{1})", new Object[]{getMascot(), this});
 
-                    if (Main.getInstance().isMultiscreenAllowed()) {
-                        getMascot().setAnchor(new Point(
-                                (int) (Math.random() * (getEnvironment().getScreen().getRight() - getEnvironment().getScreen().getLeft())) + getEnvironment().getScreen().getLeft(),
-                                getEnvironment().getScreen().getTop() - 256)
-                        );
-                    } else {
-                        getMascot().setAnchor(new Point(
-                                (int) (Math.random() * (getEnvironment().getWorkArea().getRight() - getEnvironment().getWorkArea().getLeft())) + getEnvironment().getWorkArea().getLeft(),
-                                getEnvironment().getWorkArea().getTop() - 256)
-                        );
-                    }
+                    int waRight = getEnvironment().getWorkArea().getRight();
+                    int waLeft = getEnvironment().getWorkArea().getLeft();
+
+                    getMascot().setAnchor(new Point(
+                            (int) (Math.random() * (waRight - waLeft)) + waLeft,
+                            getEnvironment().getWorkArea().getTop() - 256)
+                    );
 
                     try {
                         getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_FALL)));
