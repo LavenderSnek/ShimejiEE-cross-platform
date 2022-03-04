@@ -64,7 +64,7 @@ public class Jump extends ActionBase {
         }
 
         if (distance <= velocity) {
-            getMascot().getAnchor().setLocation(targetX, targetY);
+            getMascot().setAnchor(new Point(targetX, targetY));
         }
     }
 

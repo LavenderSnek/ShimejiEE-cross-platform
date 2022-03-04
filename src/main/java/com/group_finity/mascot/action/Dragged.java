@@ -8,6 +8,7 @@ import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
+import java.awt.Point;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -72,10 +73,10 @@ public class Dragged extends ActionBase {
 
         getAnimation().next(getMascot(), getTime());
 
-        getMascot().getAnchor().setLocation(
+        getMascot().setAnchor(new Point(
                 cursor.getX() + getOffsetX() * scaling,
                 cursor.getY() + getOffsetY() * scaling
-        );
+        ));
     }
 
     private void setFootX(final double footX) {
