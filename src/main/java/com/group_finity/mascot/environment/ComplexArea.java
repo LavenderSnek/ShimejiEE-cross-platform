@@ -2,14 +2,12 @@ package com.group_finity.mascot.environment;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class ComplexArea {
 
-    private Map<String, Area> areas = new HashMap<String, Area>();
+    // most devices have 1-2 monitors
+    private final Map<String, Area> areas = new HashMap<>(2);
 
     public void set(Map<String, Rectangle> rectangles) {
         retain(rectangles.keySet());
@@ -44,13 +42,13 @@ public class ComplexArea {
     public FloorCeiling getBottomBorder(Point location) {
         FloorCeiling ret = null;
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getBottomBorder().isOn(location)) {
                 ret = area.getBottomBorder();
             }
         }
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getTopBorder().isOn(location)) {
                 ret = null;
             }
@@ -62,13 +60,13 @@ public class ComplexArea {
     public FloorCeiling getTopBorder(Point location) {
         FloorCeiling ret = null;
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getTopBorder().isOn(location)) {
                 ret = area.getTopBorder();
             }
         }
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getBottomBorder().isOn(location)) {
                 ret = null;
             }
@@ -80,13 +78,13 @@ public class ComplexArea {
     public Wall getLeftBorder(Point location) {
         Wall ret = null;
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getLeftBorder().isOn(location)) {
                 ret = area.getRightBorder();
             }
         }
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getRightBorder().isOn(location)) {
                 ret = null;
             }
@@ -98,13 +96,13 @@ public class ComplexArea {
     public Wall getRightBorder(Point location) {
         Wall ret = null;
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getRightBorder().isOn(location)) {
                 ret = area.getRightBorder();
             }
         }
 
-        for (Area area : areas.values()) {
+        for (Area area : getAreas()) {
             if (area.getLeftBorder().isOn(location)) {
                 ret = null;
             }
