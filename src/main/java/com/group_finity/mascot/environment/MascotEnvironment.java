@@ -1,6 +1,5 @@
 package com.group_finity.mascot.environment;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.NativeFactory;
 
@@ -40,9 +39,11 @@ public class MascotEnvironment {
         if (getActiveIE().getBottomBorder().isOn(mascot.getAnchor())) {
             return getActiveIE().getBottomBorder();
         }
-        if (getWorkArea().getTopBorder().isOn(mascot.getAnchor())) {
-            if (!ignoreSeparator || isScreenTopBottom()) {
-                return getWorkArea().getTopBorder();
+
+        Area workArea = getWorkArea();
+        if (workArea.getTopBorder().isOn(mascot.getAnchor())) {
+            if (isScreenTopBottom()) {
+                return workArea.getTopBorder();
             }
         }
         return NotOnBorder.INSTANCE;
@@ -65,9 +66,10 @@ public class MascotEnvironment {
             return getActiveIE().getTopBorder();
         }
 
-        if (getWorkArea().getBottomBorder().isOn(mascot.getAnchor())) {
-            if (!ignoreSeparator || isScreenTopBottom()) {
-                return getWorkArea().getBottomBorder();
+        Area workArea = getWorkArea();
+        if (workArea.getBottomBorder().isOn(mascot.getAnchor())) {
+            if (isScreenTopBottom()) {
+                return workArea.getBottomBorder();
             }
         }
         return NotOnBorder.INSTANCE;
@@ -87,9 +89,11 @@ public class MascotEnvironment {
             return ieWall;
         }
 
-        Border screenWall = mascot.isLookRight() ? getWorkArea().getRightBorder() : getWorkArea().getLeftBorder();
+        Area workArea = getWorkArea();
+        Border screenWall = mascot.isLookRight() ? workArea.getRightBorder() : workArea.getLeftBorder();
+
         if (screenWall.isOn(mascot.getAnchor())) {
-            if (!ignoreSeparator || isScreenLeftRight()) {
+            if (isScreenLeftRight()) {
                 return screenWall;
             }
         }
