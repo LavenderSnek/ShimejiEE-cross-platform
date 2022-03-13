@@ -719,18 +719,29 @@ public final class Main {
         try {
             //adding the tray icon
             Path trayIconPath = getProgramFolder().getIconPath();
-            Image trayIconImg;
-            if (trayIconPath != null) {
-                trayIconImg = ImageIO.read(trayIconPath.toFile());
-            } else {
+            Image trayIconImg = null;
+            try {
+                if (trayIconPath != null) {
+                    trayIconImg = ImageIO.read(trayIconPath.toFile());
+                }
+                if (trayIconImg == null) {
+                    trayIconImg = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/icon.png")));
+                }
+            } catch (Exception e) {
+                log.log(Level.WARNING, "unable to load tray icon", e);
+            }
+
+            if (trayIconImg == null) {
                 trayIconImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
             }
+
+
             final TrayIcon trayIcon = new TrayIcon(trayIconImg, "ShimejiEE", trayPopup);
 
             // show tray icon
             SystemTray.getSystemTray().add(trayIcon);
 
-        } catch (final IOException | AWTException e) {
+        } catch (final AWTException e) {
             log.log(Level.SEVERE, "Failed to create tray icon", e);
             System.exit(1);
         }
