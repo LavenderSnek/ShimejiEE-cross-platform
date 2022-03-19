@@ -31,8 +31,6 @@ Installation
   - Download the `no-jre` version. 
   - Untested but you can try it out; Just make sure to use java 17.
 
-- From Source:
-  - see [docs](/docs/devnotes.md)
 
 Credits
 -------
@@ -43,7 +41,7 @@ Credits
   - [Shimeji discord](https://discord.gg/dcJGAn3)
 
 - nonowarn
-  - Wrote all the native macOS environment code
+  - Wrote the initial swing + jna mac implementation
   - [GitHub page](https://github.com/nonowarn/shimeji4mac)
 
 - TigerHix
