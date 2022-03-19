@@ -1,42 +1,18 @@
 package com.group_finity.mascotnative.macjni;
 
 import com.group_finity.mascot.environment.Area;
-import com.group_finity.mascot.environment.Environment;
+import com.group_finity.mascot.environment.BaseNativeEnvironment;
 
-import java.awt.Point;
+import java.awt.Rectangle;
 
-class MacJniEnvironment extends Environment {
+class MacJniEnvironment extends BaseNativeEnvironment {
 
-    private static final Area activeIE = new Area();
+    private static final Rectangle INVISIBLE_RECT = new Rectangle(1, 1, -10_000, -10_000);
 
     @Override
-    public void tick() {
-        super.tick();
-        activeIE.setVisible(false);
+    protected void updateIe(Area ieToUpdate) {
+        ieToUpdate.setVisible(false);
+        ieToUpdate.set(INVISIBLE_RECT);
     }
-
-    @Override
-    public void moveActiveIE(final Point point) {}
-
-    @Override
-    public void restoreIE() {}
-
-    @Override
-    public Area getWorkArea() {
-        return getScreen();
-    }
-
-    @Override
-    public Area getActiveIE() {
-        return activeIE;
-    }
-
-    @Override
-    public String getActiveIETitle() {
-        return null;
-    }
-
-    @Override
-    public void refreshCache() {}
 
 }
