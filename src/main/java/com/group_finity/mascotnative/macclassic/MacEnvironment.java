@@ -1,211 +1,49 @@
 package com.group_finity.mascotnative.macclassic;
 
 import com.group_finity.mascot.environment.Area;
-import com.group_finity.mascot.environment.Environment;
-import com.group_finity.mascotnative.macclassic.jna.*;
+import com.group_finity.mascot.environment.BaseNativeEnvironment;
+import com.group_finity.mascotnative.macclassic.jna.AXUIElementRef;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
-import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
-import com.sun.jna.ptr.LongByReference;
-import com.sun.jna.ptr.PointerByReference;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Uses the apple Accessibility API  thought JNA to get environment information
  *
  * @author nonowarn
  */
-class MacEnvironment extends Environment {
-    //a lot of the comments here have been though google translate, it did a surprisingly good job tbh
+class MacEnvironment extends BaseNativeEnvironment {
 
-    private static final Carbon carbon = Carbon.INSTANCE;
-
-    private static final int MENUBAR_HEIGHT = 22;
+    // this might still break on the new notched macs
+    private static final int MENUBAR_HEIGHT = 24;
     private static final int MAX_DOCK_SIZE = 100;
 
-    /**
-     * On Mac, you can take the active window,
-     * Make the Mascot react to it.
-     * <p>
-     * So, in this class, give activeIE the alias frontmostWindow.
-     */
-    private static final Area activeIE = new Area();
+    private static final long myPID = Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+    private long frontMostAppPid = myPID;
+    private final Set<Long> touchedProcesses = new HashSet<>();
 
-    private static final Area frontmostWindow = activeIE;
-
-    private static final int screenWidth = (int) Math.round(Toolkit.getDefaultToolkit().getScreenSize().getWidth());
-    private static final int screenHeight = (int) Math.round(Toolkit.getDefaultToolkit().getScreenSize().getHeight());
-
-    /**
-     * the Shimeji program's PID
-     */
-    private static final long myPID =
-            Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
-
-    /**
-     * PID of the frontmost window's application
-     */
-    private static long frontMostAppPid = myPID;
-
-    private static final HashSet<Long> touchedProcesses = new HashSet<>();
-
-    private static final CFStringRef kAXPosition = toCFString("AXPosition");
-    private static final CFStringRef kAXSize = toCFString("AXSize");
-    private static final CFStringRef kAXFocusedWindow = toCFString("AXFocusedWindow");
-    private static final CFStringRef kAXChildren = toCFString("AXChildren");
-
-    private static CFStringRef toCFString(String s) {
-        return CFStringRef.createCFString(s);
-    }
-
-    private static long getFrontmostAppsPID() {
-        ProcessSerialNumber frontProcessPsn = new ProcessSerialNumber();
-        LongByReference frontProcessPidp = new LongByReference();
-
-        carbon.GetFrontProcess(frontProcessPsn);
-        carbon.GetProcessPID(frontProcessPsn, frontProcessPidp);
-
-        return frontProcessPidp.getValue();
-    }
-
-
-    private static Rectangle getFrontmostAppRect() {
-        Rectangle rect = null;
-        long pid = getFrontMostAppPid();
+    private Rectangle getFrontmostAppRect() {
 
         // prevent crash from not running appkit on main thread
-        if (pid == myPID) {
+        if (frontMostAppPid == myPID) {
             return null;
         }
 
-        AXUIElementRef application = carbon.AXUIElementCreateApplication(pid);
-
-        PointerByReference windowp = new PointerByReference();
-
-        // XXX: Is error checking necessary other than here?
-        if (carbon.AXUIElementCopyAttributeValue(application, kAXFocusedWindow, windowp) == carbon.kAXErrorSuccess) {
-            AXUIElementRef window = new AXUIElementRef();
-            window.setPointer(windowp.getValue());
-            rect = getRectOfWindow(window);
-        }
-
-        application.release();
-        return rect;
+        return AXUtils.getFocusedWindowRectOfPid(frontMostAppPid);
     }
 
-
-    private static CGPoint getPositionOfWindow(AXUIElementRef window) {
-        CGPoint position = new CGPoint();
-        AXValueRef axvalue = new AXValueRef();
-        PointerByReference valuep = new PointerByReference();
-
-        carbon.AXUIElementCopyAttributeValue(window, kAXPosition, valuep);
-        axvalue.setPointer(valuep.getValue());
-        carbon.AXValueGetValue(axvalue, carbon.kAXValueCGPointType, position.getPointer());
-        position.read();
-
-        return position;
-    }
-
-
-    private static CGSize getSizeOfWindow(AXUIElementRef window) {
-        CGSize size = new CGSize();
-        AXValueRef axvalue = new AXValueRef();
-        PointerByReference valuep = new PointerByReference();
-
-        carbon.AXUIElementCopyAttributeValue(window, kAXSize, valuep);
-        axvalue.setPointer(valuep.getValue());
-        carbon.AXValueGetValue(axvalue, carbon.kAXValueCGSizeType, size.getPointer());
-        size.read();
-
-        return size;
-    }
-
-
-    private static void moveFrontmostWindow(final Point point) {
-        AXUIElementRef application =
-                carbon.AXUIElementCreateApplication(frontMostAppPid);
-
-        PointerByReference windowp = new PointerByReference();
-
-        if (carbon.AXUIElementCopyAttributeValue(application, kAXFocusedWindow, windowp) == carbon.kAXErrorSuccess) {
-            AXUIElementRef window = new AXUIElementRef();
-            window.setPointer(windowp.getValue());
-            moveWindow(window, point.x, point.y);
-        }
-
-        application.release();
-    }
-
-
-    private static void restoreWindows() {
-        Rectangle visibleArea = getWindowVisibleArea();
-        for (long pid : getTouchedProcesses()) {
-            AXUIElementRef application =
-                    carbon.AXUIElementCreateApplication(pid);
-
-            for (AXUIElementRef window : getWindowsOf(application)) {
-                window.retain();
-                Rectangle windowRect = getRectOfWindow(window);
-                if (!visibleArea.intersects(windowRect)) {
-                    moveWindow(window, 0, 0);
-                }
-                window.release();
-            }
-
-            application.release();
+    private void setFrontMostAppPid(long pid) {
+        if (pid != myPID) {
+            frontMostAppPid = pid;
+            touchedProcesses.add(pid);
         }
     }
 
-
-    private static ArrayList<AXUIElementRef> getWindowsOf(AXUIElementRef application) {
-        PointerByReference axWindowsp = new PointerByReference();
-        ArrayList<AXUIElementRef> ret = new ArrayList<>();
-
-        carbon.AXUIElementCopyAttributeValue(application, kAXChildren, axWindowsp);
-
-        if (axWindowsp.getValue() == Pointer.NULL) {
-            return ret;
-        }
-
-        var cfWindows = new CFArrayRef(axWindowsp.getValue());
-
-        for (int i = 0, l = cfWindows.getCount(); i < l; ++i) {
-            Pointer p = cfWindows.getValueAtIndex(i);
-            AXUIElementRef el = new AXUIElementRef();
-            el.setPointer(p);
-            ret.add(el);
-        }
-
-        return ret;
-    }
-
-    private static Rectangle getRectOfWindow(AXUIElementRef window) {
-        CGPoint pos = getPositionOfWindow(window);
-        CGSize size = getSizeOfWindow(window);
-        return new Rectangle(pos.getX(), pos.getY(), size.getWidth(), size.getHeight());
-    }
-
-    private static void moveWindow(AXUIElementRef window, int x, int y) {
-        CGPoint position = new CGPoint(x, y);
-        position.write();
-        AXValueRef axvalue = carbon.AXValueCreate(
-                carbon.kAXValueCGPointType, position.getPointer());
-        carbon.AXUIElementSetAttributeValue(window, kAXPosition, axvalue);
-    }
-
-    /**
-     * When min < max,
-     * Returns x if min <= x <= max
-     * Returns min if x < min
-     * Returns max if x> max
-     */
     private static double betweenOrLimit(double n, double min, double max) {
         return Math.min(Math.max(n, min), max);
     }
@@ -216,41 +54,31 @@ class MacEnvironment extends Environment {
      *
      * @return A rectangle where the window will still be visible on screen
      */
-    private static Rectangle getWindowVisibleArea() {
-        return new Rectangle(
-                MAX_DOCK_SIZE,
-                MENUBAR_HEIGHT,
-                getScreenWidth() - 2 * MAX_DOCK_SIZE,
-                getScreenHeight() - MENUBAR_HEIGHT
-        );
+    private Rectangle getWindowVisibleArea() {
+        var total = getScreen().toRectangle();
+        total.y += MENUBAR_HEIGHT;
+        total.x += MAX_DOCK_SIZE;
+        total.width -= MAX_DOCK_SIZE;
+        return total;
     }
 
-    private void updateFrontmostWindow() {
+    @Override
+    protected void updateIe(Area ieToUpdate) {
+        setFrontMostAppPid(AXUtils.getFrontmostAppsPID());
+
         final Rectangle frontmostWindowRect = getFrontmostAppRect();
         final Rectangle windowVisibleArea = getWindowVisibleArea();
 
-        frontmostWindow.setVisible(
+        ieToUpdate.setVisible(
                 (frontmostWindowRect != null)
                         && frontmostWindowRect.intersects(windowVisibleArea)
                         && !frontmostWindowRect.contains(windowVisibleArea) // Exclude desktop
         );
-        frontmostWindow.set(
+        ieToUpdate.set(
                 frontmostWindowRect == null
                         ? new Rectangle(-1, -1, 0, 0)
                         : frontmostWindowRect
         );
-    }
-
-    private static void updateFrontmostApp() {
-        long newPID = getFrontmostAppsPID();
-        setFrontMostAppPid(newPID);
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        updateFrontmostApp();
-        this.updateFrontmostWindow();
     }
 
     /**
@@ -259,78 +87,66 @@ class MacEnvironment extends Environment {
      */
     @Override
     public void moveActiveIE(final Point point) {
-        final Rectangle visibleRect = getWindowVisibleArea();
-        final Rectangle windowRect = getFrontmostAppRect();
+        if (frontMostAppPid == myPID) {
+            return;
+        }
 
-        // Wrap coordinates to the left
+        Rectangle windowRect = getFrontmostAppRect();
+        if (windowRect == null) {
+            return;
+        }
+
+        Rectangle visibleRect = getWindowVisibleArea();
+
         final double minX = visibleRect.getMinX() - windowRect.getWidth();
-        // Wrap coordinates to the right
         final double maxX = visibleRect.getMaxX();
-
-        // Upward wrapping coordinates (Cannot move above the menu bar)
         final double minY = visibleRect.getMinY();
-        // Downward wrapping coordinates
         final double maxY = visibleRect.getMaxY();
 
-        double pX = point.getX();
-        double pY = point.getY();
+        double pX = betweenOrLimit(point.x, minX, maxX);
+        double pY = betweenOrLimit(point.y, minY, maxY);
 
-        // Folding in the X direction
-        pX = betweenOrLimit(pX, minX, maxX);
+        AXUIElementRef focusedWin = AXUtils.copyFocusedWindowOfPid(frontMostAppPid);
 
-        // Folding in the Y direction
-        pY = betweenOrLimit(pY, minY, maxY);
-
-        point.setLocation(pX, pY);
-        moveFrontmostWindow(point);
+        if (focusedWin != null) {
+            AXUtils.setAXPositionOf(focusedWin, pX, pY);
+            focusedWin.release();
+        }
     }
 
     @Override
     public void restoreIE() {
-        restoreWindows();
-        getTouchedProcesses().clear();
-    }
-
-    @Override
-    public Area getWorkArea() {
-        return getScreen();
-    }
-
-    @Override
-    public Area getActiveIE() {
-        return activeIE;
-    }
-
-    @Override
-    public String getActiveIETitle() {
-        return null;
-    }
-
-    @Override
-    public void refreshCache() {}
-
-
-    private static void setFrontMostAppPid(long pid) {
-        if (pid != myPID) {
-            frontMostAppPid = pid;
-            getTouchedProcesses().add(pid);
+        for (long pid : touchedProcesses) {
+            CFArrayRef childWindows = AXUtils.copyChildWindowsOfPid(pid);
+            restoreWindowsInArr(childWindows);
+            childWindows.release();
         }
+        touchedProcesses.clear();
     }
 
-    private static long getFrontMostAppPid() {
-        return frontMostAppPid;
-    }
+    private void restoreWindowsInArr(CFArrayRef axUiWindows) {
+        Rectangle visibleArea = getWindowVisibleArea();
 
-    private static HashSet<Long> getTouchedProcesses() {
-        return touchedProcesses;
-    }
+        if (axUiWindows == null) {
+            return;
+        }
 
-    private static int getScreenWidth() {
-        return screenWidth;
-    }
+        int ct = axUiWindows.getCount();
+        for (int i = 0; i < ct; i++) {
+            Pointer winPtr = axUiWindows.getValueAtIndex(i);
+            if (winPtr == Pointer.NULL) {
+                continue;
+            }
 
-    private static int getScreenHeight() {
-        return screenHeight;
+            AXUIElementRef window = new AXUIElementRef();
+            window.setPointer(winPtr);
+            Rectangle windowRect = AXUtils.getRectOf(window);
+
+            if (!visibleArea.intersects(windowRect)) {
+                AXUtils.setAXPositionOf(window, 0,0);
+            }
+        }
+
     }
 
 }
