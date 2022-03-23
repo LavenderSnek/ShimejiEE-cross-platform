@@ -98,8 +98,6 @@ public abstract class Environment implements NativeEnvironment {
 
 	public abstract void restoreIE();
 
-	public abstract void refreshCache();
-
     public boolean isScreenTopBottom(final Point location) {
         int count = 0;
 

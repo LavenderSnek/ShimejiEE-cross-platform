@@ -91,14 +91,6 @@ public interface NativeEnvironment {
      */
     default void restoreIE() {}
 
-    /**
-     * Clears native caches relating to the desktop environment
-     * <p>
-     * An example of this function's use includes
-     * clearing the cache of the IE allowlist.
-     */
-    default void refreshCache() {}
-
     //---cursor
 
     /**

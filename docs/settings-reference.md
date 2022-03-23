@@ -32,7 +32,6 @@ Properties set from the command line take priority over those read from the sett
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Language`           | The language tag for the UI locale. Default value is english (`en`).                                                                                                                                                                                                                      |
 | `ActiveShimeji`      | A slash separated list of selected image sets from the current img folder. For example the value `ImageSet1/abcd/loremipsum/`  would select `ImageSet1`, `abcd`, and `loremipsum`. If an image set can't be loaded for any reason,  it is discarded from the list of selected image sets. |
-| `InteractiveWindows` | This value is system dependent                                                                                                                                                                                                                                                            |
 
 ### Program Folder
 

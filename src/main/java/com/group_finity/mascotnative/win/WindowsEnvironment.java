@@ -1,6 +1,5 @@
 package com.group_finity.mascotnative.win;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
 import com.group_finity.mascotnative.win.jna.Dwmapi;
@@ -32,8 +31,6 @@ class WindowsEnvironment extends Environment {
     public static Area workArea = new Area();
     public static Area activeIE = new Area();
 
-    private static String[] windowTitles = null;
-
     private enum IEResult {INVALID, NOT_IE, IE_OUT_OF_BOUNDS, IE}
 
     private static boolean isIE(final Pointer ie) {
@@ -56,19 +53,8 @@ class WindowsEnvironment extends Environment {
             return false;
         }
 
-        if (windowTitles == null) {
-            windowTitles = Main.getInstance().getInteractiveWindowAllowlist().toArray(new String[0]);
-        }
-
-        for (String windowTitle : windowTitles) {
-            if (!windowTitle.trim().isEmpty() && ieTitle.contains(windowTitle)) {
-                ieCache.put(ie, true);
-                return true;
-            }
-        }
-
-        ieCache.put(ie, false);
-        return false;
+        ieCache.put(ie, true);
+        return true;
     }
 
     private static IEResult isViableIE(Pointer ie) {
@@ -235,12 +221,6 @@ class WindowsEnvironment extends Environment {
         final int titleLength = User32.INSTANCE.GetWindowTextW(ie, title, 1024);
 
         return new String(title, 0, titleLength);
-    }
-
-    @Override
-    public void refreshCache() {
-        ieCache.clear(); // will be repopulated next isIE call
-        windowTitles = null;
     }
 
 }

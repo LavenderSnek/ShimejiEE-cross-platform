@@ -85,7 +85,6 @@ public final class Main {
 
     private Locale locale = Locale.ENGLISH;
     private int scaling = 1;
-    private Set<String> interactiveWindowAllowlist = new HashSet<>(List.of("*", "a", "e", "o", "u"));
     private final ConcurrentMap<String, Boolean> userSwitches = new ConcurrentHashMap<>();
 
     private final Manager manager = new Manager();
@@ -110,12 +109,6 @@ public final class Main {
 
     public Configuration getConfiguration(String imageSet) {
         return configurations.get(imageSet);
-    }
-
-    public Set<String> getInteractiveWindowAllowlist() {return interactiveWindowAllowlist;}
-    private void setInteractiveWindowAllowlist(Set<String> allowlist) {
-        this.interactiveWindowAllowlist = allowlist;
-        NativeFactory.getInstance().getEnvironment().refreshCache();
     }
 
     public Locale getLocale() {return locale;}
@@ -538,11 +531,6 @@ public final class Main {
             activeImageSets.addAll(ims);
         }
 
-        var winListProp = getSetting(props, "InteractiveWindows");
-        if (winListProp != null) {
-            interactiveWindowAllowlist.addAll(List.of(winListProp.split("/")));
-            interactiveWindowAllowlist.remove("");
-        }
     }
 
     private void writeAllSettings(Path outputFilePath) {
@@ -561,15 +549,6 @@ public final class Main {
             sb.append(set).append('/');
         }
         props.setProperty("ActiveShimeji", sb.toString());
-
-        var winList = getInteractiveWindowAllowlist();
-        if (winList != null) {
-            var sb2 = new StringBuilder();
-            for (String win : winList) {
-                sb2.append(win).append('/');
-            }
-            props.setProperty("InteractiveWindows", sb2.toString());
-        }
 
         // program folder excluded on purpose since there's not going to be a gui for it
 
@@ -683,10 +662,6 @@ public final class Main {
         final MenuItem chooseShimeji = new MenuItem(Tr.tr("ChooseShimeji"));
         chooseShimeji.addActionListener(e -> ImageSetUtils.askUserForSelection(this::setActiveImageSets));
 
-        //interactive window chooser
-        MenuItem interactiveMenu = new MenuItem(Tr.tr("ChooseInteractiveWindows"));
-        interactiveMenu.setEnabled(false);
-
         //reload button
         final MenuItem reloadMascot = new MenuItem(Tr.tr("ReloadMascots"));
         reloadMascot.addActionListener(e -> reloadImageSets());
@@ -713,7 +688,6 @@ public final class Main {
 
         trayPopup.add(chooseShimeji);
         trayPopup.add(reloadMascot);
-        trayPopup.add(interactiveMenu);
         trayPopup.add(dismissAll);
 
         try {
