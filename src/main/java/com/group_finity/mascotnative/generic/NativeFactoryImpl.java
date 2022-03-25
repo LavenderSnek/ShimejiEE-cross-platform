@@ -17,7 +17,7 @@ public class NativeFactoryImpl extends NativeFactory {
     }
 
     @Override
-    public NativeImage newNativeImage(final BufferedImage src) {
+    public NativeImage newNativeImage(final BufferedImage src, int scaling) {
         return new GenericNativeImage(src);
     }
 

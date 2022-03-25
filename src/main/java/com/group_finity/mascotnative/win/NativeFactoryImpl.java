@@ -17,8 +17,8 @@ public class NativeFactoryImpl extends NativeFactory {
     }
 
     @Override
-    public NativeImage newNativeImage(final BufferedImage src) {
-        return new WindowsNativeImage(src);
+    public NativeImage newNativeImage(final BufferedImage src, int scaling) {
+        return new WindowsNativeImage(src, scaling);
     }
 
     @Override

@@ -45,12 +45,12 @@ public class ImagePairLoader {
         }
 
         var leftMascotImage = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(leftImage),
+                NativeFactory.getInstance().newNativeImage(leftImage, scaling),
                 new Point(anchor.x * scaling, anchor.y * scaling),
                 new Dimension(leftImage.getWidth() * scaling, leftImage.getHeight() * scaling)
         );
         var rightMascotImage = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(rightImage),
+                NativeFactory.getInstance().newNativeImage(rightImage, scaling),
                 new Point((rightImage.getWidth() - anchor.x) * scaling, anchor.y * scaling),
                 new Dimension(rightImage.getWidth() * scaling, rightImage.getHeight() * scaling)
         );

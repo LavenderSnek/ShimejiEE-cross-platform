@@ -1,6 +1,5 @@
 package com.group_finity.mascotnative.win;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascotnative.win.jna.BITMAP;
 import com.group_finity.mascotnative.win.jna.BITMAPINFOHEADER;
@@ -101,8 +100,7 @@ class WindowsNativeImage implements NativeImage {
         Gdi32.INSTANCE.DeleteObject(nativeHandle);
     }
 
-    public WindowsNativeImage(final BufferedImage image) {
-        int scaling = Main.getInstance().getScaling();
+    public WindowsNativeImage(final BufferedImage image, int scaling) {
 
         this.managedImage = image;
         int imageWidth = getManagedImage().getWidth();
