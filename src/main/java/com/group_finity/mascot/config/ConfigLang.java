@@ -1,4 +1,4 @@
-package com.group_finity.shimejiutils;
+package com.group_finity.mascot.config;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -16,6 +16,10 @@ public enum ConfigLang {
 
     public ResourceBundle getRb() {
         return resourceBundle;
+    }
+
+    public String tr(String s) {
+        return getRb().getString(s);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.group_finity.shimejiutils;
+package com.group_finity.mascot.imageset;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,6 +41,20 @@ public record ShimejiProgramFolder(
     private static final String UNUSED_DIR = "unused";
     private static final String ICON_NAME = "icon.png";
     private static final String SHIME_1 = "shime1.png";
+
+    private static final String[] BEHAVIOR_FILENAMES = {
+            "behavior.xml", "behaviors.xml",
+            "行動.xml", "#U884c#U52d5.xml",
+            "ÞíîÕïò.xml", "µ¦-.xml", "ìsô«.xml",
+            "two.xml", "2.xml",
+    };
+
+    private static final String[] ACTIONS_FILENAMES = {
+            "actions.xml", "action.xml",
+            "動作.xml", "#U52d5#U4f5c.xml",
+            "Õïòõ¢£.xml", "¦-º@.xml", "ô«ìý",
+            "one.xml", "1.xml",
+    };
 
     /**
      * Creates a {@link ShimejiProgramFolder} object from an existing shimeji installation.
@@ -87,7 +101,7 @@ public record ShimejiProgramFolder(
      *                     value ignored if {@link #isMonoImageSet()} is true.
      */
     public Path getBehaviorConfPath(String imageSetName) throws FileNotFoundException {
-        return getConfFilePath(imageSetName, BehaviorConfUtils.POSSIBLE_FILENAMES);
+        return getConfFilePath(imageSetName, BEHAVIOR_FILENAMES);
     }
 
     /**
@@ -95,7 +109,7 @@ public record ShimejiProgramFolder(
      *                     value ignored if {@link #isMonoImageSet()} is true.
      */
     public Path getActionConfPath(String imageSetName) throws FileNotFoundException {
-        return getConfFilePath(imageSetName, ActionConfUtils.POSSIBLE_FILENAMES);
+        return getConfFilePath(imageSetName, ACTIONS_FILENAMES);
     }
 
     /**
