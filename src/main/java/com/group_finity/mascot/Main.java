@@ -582,7 +582,7 @@ public final class Main {
                         {"Català", "ca-ES"},//Catalan
                         {"Deutsch", "de-DE"},//German
                         {"Español", "es-ES"},//Spanish
-                        {"Français", "fr-FR"},//French
+                        {"Français Canadien", "fr-CA"}, // Canadian french
                         {"Hrvatski", "hr-HR"},//Croatian
                         {"Italiano", "it-IT"},//Italian
                         {"Nederlands", "nl-NL"},//Dutch
