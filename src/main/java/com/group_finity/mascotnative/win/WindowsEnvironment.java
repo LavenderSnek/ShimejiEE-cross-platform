@@ -68,7 +68,8 @@ class WindowsEnvironment extends Environment {
             // have to consider the new cloaked variable instead
             LongByReference flagsRef = new LongByReference();
             NativeLong result = Dwmapi.INSTANCE.DwmGetWindowAttribute(ie, Dwmapi.DWMWA_CLOAKED, flagsRef, 8);
-            if (result.longValue() != 0 || flagsRef.getValue() != 0) {
+            // unsupported on 7 so skip the check
+            if (result.longValue() != 0x80070057 && (result.longValue() != 0 || flagsRef.getValue() != 0)) {
                 return IEResult.INVALID;
             }
 
