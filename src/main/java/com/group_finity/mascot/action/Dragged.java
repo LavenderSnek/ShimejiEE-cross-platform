@@ -18,6 +18,8 @@ public class Dragged extends ActionBase {
 
     public static final String VARIABLE_FOOTX = "FootX";
     private double footX;
+
+    private static final String VARIABLE_FOOTDX = "FootDX";
     private double footDx;
 
     public static final String PARAMETER_OFFSETX = "OffsetX";
@@ -40,7 +42,7 @@ public class Dragged extends ActionBase {
 
         scaling = Main.getInstance().getScaling();
 
-        setFootX(getEnvironment().getCursor().getX());
+        setFootX(getEnvironment().getCursor().getX() + getOffsetX() * scaling);
         setTimeToRegist(250);
 
     }
@@ -60,7 +62,7 @@ public class Dragged extends ActionBase {
 
         final Location cursor = getEnvironment().getCursor();
 
-        if (Math.abs(cursor.getX() - getMascot().getAnchor().x) >= 5) {
+        if (Math.abs(cursor.getX() - getMascot().getAnchor().x + getOffsetX() * scaling) >= 5) {
             this.setTime(0);
         }
 
@@ -69,6 +71,7 @@ public class Dragged extends ActionBase {
         setFootDx((getFootDx() + ((newX - getFootX()) * 0.1)) * 0.8);
         setFootX(getFootX() + getFootDx());
 
+        putVariable(getSchema().getString(VARIABLE_FOOTDX), getFootDx());
         putVariable(getSchema().getString(VARIABLE_FOOTX), getFootX());
 
         getAnimation().next(getMascot(), getTime());
