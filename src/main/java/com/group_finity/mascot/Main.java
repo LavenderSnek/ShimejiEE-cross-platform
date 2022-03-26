@@ -129,6 +129,9 @@ public final class Main {
     public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
     private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
 
+    public boolean isTransientBreedingAllowed() {return userSwitches.getOrDefault("Transients", true);}
+    private void setTransientBreedingAllowed(boolean allowed) {userSwitches.put("Transients", allowed);}
+
     public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
     private void setTransformationAllowed(boolean allowed) {userSwitches.put("Transformation", allowed);}
 
@@ -639,6 +642,7 @@ public final class Main {
         final Menu togglesMenu = new Menu(Tr.tr("AllowedBehaviours"));
 
         final var breedingToggle = getToggleItem("BreedingCloning", this::isBreedingAllowed, this::setBreedingAllowed);
+        final var transientToggle = getToggleItem("BreedingTransient", this::isTransientBreedingAllowed, this::setTransientBreedingAllowed);
         final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
         final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
         final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
@@ -646,6 +650,7 @@ public final class Main {
         final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
 
         togglesMenu.add(breedingToggle);
+        togglesMenu.add(transientToggle);
         togglesMenu.add(transformToggle);
         togglesMenu.add(windowThrowToggle);
         togglesMenu.add(soundToggle);

@@ -44,9 +44,15 @@ public class Breed extends Animate {
 
     /**
      * @see Breed#getBornMascot()
-     * */
+     */
     public static final String PARAMETER_BORNMASCOT = "BornMascot";
     private static final String DEFAULT_BORNMASCOT = "";
+
+    /**
+     * @see Breed#getBornTransient()
+     */
+    public static final String PARAMETER_BORNTRANSIENT = "BornTransient";
+    private static final boolean DEFAULT_BORNTRANSIENT = false;
 
     private int scaling;
 
@@ -65,7 +71,16 @@ public class Breed extends Animate {
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
 
-        if (getTime() == getAnimation().getDuration() - 1 && Main.getInstance().isBreedingAllowed()) {
+        if (getTime() != getAnimation().getDuration() - 1) {
+            return;
+        }
+
+        boolean allowed =
+                getBornTransient()
+                    ? Main.getInstance().isTransientBreedingAllowed()
+                    : Main.getInstance().isBreedingAllowed();
+
+        if (allowed) {
             breed();
         }
     }
@@ -131,9 +146,19 @@ public class Breed extends Animate {
      * Name of the imageSet that the new mascot will be of.
      * <p>
      * If this is not provided, the imageSet of the creating mascot will be used.
-     * */
+     */
     private String getBornMascot() throws VariableException {
         return eval(getSchema().getString(PARAMETER_BORNMASCOT), String.class, DEFAULT_BORNMASCOT);
+    }
+
+    /**
+     * Whether the mascot will be considered 'transient'.
+     * <p>
+     * Unlike regular mascots, transient mascots will not be prevented from spawning when the user
+     * disables regular breeding. Use this for short term mascots such as projectiles and particles.
+     */
+    private boolean getBornTransient() throws VariableException {
+        return eval(getSchema().getString(PARAMETER_BORNTRANSIENT), Boolean.class, DEFAULT_BORNTRANSIENT);
     }
 
 }
