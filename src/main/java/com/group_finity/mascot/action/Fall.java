@@ -49,7 +49,10 @@ public class Fall extends ActionBase {
     public static final String PARAMETER_GRAVITY = "Gravity";
     private static final double DEFAULT_GRAVITY = 2;
 
+    public static final String VARIABLE_VELOCITYX = "VelocityX";
     private double velocityX;
+
+    public static final String VARIABLE_VELOCITYY = "VelocityY";
     private double velocityY;
 
     private double modX;
@@ -84,6 +87,9 @@ public class Fall extends ActionBase {
 
         this.setVelocityX(this.getVelocityX() - (this.getVelocityX() * getResistanceX()));
         this.setVelocityY(this.getVelocityY() - (this.getVelocityY() * getResistanceY()) + getGravity());
+
+        putVariable(getSchema().getString(VARIABLE_VELOCITYX), getVelocityX());
+        putVariable(getSchema().getString(VARIABLE_VELOCITYY), getVelocityY());
 
         this.setModX(this.getModX() + (this.getVelocityX() % 1));
         this.setModY(this.getModY() + (this.getVelocityY() % 1));
