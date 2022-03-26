@@ -1,6 +1,5 @@
 package com.group_finity.mascot.config;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
@@ -22,29 +21,45 @@ public class Configuration {
 
     private static final Logger log = Logger.getLogger(Configuration.class.getName());
 
-    private ResourceBundle schema;
+    public enum Schema {
+        JP(Locale.JAPANESE),
+        EN(Locale.ENGLISH);
 
-    private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<String, ActionBuilder>();
-    private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<String, BehaviorBuilder>();
+        private final ResourceBundle resourceBundle;
+
+
+        Schema(Locale locale) {
+            this.resourceBundle = ResourceBundle.getBundle("schema", locale);
+        }
+
+        public ResourceBundle getRb() {
+            return resourceBundle;
+        }
+        public String tr(String s) {
+            return getRb().getString(s);
+        }
+
+    }
+
+    private Schema schema = Schema.EN;
+
+    private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<>();
+    private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<>();
 
     public void load(final Entry configurationNode, final String imageSet) throws IOException, ConfigurationException {
         log.log(Level.INFO, "Start Reading Configuration File...");
 
-        Locale locale;
-
-        // check for Japanese XML tag and adapt locale accordingly
-        if (configurationNode.hasChild("動作リスト") || configurationNode.hasChild("行動リスト")) {
-            locale = Locale.forLanguageTag("ja-JP");
-        } else {
-            locale = Locale.forLanguageTag("en-US");
+        for (Schema lang : Schema.values()) {
+            if (configurationNode.hasChild(lang.tr("ActionList")) || configurationNode.hasChild(lang.tr("BehaviourList"))) {
+                schema = lang;
+                break;
+            }
         }
 
-        schema = ResourceBundle.getBundle("schema", locale);
-
-        for (final Entry list : configurationNode.selectChildren(schema.getString("ActionList"))) {
+        for (final Entry list : configurationNode.selectChildren(getSchema().getString("ActionList"))) {
             log.log(Level.INFO, "Action List...");
 
-            for (final Entry node : list.selectChildren(schema.getString("Action"))) {
+            for (final Entry node : list.selectChildren(getSchema().getString("Action"))) {
                 final ActionBuilder action = new ActionBuilder(this, node, imageSet);
 
                 if (getActionBuilders().containsKey(action.getName())) {
@@ -55,10 +70,10 @@ public class Configuration {
             }
         }
 
-        for (final Entry list : configurationNode.selectChildren(schema.getString("BehaviourList"))) {
+        for (final Entry list : configurationNode.selectChildren(getSchema().getString("BehaviourList"))) {
             log.log(Level.INFO, "Behavior List...");
 
-            loadBehaviors(list, new ArrayList<String>());
+            loadBehaviors(list, new ArrayList<>());
         }
 
         log.log(Level.INFO, "Behavior List");
@@ -66,12 +81,12 @@ public class Configuration {
 
     private void loadBehaviors(final Entry list, final List<String> conditions) {
         for (final Entry node : list.getChildren()) {
-            if (node.getName().equals(schema.getString("Condition"))) {
-                final List<String> newConditions = new ArrayList<String>(conditions);
-                newConditions.add(node.getAttribute(schema.getString("Condition")));
+            if (node.getName().equals(getSchema().getString("Condition"))) {
+                final List<String> newConditions = new ArrayList<>(conditions);
+                newConditions.add(node.getAttribute(getSchema().getString("Condition")));
 
                 loadBehaviors(node, newConditions);
-            } else if (node.getName().equals(schema.getString("Behaviour"))) {
+            } else if (node.getName().equals(getSchema().getString("Behaviour"))) {
                 final BehaviorBuilder behavior = new BehaviorBuilder(this, node, conditions);
                 this.getBehaviorBuilders().put(behavior.getName(), behavior);
             }
@@ -142,7 +157,7 @@ public class Configuration {
                     (int) (Math.random() * (waRight - waLeft)) + waLeft,
                     mascot.getEnvironment().getWorkArea().getTop() - 256)
             );
-            return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL));
+            return buildBehavior(getSchema().getString(UserBehavior.BEHAVIOURNAME_FALL));
         }
 
         double random = Math.random() * totalFrequency;
@@ -169,12 +184,12 @@ public class Configuration {
         return this.behaviorBuilders;
     }
 
-    public java.util.Set<String> getBehaviorNames() {
+    public Set<String> getBehaviorNames() {
         return behaviorBuilders.keySet();
     }
 
-    public java.util.ResourceBundle getSchema() {
-        return schema;
+    public ResourceBundle getSchema() {
+        return schema.getRb();
     }
 
 }
