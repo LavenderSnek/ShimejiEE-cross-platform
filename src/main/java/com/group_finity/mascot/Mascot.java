@@ -5,9 +5,6 @@ import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.image.TranslucentWindow;
-import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
-import com.group_finity.mascot.ui.contextmenu.MenuRep;
-import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascot.ui.debug.DebugUi;
 import com.group_finity.mascot.ui.debug.DebugWindow;
@@ -15,10 +12,8 @@ import com.group_finity.mascot.ui.debug.DebugWindow;
 import javax.sound.sampled.Clip;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,15 +51,16 @@ public class Mascot implements ScriptableMascot {
     private Point anchor = new Point(0, 0);
     private boolean lookRight = false;
 
-    protected DebugUi debugWindow = null;
+    private MascotEventHandler eventHandler = new MascotEventHandler(this);
+    private DebugUi debugUi = null;
 
     public Mascot(final String imageSet) {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
-        getWindow().setLeftMousePressedAction(this::leftMousePressed);
-        getWindow().setLeftMouseReleasedAction(this::leftMouseReleased);
-        getWindow().setPopupMenuSupplier(this::createPopupRep);
+        getWindow().setLeftMousePressedAction(eventHandler::leftMousePressed);
+        getWindow().setLeftMouseReleasedAction(eventHandler::leftMouseReleased);
+        getWindow().setPopupMenuSupplier(eventHandler::createPopupMenuRep);
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
     }
@@ -74,88 +70,20 @@ public class Mascot implements ScriptableMascot {
         return "mascot" + this.id;
     }
 
-    private void leftMousePressed() {
-        // Switch to drag the animation when the mouse is down
-        if (getBehavior() != null) {
-            try {
-                getBehavior().mousePressed(null);
-            } catch (final CantBeAliveException e) {
-                log.log(Level.SEVERE, "Fatal Error", e);
-                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                        + "\n" + e.getMessage()
-                        + "\n" + Tr.tr("SeeLogForDetails"));
-                dispose();
-            }
+    void startDebugUi() {
+        if (debugUi == null) {
+            debugUi = new DebugWindow();
         }
+        // slightly messy
+        debugUi.setAfterDisposeAction(() -> debugUi = null);
+        debugUi.setVisible(true);
     }
 
-    private void leftMouseReleased() {
-        if (getBehavior() != null) {
-            try {
-                getBehavior().mouseReleased(null);
-            } catch (final CantBeAliveException e) {
-                log.log(Level.SEVERE, "Fatal Error", e);
-                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                        + "\n" + e.getMessage()
-                        + "\n" + Tr.tr("SeeLogForDetails"));
-                dispose();
-            }
+    private void stopDebugUi() {
+        if (debugUi != null) {
+            debugUi.setVisible(false);
+            debugUi.dispose();
         }
-    }
-
-    private TopLevelMenuRep createPopupRep() {
-        var config = Main.getInstance().getConfiguration(getImageSet());
-        boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
-
-        List<MenuItemRep> behaviorItems = new ArrayList<>();
-        Behavior behaviour;
-        for (String behaviorName : config.getBehaviorNames()) {
-            String lblName = translateNames ? Tr.trBv(behaviorName) : behaviorName;
-            try {
-                behaviour = config.buildBehavior(behaviorName);
-                if (!behaviour.isHidden()) {
-                    behaviorItems.add(new MenuItemRep(lblName, () -> {
-                        try {
-                            setBehavior(config.buildBehavior(behaviorName));
-                        } catch (Exception err) {
-                            log.log(Level.SEVERE, "Error ({0})");
-                            Main.showError(Tr.tr("CouldNotSetBehaviourErrorMessage")
-                                    + "\n" + err.getMessage()
-                                    + "\n" + Tr.tr("SeeLogForDetails"));
-                        }
-                    }));
-                }
-            } catch (Exception ignored) {
-                behaviorItems.add(new MenuItemRep(lblName, null, false));
-            }
-        }
-
-        TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
-                new MenuItemRep(Tr.tr("CallAnother"), () -> Main.getInstance().createMascot(getImageSet())),
-                MenuItemRep.SEPARATOR,
-                new MenuItemRep(Tr.tr("FollowCursor"), () ->
-                        getManager().setBehaviorAll(config, Main.BEHAVIOR_GATHER, getImageSet())
-                ),
-                new MenuItemRep(Tr.tr("RestoreWindows"), () -> NativeFactory.getInstance().getEnvironment().restoreIE()),
-                new MenuItemRep(Tr.tr("RevealStatistics"), () -> {
-                    if (debugWindow == null) {
-                        debugWindow = new DebugWindow();
-                    }
-                    debugWindow.setVisible(true);
-                }),
-                MenuItemRep.SEPARATOR,
-                new MenuRep(Tr.tr("SetBehaviour"), behaviorItems.toArray(new MenuItemRep[0])),
-                MenuItemRep.SEPARATOR,
-                new MenuItemRep(Tr.tr("Dismiss"), this::dispose),
-                new MenuItemRep(Tr.tr("DismissOthers"), () -> getManager().remainOne(getImageSet())),
-                new MenuItemRep(Tr.tr("DismissAllOthers"), () -> getManager().remainOne(this)),
-                new MenuItemRep(Tr.tr("DismissAll"), () -> System.exit(0))
-        );
-
-        mainMenu.setOnOpenAction(() -> this.setAnimating(false));
-        mainMenu.setOnCloseAction(() -> this.setAnimating(true));
-
-        return mainMenu;
     }
 
     void tick() {
@@ -174,10 +102,8 @@ public class Mascot implements ScriptableMascot {
                 setTime(getTime() + 1);
             }
 
-            if (debugWindow != null) {
-                debugWindow.setBehaviorName(behavior.toString().substring(9, behavior.toString().length() - 1));
-                debugWindow.setMascotAnchor(getAnchor());
-                debugWindow.setMascotEnvironment(getEnvironment());
+            if (debugUi != null) {
+                debugUi.update(this);
             }
         }
     }
@@ -215,14 +141,10 @@ public class Mascot implements ScriptableMascot {
     public void dispose() {
         log.log(Level.INFO, "destroy mascot ({0})", this);
 
-        if (debugWindow != null) {
-            debugWindow.setVisible(false);
-            debugWindow.dispose();
-            debugWindow = null;
-        }
-
+        stopDebugUi();
         setAnimating(false);
         getWindow().dispose();
+
         if (getManager() != null) {
             getManager().remove(Mascot.this);
         }

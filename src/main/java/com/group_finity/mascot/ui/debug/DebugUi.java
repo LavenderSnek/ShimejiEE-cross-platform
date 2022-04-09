@@ -1,16 +1,12 @@
 package com.group_finity.mascot.ui.debug;
 
-import com.group_finity.mascot.environment.MascotEnvironment;
-
-import java.awt.Point;
+import com.group_finity.mascot.Mascot;
 
 public interface DebugUi {
 
-    void setBehaviorName(String behaviorName);
+    void update(Mascot mascot);
 
-    void setMascotAnchor(Point anchor);
-
-    void setMascotEnvironment(MascotEnvironment environment);
+    void setAfterDisposeAction(Runnable action);
 
     void setVisible(boolean visible);
 
