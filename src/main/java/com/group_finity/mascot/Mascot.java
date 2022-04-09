@@ -16,6 +16,8 @@ import javax.sound.sampled.Clip;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -28,39 +30,33 @@ import java.util.logging.Logger;
  * When this short-term action ends, {@link Behavior} picks the next action to be executed,
  * forming the long-term pattern of actions.
  */
-public class Mascot {
+public class Mascot implements ScriptableMascot {
 
     private static final Logger log = Logger.getLogger(Mascot.class.getName());
 
-    private static AtomicInteger lastId = new AtomicInteger();
+    private static final AtomicInteger lastId = new AtomicInteger();
 
     private final int id;
 
-    private String imageSet;
-
     private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();
 
-    private Manager manager = null;
-
-    private Point anchor = new Point(0, 0);
-
-    private MascotImage image = null;
-
-    private boolean lookRight = false;
-
-    private Behavior behavior = null;
-
     private int time = 0;
-
     private boolean animating = true;
 
-    private MascotEnvironment environment = new MascotEnvironment(this);
+    private Manager manager = null;
+    private Behavior behavior = null;
+    private final Collection<String> affordances = new HashSet<>(5);
+
+    private final MascotEnvironment environment = new MascotEnvironment(this);
+
+    private String imageSet;
 
     private String sound = null;
+    private MascotImage image = null;
+    private Point anchor = new Point(0, 0);
+    private boolean lookRight = false;
 
     protected DebugUi debugWindow = null;
-
-    private ArrayList<String> affordances = new ArrayList<>(5);
 
     public Mascot(final String imageSet) {
         this.id = lastId.incrementAndGet();
@@ -111,7 +107,7 @@ public class Mascot {
         var config = Main.getInstance().getConfiguration(getImageSet());
         boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
 
-        List<MenuItemRep> behaviorItems = new ArrayList<MenuItemRep>();
+        List<MenuItemRep> behaviorItems = new ArrayList<>();
         Behavior behaviour;
         for (String behaviorName : config.getBehaviorNames()) {
             String lblName = translateNames ? Tr.trBv(behaviorName) : behaviorName;
@@ -188,25 +184,20 @@ public class Mascot {
 
     public void apply() {
         if (isAnimating()) {
-            // Make sure there's an image
             if (getImage() != null) {
-                // Set the window region
+                // update
                 getWindow().setBounds(getBounds());
-
-                // Set Images
                 getWindow().setImage(getImage().getImage());
 
-                // Display
                 if (!getWindow().isVisible()) {
                     getWindow().setVisible(true);
                 }
 
-                // Redraw
+                // repaint
                 getWindow().updateImage();
-            } else {
-                if (getWindow().isVisible()) {
-                    getWindow().setVisible(false);
-                }
+
+            } else if (getWindow().isVisible()) {
+                getWindow().setVisible(false);
             }
 
             // play sound if requested
@@ -220,6 +211,7 @@ public class Mascot {
         }
     }
 
+    @Override
     public void dispose() {
         log.log(Level.INFO, "destroy mascot ({0})", this);
 
@@ -236,6 +228,9 @@ public class Mascot {
         }
     }
 
+    /**
+     * Calculates the new bounds based on the current state of the mascot.
+     */
     public Rectangle getBounds() {
         if (getImage() != null) {
             final int top = getAnchor().y - getImage().getCenter().y;
@@ -248,6 +243,30 @@ public class Mascot {
         }
     }
 
+    /**
+     * The native window that displays the mascot.
+     */
+    private TranslucentWindow getWindow() {
+        return this.window;
+    }
+
+    @Override
+    public int getTime() {
+        return this.time;
+    }
+
+    private void setTime(int time) {
+        this.time = time;
+    }
+
+    boolean isAnimating() {
+        return this.animating;
+    }
+
+    void setAnimating(boolean animating) {
+        this.animating = animating;
+    }
+
     public void setBehavior(final Behavior behavior) throws CantBeAliveException {
         this.behavior = behavior;
         this.behavior.init(this);
@@ -257,6 +276,7 @@ public class Mascot {
         return this.behavior;
     }
 
+    @Override
     public Manager getManager() {
         return this.manager;
     }
@@ -265,125 +285,23 @@ public class Mascot {
         this.manager = manager;
     }
 
-    /**
-     * The number of mascots of the same image set being controlled by
-     * the same manager
-     * */
-    public int getCount() {
-        return getManager().getCount(imageSet);
+    @Override
+    public Collection<String> getAffordances() {
+        return affordances;
     }
 
-    /**
-     * The total number of mascots being controlled by the same manager
-     * */
-    public int getTotalCount() {
-        return getManager().getCount();
-    }
-
-    /**
-     * The window that displays the mascot.
-     * <p>
-     * do not to use this in actions/scripts. AWT/Swing breaks in many creative ways,
-     */
-    private TranslucentWindow getWindow() {
-        return this.window;
-    }
-
-    /**
-     * Represents the screen environment of the mascot. Includes thing like screen size and interactive windows.
-     * */
+    @Override
     public MascotEnvironment getEnvironment() {
         return environment;
     }
 
-    public ArrayList<String> getAffordances() {
-        return affordances;
-    }
-
-    /**
-     * The location of the mascot on the screen. 0,0 is top left.
-     * <p>
-     * For xml scripting: The mascot itself can be moved by using the methods in {@link Point} to manipulate location.
-     * <p>
-     * Where the point is within the mascot is the determined by the {@code ImageAnchor} property of the current image.
-     * This image anchor is generally placed where the mascot touches the environment.
-     * For example the default standing frame has it placed at bottom middle (64,128) where the feet are.
-     */
-    public Point getAnchor() {
-        return this.anchor;
-    }
-
-    /**
-     * Can't be used from the xml because it's not possible to create a point object from the xml.
-     * <p>
-     * To move the mascot, use {@link #getAnchor()} along with the methods in {@link Point} to manipulate location.
-     * */
-    public void setAnchor(Point anchor) {
-        this.anchor = anchor;
-    }
-
-    public MascotImage getImage() {
-        return this.image;
-    }
-
-    public void setImage(final MascotImage image) {
-        this.image = image;
-    }
-
-    /**
-     * Whether the mascot is looking right or left.
-     * <p>
-     * Note that the default image is treated as facing left.
-     */
-    public boolean isLookRight() {
-        return this.lookRight;
-    }
-
-    /**
-     * Sets the direction the mascot is facing.
-     * <p>
-     * When this is set to true the {@code ImageRight} image will be used if present.
-     * If not then the flipped version of the default image is used
-     *
-     * @see com.group_finity.mascot.action.Look
-     * */
-    public void setLookRight(final boolean lookRight) {
-        this.lookRight = lookRight;
-    }
-
-    /**
-     * Counter that increases with each frame.
-     * */
-    public int getTime() {
-        return this.time;
-    }
-
-    private void setTime(final int time) {
-        this.time = time;
-    }
-
-    private boolean isAnimating() {
-        return this.animating;
-    }
-
-    private void setAnimating(final boolean animating) {
-        this.animating = animating;
-    }
-
-    /**
-     * The name of the image set this mascot belongs to
-     * */
+    @Override
     public String getImageSet() {
         return imageSet;
     }
 
-    /**
-     * Do not use directly in scripts as it can have unpredictable results when sharing imageSets
-     * <p>
-     * There is no guarantee that the new imageSet is loaded even when it is present. To covert to a different
-     * imageSet properly, use the {@link com.group_finity.mascot.action.Transform Transform} action.
-     * */
-    public void setImageSet(final String set) {
+    @Override
+    public void setImageSet(String set) {
         imageSet = set;
     }
 
@@ -391,8 +309,36 @@ public class Mascot {
         return sound;
     }
 
-    public void setSound(final String name) {
+    public void setSound(String name) {
         sound = name;
+    }
+
+    public MascotImage getImage() {
+        return this.image;
+    }
+
+    public void setImage(MascotImage image) {
+        this.image = image;
+    }
+
+    @Override
+    public Point getAnchor() {
+        return this.anchor;
+    }
+
+    @Override
+    public void setAnchor(Point anchor) {
+        this.anchor = anchor;
+    }
+
+    @Override
+    public boolean isLookRight() {
+        return this.lookRight;
+    }
+
+    @Override
+    public void setLookRight(boolean lookRight) {
+        this.lookRight = lookRight;
     }
 
 }
