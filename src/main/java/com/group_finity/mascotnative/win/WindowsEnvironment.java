@@ -26,7 +26,7 @@ class WindowsEnvironment extends Environment {
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
     }
 
-    private static HashMap<Pointer, Boolean> ieCache = new LinkedHashMap<Pointer, Boolean>();
+    private static final HashMap<Pointer, Boolean> ieCache = new LinkedHashMap<>();
 
     public static Area workArea = new Area();
     public static Area activeIE = new Area();
@@ -58,32 +58,34 @@ class WindowsEnvironment extends Environment {
     }
 
     private static IEResult isViableIE(Pointer ie) {
-        if (User32.INSTANCE.IsWindowVisible(ie) != 0) {
-            int flags = User32.INSTANCE.GetWindowLongW(ie, User32.GWL_STYLE);
-            if ((flags & User32.WS_MAXIMIZE) != 0) {
-                return IEResult.INVALID;
-            }
-
-            // metro apps can be closed or minimised and still be considered "visible" by User32
-            // have to consider the new cloaked variable instead
-            LongByReference flagsRef = new LongByReference();
-            NativeLong result = Dwmapi.INSTANCE.DwmGetWindowAttribute(ie, Dwmapi.DWMWA_CLOAKED, flagsRef, 8);
-            // unsupported on 7 so skip the check
-            if (result.longValue() != 0x80070057 && (result.longValue() != 0 || flagsRef.getValue() != 0)) {
-                return IEResult.INVALID;
-            }
-
-            if (isIE(ie) && (User32.INSTANCE.IsIconic(ie) == 0)) {
-                Rectangle ieRect = getIERect(ie);
-                if (ieRect.intersects(getScreenRect())) {
-                    return IEResult.IE;
-                } else {
-                    return IEResult.IE_OUT_OF_BOUNDS;
-                }
-            }
+        if (User32.INSTANCE.IsWindowVisible(ie) == 0) {
+            return IEResult.NOT_IE;
         }
 
-        return IEResult.NOT_IE;
+        int flags = User32.INSTANCE.GetWindowLongW(ie, User32.GWL_STYLE);
+        if ((flags & User32.WS_MAXIMIZE) != 0) {
+            return IEResult.INVALID;
+        }
+
+        // metro apps can be closed or minimised and still be considered "visible" by User32
+        // have to consider the new cloaked variable instead
+        LongByReference flagsRef = new LongByReference();
+        NativeLong result = Dwmapi.INSTANCE.DwmGetWindowAttribute(ie, Dwmapi.DWMWA_CLOAKED, flagsRef, 8);
+        // unsupported on 7 so skip the check
+        if (result.longValue() != 0x80070057 && (result.longValue() != 0 || flagsRef.getValue() != 0)) {
+            return IEResult.INVALID;
+        }
+
+        if (!isIE(ie) || (User32.INSTANCE.IsIconic(ie) != 0)) {
+            return IEResult.NOT_IE;
+        }
+
+        Rectangle ieRect = getIERect(ie);
+        if (!ieRect.intersects(getScreenRect())) {
+            return IEResult.IE_OUT_OF_BOUNDS;
+        }
+
+        return IEResult.IE;
     }
 
     private static Pointer findActiveIE() {
