@@ -1,8 +1,9 @@
 package com.group_finity.mascotnative.shared;
 
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JWindow;
@@ -10,8 +11,6 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * Base class for Swing based shimeji rendering
@@ -21,9 +20,7 @@ public abstract class BaseTranslucentSwingWindow<T extends NativeImage> extends 
 
     protected static final Color CLEAR = new Color(0, 0, 0, 0);
 
-    private Supplier<TopLevelMenuRep> popupMenuSupplier = null;
-    protected Runnable leftMousePressedAction = () -> {};
-    protected Runnable leftMouseReleasedAction = () -> {};
+    private TranslucentWindowEventHandler eventHandler = TranslucentWindowEventHandler.DEFAULT;
 
     private T image;
     private boolean imageChanged = false;
@@ -37,18 +34,12 @@ public abstract class BaseTranslucentSwingWindow<T extends NativeImage> extends 
     protected abstract void setUp();
 
     @Override
-    public void setLeftMousePressedAction(Runnable leftMousePressedAction) {
-        this.leftMousePressedAction = Objects.requireNonNullElse(leftMousePressedAction, ()->{});
+    public void setEventHandler(TranslucentWindowEventHandler eventHandler) {
+        this.eventHandler = eventHandler;
     }
 
-    @Override
-    public void setLeftMouseReleasedAction(Runnable leftMouseReleasedAction) {
-        this.leftMouseReleasedAction = Objects.requireNonNullElse(leftMouseReleasedAction, ()->{});
-    }
-
-    @Override
-    public void setPopupMenuSupplier(Supplier<TopLevelMenuRep> popupMenuSupplier) {
-        this.popupMenuSupplier = popupMenuSupplier;
+    protected TranslucentWindowEventHandler getEventHandler() {
+        return eventHandler;
     }
 
     protected void addMouseListeners() {
@@ -57,26 +48,25 @@ public abstract class BaseTranslucentSwingWindow<T extends NativeImage> extends 
             public void mousePressed(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     showPopupMenu(e);
-                }
-                else if (SwingUtilities.isLeftMouseButton(e)) {
-                    leftMousePressedAction.run();
+                } else if (SwingUtilities.isLeftMouseButton(e)) {
+                    getEventHandler().onDragBegin();
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    leftMouseReleasedAction.run();
+                    getEventHandler().onDragEnd();
                 }
             }
         });
     }
 
     protected void showPopupMenu(MouseEvent e) {
-        if (popupMenuSupplier == null) {
+        TopLevelMenuRep menuRep = getEventHandler().getContextMenuRep();
+        if (menuRep == null) {
             return;
         }
-        TopLevelMenuRep menuRep = popupMenuSupplier.get();
         JPopupMenu popupMenu = SwingPopupUtil.createJPopupmenuFrom(menuRep);
         SwingUtilities.invokeLater(() -> popupMenu.show(this, e.getX(), e.getY()));
     }

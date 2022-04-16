@@ -1,13 +1,12 @@
 package com.group_finity.mascotnative.macjni;
 
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 import com.group_finity.mascotnative.macjni.menu.MacJniPopupUtil;
 
 import java.awt.Rectangle;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 // might need to make a base jni translucent window eventually for x11
 
@@ -33,27 +32,15 @@ class MacJniShimejiWindow implements TranslucentWindow {
     private Rectangle lastSetBounds = new Rectangle();
     private boolean lastSetVisibility = false;
 
-    private Runnable leftMousePressedAction = () -> {};
-    private Runnable leftMouseReleasedAction = () -> {};
-    private Supplier<TopLevelMenuRep> popupMenuSupplier = null;
+    private TranslucentWindowEventHandler eventHandler = TranslucentWindowEventHandler.DEFAULT;
 
     MacJniShimejiWindow() {
         this.ptr = createNativeShimejiWindow();
     }
 
     @Override
-    public void setLeftMousePressedAction(Runnable leftMousePressedAction) {
-        this.leftMousePressedAction = Objects.requireNonNullElse(leftMousePressedAction, () -> {});
-    }
-
-    @Override
-    public void setLeftMouseReleasedAction(Runnable leftMouseReleasedAction) {
-        this.leftMouseReleasedAction = Objects.requireNonNullElse(leftMouseReleasedAction, () -> {});
-    }
-
-    @Override
-    public void setPopupMenuSupplier(Supplier<TopLevelMenuRep> popupMenuSupplier) {
-        this.popupMenuSupplier = popupMenuSupplier;
+    public void setEventHandler(TranslucentWindowEventHandler eventHandler) {
+        this.eventHandler = eventHandler;
     }
 
     @Override
@@ -99,16 +86,17 @@ class MacJniShimejiWindow implements TranslucentWindow {
     //--- native callbacks---//
 
     private void _onLeftMouseDown() {
-        leftMousePressedAction.run();
+        eventHandler.onDragBegin();
     }
 
     private void _onLeftMouseUp() {
-        leftMouseReleasedAction.run();
+        eventHandler.onDragEnd();
     }
 
     private long _getNSMenuPtrForPopup() {
-        if (popupMenuSupplier != null) {
-            return MacJniPopupUtil.createNSMenuFor(popupMenuSupplier.get());
+        TopLevelMenuRep topLevelMenuRep = eventHandler.getContextMenuRep();
+        if (topLevelMenuRep != null) {
+            return MacJniPopupUtil.createNSMenuFor(topLevelMenuRep);
         }
         return 0;
     }

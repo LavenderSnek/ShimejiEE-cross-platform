@@ -58,9 +58,7 @@ public class Mascot implements ScriptableMascot {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
-        getWindow().setLeftMousePressedAction(eventHandler::leftMousePressed);
-        getWindow().setLeftMouseReleasedAction(eventHandler::leftMouseReleased);
-        getWindow().setPopupMenuSupplier(eventHandler::createPopupMenuRep);
+        getWindow().setEventHandler(eventHandler);
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
     }

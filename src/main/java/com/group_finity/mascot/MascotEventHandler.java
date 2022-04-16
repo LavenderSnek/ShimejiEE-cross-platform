@@ -5,11 +5,12 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
 import com.group_finity.mascot.ui.contextmenu.MenuRep;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class MascotEventHandler {
+class MascotEventHandler implements TranslucentWindowEventHandler {
 
     private final Mascot mascot;
 
@@ -17,33 +18,36 @@ class MascotEventHandler {
         this.mascot = mascot;
     }
 
-    public void leftMousePressed() {
+    @Override
+    public void onDragBegin() {
         if (mascot.getBehavior() != null) {
             try {
                 mascot.getBehavior().mousePressed(null);
             } catch (final CantBeAliveException e) {
                 Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                        + "\n" + e.getMessage()
-                        + "\n" + Tr.tr("SeeLogForDetails"));
+                               + "\n" + e.getMessage()
+                               + "\n" + Tr.tr("SeeLogForDetails"));
                 mascot.dispose();
             }
         }
     }
 
-    public void leftMouseReleased() {
+    @Override
+    public void onDragEnd() {
         if (mascot.getBehavior() != null) {
             try {
                 mascot.getBehavior().mouseReleased(null);
             } catch (final CantBeAliveException e) {
                 Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                        + "\n" + e.getMessage()
-                        + "\n" + Tr.tr("SeeLogForDetails"));
+                               + "\n" + e.getMessage()
+                               + "\n" + Tr.tr("SeeLogForDetails"));
                 mascot.dispose();
             }
         }
     }
 
-    public TopLevelMenuRep createPopupMenuRep() {
+    @Override
+    public TopLevelMenuRep getContextMenuRep() {
         TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
                 new MenuItemRep(Tr.tr("CallAnother"), () -> Main.getInstance().createMascot(mascot.getImageSet())),
                 MenuItemRep.SEPARATOR,
@@ -84,8 +88,8 @@ class MascotEventHandler {
                             mascot.setBehavior(config.buildBehavior(behaviorName));
                         } catch (Exception err) {
                             Main.showError(Tr.tr("CouldNotSetBehaviourErrorMessage")
-                                    + "\n" + err.getMessage()
-                                    + "\n" + Tr.tr("SeeLogForDetails"));
+                                           + "\n" + err.getMessage()
+                                           + "\n" + Tr.tr("SeeLogForDetails"));
                         }
                     }));
                 }
