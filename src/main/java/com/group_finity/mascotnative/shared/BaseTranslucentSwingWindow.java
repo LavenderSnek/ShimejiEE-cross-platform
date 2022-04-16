@@ -1,7 +1,7 @@
 package com.group_finity.mascotnative.shared;
 
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 
 import javax.swing.JPopupMenu;

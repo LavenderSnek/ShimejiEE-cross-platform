@@ -2,7 +2,7 @@ package com.group_finity.mascot;
 
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.sun.jna.Platform;
 
 import java.awt.image.BufferedImage;

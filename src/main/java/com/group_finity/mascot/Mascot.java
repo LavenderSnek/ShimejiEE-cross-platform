@@ -4,7 +4,7 @@ import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
-import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascot.ui.debug.DebugUi;
 import com.group_finity.mascot.ui.debug.DebugWindow;

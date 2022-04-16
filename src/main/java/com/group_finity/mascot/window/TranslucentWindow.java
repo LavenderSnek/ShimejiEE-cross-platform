@@ -1,5 +1,6 @@
-package com.group_finity.mascot.image;
+package com.group_finity.mascot.window;
 
+import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 
 import java.awt.Rectangle;

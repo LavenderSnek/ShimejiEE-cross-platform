@@ -1,5 +1,7 @@
 package com.group_finity.mascot.image;
 
+import com.group_finity.mascot.window.TranslucentWindow;
+
 import java.awt.Dimension;
 import java.awt.Point;
 

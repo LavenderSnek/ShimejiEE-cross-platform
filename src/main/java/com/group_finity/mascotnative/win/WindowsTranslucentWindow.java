@@ -1,6 +1,6 @@
 package com.group_finity.mascotnative.win;
 
-import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascotnative.shared.BaseTranslucentSwingWindow;
 import com.group_finity.mascotnative.win.jna.*;
 import com.sun.jna.Native;

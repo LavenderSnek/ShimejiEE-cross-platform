@@ -4,7 +4,7 @@ import com.group_finity.mascot.Main;
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascot.image.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
