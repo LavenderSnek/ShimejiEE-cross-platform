@@ -150,13 +150,16 @@ public class Configuration {
         }
 
         if (totalFrequency == 0) {
-            int waRight = mascot.getEnvironment().getWorkArea().getRight();
-            int waLeft = mascot.getEnvironment().getWorkArea().getLeft();
+            var s = mascot.getEnvironment().getScreen();
 
-            mascot.setAnchor(new Point(
-                    (int) (Math.random() * (waRight - waLeft)) + waLeft,
-                    mascot.getEnvironment().getWorkArea().getTop() - 256)
-            );
+            int screenRight = s.getRight() + (int) (s.getWidth() * 0.1);
+            int screenLeft = s.getLeft() - (int) (s.getWidth() * 0.1);
+
+            int spawnX = (int) (Math.random() * (screenRight - screenLeft)) + screenLeft;
+            int spawnY = s.getTop() - (mascot.getBounds().height + 128);
+
+            mascot.setAnchor(new Point(spawnX, spawnY));
+
             return buildBehavior(getSchema().getString(UserBehavior.BEHAVIOURNAME_FALL));
         }
 

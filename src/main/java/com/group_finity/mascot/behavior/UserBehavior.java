@@ -1,6 +1,5 @@
 package com.group_finity.mascot.behavior;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
@@ -36,7 +35,7 @@ public class UserBehavior implements Behavior {
 
     private Mascot mascot;
 
-    private boolean hidden;
+    private final boolean hidden;
 
     public UserBehavior(final String name, final Action action, final Configuration configuration, boolean hidden) {
         this.name = name;
@@ -142,13 +141,15 @@ public class UserBehavior implements Behavior {
 
                     log.log(Level.INFO, "Out of the screen bounds({0},{1})", new Object[]{getMascot(), this});
 
-                    int waRight = getEnvironment().getWorkArea().getRight();
-                    int waLeft = getEnvironment().getWorkArea().getLeft();
+                    var s = getEnvironment().getScreen();
 
-                    getMascot().setAnchor(new Point(
-                            (int) (Math.random() * (waRight - waLeft)) + waLeft,
-                            getEnvironment().getWorkArea().getTop() - 256)
-                    );
+                    int screenRight = s.getRight() + (int) (s.getWidth() * 0.1);
+                    int screenLeft = s.getLeft() - (int) (s.getWidth() * 0.1);
+
+                    int spawnX = (int) (Math.random() * (screenRight - screenLeft)) + screenLeft;
+                    int spawnY = s.getTop() - (getMascot().getBounds().height + 128);
+
+                    getMascot().setAnchor(new Point(spawnX, spawnY));
 
                     try {
                         getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_FALL)));
