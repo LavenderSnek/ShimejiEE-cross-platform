@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * The {@link #tick()} method gets the latest environmental information.
  * It then moves all the mascots
  */
-public class Manager {
+public class Manager implements ScriptableManager {
 
     private static final Logger log = Logger.getLogger(Manager.class.getName());
 
@@ -120,7 +120,7 @@ public class Manager {
 
     /**
      * Advance the mascot one frame.
-     * */
+     */
     private void tick() {
 
         // Update the environmental information
@@ -264,28 +264,14 @@ public class Manager {
     }
 
 
-    /**
-     * The total number of mascots that are being controlled by this manager
-     * */
-    public int getCount() {
-        return getCount(null);
-    }
-
-    /**
-     * The number of mascots from a certain imageSet that are being controlled by this manager
-     * */
+    @Override
     public int getCount(String imageSet) {
-
         synchronized (getMascots()) {
-
             if (imageSet == null) {
                 return getMascots().size();
             } else {
                 int count = 0;
-
-                for (int index = 0; index < getMascots().size(); index++) {
-
-                    Mascot m = getMascots().get(index);
+                for (Mascot m : getMascots()) {
                     if (m.getImageSet().equals(imageSet)) {
                         count++;
                     }
@@ -295,39 +281,28 @@ public class Manager {
         }
     }
 
-    /**
-     * Returns another Mascot with the given affordance.
-     *
-     * @param affordance the affordance being searched for
-     * @return A reference to a mascot with the required affordance, or null if a match is not found
-     */
+    @Override
     public WeakReference<Mascot> getMascotWithAffordance(String affordance) {
         synchronized (this.getMascots()) {
             for (final Mascot mascot : this.getMascots()) {
-
                 if (mascot.getAffordances().contains(affordance)) {
-                    return new WeakReference<Mascot>(mascot);
+                    return new WeakReference<>(mascot);
                 }
-
             }
         }
-
         return null;
     }
 
+    @Override
     public boolean hasOverlappingMascotsAtPoint(Point anchor) {
-
         int count = 0;
-
         synchronized (this.getMascots()) {
-
             for (final Mascot mascot : this.getMascots()) {
-
                 if (mascot.getAnchor().equals(anchor)) {
                     count++;
-                }
-                if (count > 1) {
-                    return true;
+                    if (count > 1) {
+                        return true;
+                    }
                 }
             }
         }
@@ -349,9 +324,9 @@ public class Manager {
      * If the tray icon creation fails, the process will remain forever if the program
      * is not terminated when the mascot disappears.
      */
-	public boolean isExitOnLastRemoved() {
-		return exitOnLastRemoved;
-	}
+    public boolean isExitOnLastRemoved() {
+        return exitOnLastRemoved;
+    }
 
     public void setExitOnLastRemoved(boolean exitOnLastRemoved) {
         this.exitOnLastRemoved = exitOnLastRemoved;

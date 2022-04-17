@@ -15,7 +15,7 @@ public interface NativeEnvironment {
      * This method is called at very irregular intervals and should not
      * have side effects.
      *
-     * @return The ares of the work area the specified point,
+     * @return The work area at the specified point,
      * If two areas are found, the first one found is returned.
      * The delta values of these areas are not reliable and should
      * always be treated as 0. They may also be immutable and changes

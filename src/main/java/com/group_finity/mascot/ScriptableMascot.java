@@ -3,6 +3,7 @@ package com.group_finity.mascot;
 import com.group_finity.mascot.environment.MascotEnvironment;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.Collection;
 
 /**
@@ -21,6 +22,11 @@ public interface ScriptableMascot {
     void dispose();
 
     /**
+     * Calculates the new bounds based on the current state of the mascot.
+     */
+    Rectangle getBounds();
+
+    /**
      * Number of frames since the mascot's creation.
      */
     int getTime();
@@ -31,7 +37,7 @@ public interface ScriptableMascot {
      * There are a very limited number of reasons to directly access the manager and its API is relatively unstable.
      * To get the amount of mascots, use {@link #getCount()} and {@link #getTotalCount()} instead.
      */
-    Manager getManager();
+    ScriptableManager getManager();
 
     /**
      * The number of mascots of the same image set being controlled by

@@ -148,9 +148,7 @@ public class Mascot implements ScriptableMascot {
         }
     }
 
-    /**
-     * Calculates the new bounds based on the current state of the mascot.
-     */
+    @Override
     public Rectangle getBounds() {
         if (getImage() != null) {
             final int top = getAnchor().y - getImage().getCenter().y;
