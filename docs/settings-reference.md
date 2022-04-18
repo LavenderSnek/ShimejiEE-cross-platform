@@ -22,7 +22,6 @@ Properties set from the command line take priority over those read from the sett
 | `Transformation`           | Allow shimeji to transform between image sets                   | `true`  |
 | `Throwing`                 | Allow shimeji to move/throw windows                             | `true`  |
 | `Sounds`                   | Allow shimeji to play sound                                     | `true`  |
-| `Multiscreen`              | Whether shimeji can move between screens                        | `true`  |
 | `AlwaysShowShimejiChooser` | Show the image set chooser on startup regardless of selections  | `false` |
 | `TranslateBehaviorNames`   | Translate behaviour names to more readable forms in menus       | `false` |
 

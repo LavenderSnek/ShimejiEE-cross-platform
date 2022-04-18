@@ -4,7 +4,7 @@ ShimejiEE Cross Platform
 
 https://github.com/LavenderSnek/ShimejiEE-cross-platform
 
-Go to the releases section for the latest release.
+The releases aren't updated frequently, so build it from source for the latest release.
 
 This project is a fork of [Kilkakon's shimeji version](http://kilkakon.com/shimeji) and incorporates the work from [nonowarn's shimeji4mac](https://github.com/nonowarn/shimeji4mac)
 
