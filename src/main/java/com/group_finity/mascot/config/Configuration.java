@@ -27,7 +27,6 @@ public class Configuration {
 
         private final ResourceBundle resourceBundle;
 
-
         Schema(Locale locale) {
             this.resourceBundle = ResourceBundle.getBundle("schema", locale);
         }
@@ -43,6 +42,7 @@ public class Configuration {
 
     private Schema schema = Schema.EN;
 
+    private final Map<String, String> constants = new LinkedHashMap<>(2);
     private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<>();
     private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<>();
 
@@ -54,6 +54,12 @@ public class Configuration {
                 schema = lang;
                 break;
             }
+        }
+
+        for (Entry constant : configurationNode.selectChildren(getSchema().getString("Constant"))) {
+            String name = constant.getAttribute(getSchema().getString("Name"));
+            String value = constant.getAttribute(getSchema().getString("Value"));
+            getConstants().put(name, value);
         }
 
         for (final Entry list : configurationNode.selectChildren(getSchema().getString("ActionList"))) {
@@ -95,7 +101,7 @@ public class Configuration {
 
     public Action buildAction(final String name, final Map<String, String> params) throws ActionInstantiationException {
 
-        final ActionBuilder factory = this.actionBuilders.get(name);
+        final ActionBuilder factory = getActionBuilders().get(name);
         if (factory == null) {
             throw new ActionInstantiationException(Tr.tr("NoCorrespondingActionFoundErrorMessage") + ": " + name);
         }
@@ -116,6 +122,7 @@ public class Configuration {
     public Behavior buildBehavior(final String previousName, final Mascot mascot) throws BehaviorInstantiationException {
 
         final VariableMap context = new VariableMap();
+        context.putAll(getConstants()); // put first so they can't override mascot
         context.put("mascot", mascot);
 
         final List<BehaviorBuilder> candidates = new ArrayList<>();
@@ -177,6 +184,10 @@ public class Configuration {
 
     public Behavior buildBehavior(final String name) throws BehaviorInstantiationException {
         return this.getBehaviorBuilders().get(name).buildBehavior();
+    }
+
+    private Map<String, String> getConstants() {
+        return constants;
     }
 
     Map<String, ActionBuilder> getActionBuilders() {
