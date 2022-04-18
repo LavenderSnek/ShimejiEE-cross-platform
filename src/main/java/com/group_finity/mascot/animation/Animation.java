@@ -40,7 +40,7 @@ public class Animation {
         time %= getDuration();
 
         for (final Pose pose : getPoses()) {
-            time -= pose.getDuration();
+            time -= pose.duration();
             if (time < 0) {
                 return pose;
             }
@@ -52,7 +52,7 @@ public class Animation {
     public int getDuration() {
         int duration = 0;
         for (final Pose pose : getPoses()) {
-            duration += pose.getDuration();
+            duration += pose.duration();
         }
 
         return duration;
