@@ -4,7 +4,7 @@ import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.image.ImagePairs;
 import com.group_finity.mascot.sound.Sounds;
-import com.group_finity.mascot.ui.imagesets.ImageSetUtils;
+import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 
 import javax.imageio.ImageIO;
@@ -181,7 +181,7 @@ public final class Main {
         Set<String> selections = getActiveImageSets();
 
         if (selections.isEmpty() || shouldShowChooserAtStart()) {
-            ImageSetUtils.askUserForSelection(c -> {
+            ImageSetChooserUtils.askUserForSelection(c -> {
                 setActiveImageSets(c);
                 getManager().setExitOnLastRemoved(isExit);
             });
@@ -661,7 +661,7 @@ public final class Main {
 
         //image set chooser
         final MenuItem chooseShimeji = new MenuItem(Tr.tr("ChooseShimeji"));
-        chooseShimeji.addActionListener(e -> ImageSetUtils.askUserForSelection(this::setActiveImageSets));
+        chooseShimeji.addActionListener(e -> ImageSetChooserUtils.askUserForSelection(this::setActiveImageSets));
 
         //reload button
         final MenuItem reloadMascot = new MenuItem(Tr.tr("ReloadMascots"));

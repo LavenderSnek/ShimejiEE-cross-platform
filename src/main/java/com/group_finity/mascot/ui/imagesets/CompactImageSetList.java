@@ -1,13 +1,13 @@
 package com.group_finity.mascot.ui.imagesets;
 
+import com.group_finity.mascot.ui.Theme;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.SystemColor;
 
 public class CompactImageSetList extends JList<CompactImageSetPreview> {
 
@@ -20,21 +20,20 @@ public class CompactImageSetList extends JList<CompactImageSetPreview> {
     }
 
     private static class ImageSetRenderer implements ListCellRenderer<CompactImageSetPreview> {
-
         @Override
         public Component getListCellRendererComponent(JList<? extends CompactImageSetPreview> list, CompactImageSetPreview value,
                                                       int index, boolean isSelected, boolean cellHasFocus) {
             var component = value.getPanel();
 
-            if (index % 2 == 0) {
-                component.setBackground(new Color(244, 245, 245));
-            } else {
-                component.setBackground(Color.white);
-            }
-
             if (isSelected) {
-                component.setBackground(SystemColor.textHighlight);
-                component.setBorder(BorderFactory.createLineBorder(SystemColor.textHighlight.darker()));
+                component.setBackground(Theme.SELECTION_HIGHLIGHT);
+                component.setBorder(BorderFactory.createLineBorder(Theme.SELECTION_BORDER));
+            } else if (index % 2 == 0) {
+                component.setBackground(Theme.LIST_COLOR_DARK);
+                component.setBorder(null);
+            } else {
+                component.setBackground(Theme.LIST_COLOR_LIGHT);
+                component.setBorder(null);
             }
 
             return component;

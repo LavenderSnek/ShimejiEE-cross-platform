@@ -2,6 +2,7 @@ package com.group_finity.mascot.ui.imagesets;
 
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Tr;
+import com.group_finity.mascot.ui.Theme;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -12,26 +13,33 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
-import java.awt.Color;
+import javax.swing.WindowConstants;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class CompactChooser extends JFrame {
+class CompactChooser {
+
+    private final JFrame frame = new JFrame();
+    {
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
 
     private JList<CompactImageSetPreview> imageSetJlist;
 
-    Consumer<Collection<String>> onSelection;
+    private final Consumer<Collection<String>> onSelection;
 
-    public CompactChooser(Consumer<Collection<String>> onSelection) {
+    CompactChooser(Consumer<Collection<String>> onSelection) {
         this.onSelection = onSelection;
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     /**
@@ -43,14 +51,14 @@ public class CompactChooser extends JFrame {
             addDataToUI();
 
             //Set up the content pane.
-            addContentToPane(getContentPane());
+            addContentToPane(frame.getContentPane());
 
-            this.setResizable(false);
+            frame.setResizable(true);
 
-            pack();
-            setLocationRelativeTo(null);
-            setVisible(true);
-            toFront();
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+            frame.toFront();
         });
     }
 
@@ -69,7 +77,7 @@ public class CompactChooser extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
             Main.showError("Unable to load imageSets");
-            this.dispose();
+            frame.dispose();
             return;
         }
 
@@ -115,7 +123,7 @@ public class CompactChooser extends JFrame {
         constraints.gridy = 0;
         constraints.insets = new Insets(9, 9, 9, 9);
 
-        scPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        scPane.setBorder(BorderFactory.createLineBorder(Theme.PANEL_BORDER));
         scPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scPane.setPreferredSize(new Dimension(400, 400));
 
@@ -123,15 +131,15 @@ public class CompactChooser extends JFrame {
 
         //--------buttons--------//
         var buttonCancel = new JButton(Tr.tr("Cancel"));
-        buttonCancel.addActionListener(e -> this.dispose());
+        buttonCancel.addActionListener(e -> frame.dispose());
 
         var buttonOK = new JButton(Tr.tr("UseSelected"));
         buttonOK.addActionListener(e -> {
-            this.dispose();
+            frame.dispose();
             onSelection.accept(getSelections());
         });
 
-        this.getRootPane().setDefaultButton(buttonOK);
+        frame.getRootPane().setDefaultButton(buttonOK);
 
         constraints = new GridBagConstraints();//reset
         var btnsPanel = new JPanel(gbl);

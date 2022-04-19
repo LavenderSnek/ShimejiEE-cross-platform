@@ -20,7 +20,6 @@ import java.nio.file.Path;
 public class CompactImageSetPreview {
 
     private JPanel panel;
-    private final JLabel label = new JLabel();
     private final String name;
 
     private static final int nameTrim = 40;
@@ -45,7 +44,7 @@ public class CompactImageSetPreview {
         return panel;
     }
 
-    private JPanel createJpanel(String imageSet) {
+    private static JPanel createJpanel(String imageSet) {
         var component = new JPanel();
         component.setPreferredSize(new Dimension(CompactImageSetPreview.PANEL_W, CompactImageSetPreview.PANEL_H));
         component.setLayout(new BoxLayout(component, BoxLayout.LINE_AXIS));
@@ -75,7 +74,7 @@ public class CompactImageSetPreview {
                 imageSet.length() > CompactImageSetPreview.nameTrim ?
                         imageSet.substring(0, CompactImageSetPreview.nameTrim - 3) + "..." : imageSet;
 
-        label.setText(trimmedImageSet);
+        JLabel label = new JLabel(trimmedImageSet);
         component.add(label);
 
         return component;

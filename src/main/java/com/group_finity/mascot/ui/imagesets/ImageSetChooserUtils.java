@@ -3,7 +3,7 @@ package com.group_finity.mascot.ui.imagesets;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-public final class ImageSetUtils {
+public final class ImageSetChooserUtils {
 
     /**
      * Displays UI for choosing imageSets.
