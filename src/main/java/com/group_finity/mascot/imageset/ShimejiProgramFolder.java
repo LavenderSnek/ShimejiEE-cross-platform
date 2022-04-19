@@ -60,18 +60,26 @@ public record ShimejiProgramFolder(
      * Creates a {@link ShimejiProgramFolder} object from an existing shimeji installation.
      * It does not guarantee that any of the paths will actually exist.
      */
-    public static ShimejiProgramFolder fromFolder(Path programFolder) throws IOException {
+    public static ShimejiProgramFolder fromFolder(Path programFolder) {
         final Path imgPath = programFolder.resolve(DEFAULT_IMG_DIR);
         final Path confPath = programFolder.resolve(DEFAULT_CONF_DIR);
         final Path soundPath = programFolder.resolve(DEFAULT_SOUND_DIR);
 
+
+        boolean isMono = false;
+
         // this isn't a surefire way to check if it's a mono imageSet, but it'll work most of the time
-        boolean isMono = listMatchingFilesIn(imgPath, (path, basicFileAttributes) -> {
-            boolean isFile = basicFileAttributes.isRegularFile();
-            boolean isImage = path.toString().toLowerCase().endsWith(".png");
-            return isFile && isImage;
+        try {
+            isMono = listMatchingFilesIn(imgPath, (path, basicFileAttributes) -> {
+                boolean isFile = basicFileAttributes.isRegularFile();
+                boolean isImage = path.toString().toLowerCase().endsWith(".png");
+                return isFile && isImage;
+            }
+            ).size() > MONO_CHECK_THRESHOLD;
+        } catch (Exception e) {
+            // ignore and assume it's multi image set
+            e.printStackTrace();
         }
-        ).size() > MONO_CHECK_THRESHOLD;
 
         return new ShimejiProgramFolder(confPath, imgPath, soundPath, isMono);
     }

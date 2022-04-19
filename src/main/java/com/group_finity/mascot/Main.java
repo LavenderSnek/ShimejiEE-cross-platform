@@ -66,14 +66,7 @@ public final class Main {
 
     //--------//
 
-    private ShimejiProgramFolder programFolder;
-    {
-        try {
-            programFolder = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    private ShimejiProgramFolder programFolder = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
 
     private final ConcurrentMap<String, Configuration> configurations = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Set<String>> dependencies = new ConcurrentHashMap<>();
@@ -498,12 +491,7 @@ public final class Main {
         var pfProp = getSetting(props, "ProgramFolder");
         ShimejiProgramFolder basePf = programFolder;
         if (pfProp != null) {
-            try {
-                basePf = ShimejiProgramFolder.fromFolder(Path.of(pfProp));
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+            basePf = ShimejiProgramFolder.fromFolder(Path.of(pfProp));
         }
 
         var altConfSp = getSetting(props, "ProgramFolder.conf");
