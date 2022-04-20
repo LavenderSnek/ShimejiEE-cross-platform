@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public abstract class BaseNativeEnvironment implements NativeEnvironment {
 
-    protected static final Area INVISIBLE_AREA = new Area() {
+    protected final Area invisibleScreen = new Area() {
         @Override
         public boolean isVisible() {
             return false;
@@ -55,7 +55,7 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
             }
         }
 
-        return INVISIBLE_AREA;
+        return invisibleScreen;
     }
 
     @Override
@@ -101,6 +101,11 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
             screenAreas.add(screenArea);
         }
 
+        Rectangle primary = screenAreas.size() > 0
+                ? screenAreas.get(0).toRectangle()
+                : new Rectangle();
+
+        invisibleScreen.set(primary);
         unionScreenArea.set(totalBounds);
     }
 
@@ -109,7 +114,8 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
     /**
      * The current bounds of each of the displays as reported by the system.
      * <p>
-     * Subclasses can override this method to exclude areas such as taskbars/menus
+     * The first display is assumed to be the main display. Subclasses can override
+     * this method to exclude areas such as taskbars/menus.
      */
     protected List<Rectangle> getNewDisplayBoundsList() {
         final GraphicsDevice[] screenDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
