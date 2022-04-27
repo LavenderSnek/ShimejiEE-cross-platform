@@ -32,11 +32,13 @@ public class Offset extends InstantAction {
     }
 
     private int getOffsetX() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_OFFSETX), Number.class, DEFAULT_OFFSETX).intValue();
+        int res = eval(getSchema().getString(PARAMETER_OFFSETX), Number.class, DEFAULT_OFFSETX).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     private int getOffsetY() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_OFFSETY), Number.class, DEFAULT_OFFSETY).intValue();
+        int res = eval(getSchema().getString(PARAMETER_OFFSETY), Number.class, DEFAULT_OFFSETY).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
 }

@@ -54,17 +54,8 @@ public class Breed extends Animate {
     public static final String PARAMETER_BORNTRANSIENT = "BornTransient";
     private static final boolean DEFAULT_BORNTRANSIENT = false;
 
-    private int scaling;
-
     public Breed(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
-    }
-
-    @Override
-    public void init(final Mascot mascot) throws VariableException {
-        super.init(mascot);
-
-        scaling = Main.getInstance().getScaling();
     }
 
     @Override
@@ -85,7 +76,7 @@ public class Breed extends Animate {
         }
     }
 
-    private void breed() throws VariableException {
+    void breed() throws VariableException {
         String childType = Main.getInstance().getConfiguration(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
 
         final Mascot newMascot = new Mascot(childType);
@@ -94,13 +85,13 @@ public class Breed extends Animate {
 
         if (getMascot().isLookRight()) {
             newMascot.setAnchor(new Point(
-                    getMascot().getAnchor().x - (getBornX() * scaling),
-                    getMascot().getAnchor().y + (getBornY() * scaling)
+                    getMascot().getAnchor().x - getBornX(),
+                    getMascot().getAnchor().y + getBornY()
             ));
         } else {
             newMascot.setAnchor(new Point(
-                    getMascot().getAnchor().x + (getBornX() * scaling),
-                    getMascot().getAnchor().y + (getBornY() * scaling)
+                    getMascot().getAnchor().x + getBornX(),
+                    getMascot().getAnchor().y + getBornY()
             ));
         }
 
@@ -125,14 +116,16 @@ public class Breed extends Animate {
      * The X co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
      * */
     private int getBornX() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_BORNX), Number.class, DEFAULT_BORNX).intValue();
+        int res = eval(getSchema().getString(PARAMETER_BORNX), Number.class, DEFAULT_BORNX).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     /**
      * The Y co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
      * */
     private int getBornY() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_BORNY), Number.class, DEFAULT_BORNY).intValue();
+        int res = eval(getSchema().getString(PARAMETER_BORNY), Number.class, DEFAULT_BORNY).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     /**

@@ -73,7 +73,7 @@ public final class Main {
     private final List<String> activeImageSets = new ArrayList<>();
 
     private Locale locale = Locale.ENGLISH;
-    private int scaling = 1;
+    private double scaling = 1;
     private final ConcurrentMap<String, Boolean> userSwitches = new ConcurrentHashMap<>();
 
     private final Manager manager = new Manager();
@@ -113,8 +113,8 @@ public final class Main {
         }
     }
 
-    public int getScaling() {return scaling;}
-    private void setScaling(int scaling) {
+    public double getScaling() {return scaling;}
+    private void setScaling(double scaling) {
         this.scaling = scaling > 0 ? scaling : 1;
         reloadImageSets();
     }
@@ -441,19 +441,6 @@ public final class Main {
             "TranslateBehaviorNames"
     };
 
-    private final String[] OTHER_PREF_KEYS = {
-            "Language",
-            "Scaling",
-            "ActiveShimeji",
-            "InteractiveWindows",
-            // ↓ cli only options
-            "ProgramFolder",
-            "ProgramFolder.conf",
-            "ProgramFolder.img",
-            "ProgramFolder.sound",
-            "ProgramFolder.mono",
-    };
-
     private static String getSetting(Properties defaultValues, String key) {
         var sp = System.getProperty(SP_PREFIX + key);
         if (sp != null) {
@@ -485,7 +472,7 @@ public final class Main {
 
         var scaleProp = getSetting(props, "Scaling");
         if (scaleProp != null) {
-            scaling = Integer.parseInt(scaleProp);
+            scaling = Double.parseDouble(scaleProp);
         }
 
         var pfProp = getSetting(props, "ProgramFolder");
@@ -586,8 +573,6 @@ public final class Main {
                         {"繁體中文", "zh-TW"},//Chinese(traditional)
                         {"한국어", "ko-KR"}};//Korean
 
-        final int[] scalingOptions = {1, 2, 3, 4, 5, 6, 7, 8};
-
         //------------------------------------//
 
         // create shimeji
@@ -620,9 +605,24 @@ public final class Main {
 
         //--scaling submenu
         final Menu scalingMenu = new Menu(Tr.tr("Scaling"));
-        for (int opt : scalingOptions) {
+        final double scalingStep = 0.25;
+        final int scalesCount = 16;
+        for (int i = 1; i <= scalesCount; i++) {
+            double opt = i * scalingStep;
             final var scaleBtn = new MenuItem(String.valueOf(opt));
-            scaleBtn.addActionListener(e -> setScaling(opt));
+
+            if (getScaling() == opt) {
+                scaleBtn.setEnabled(false);
+            }
+
+            int btnIdx = i - 1;
+            scaleBtn.addActionListener(e -> {
+                for (int j = 0; j < scalingMenu.getItemCount(); j++) {
+                    scalingMenu.getItem(j).setEnabled(true);
+                }
+                setScaling(opt);
+                scalingMenu.getItem(btnIdx).setEnabled(false);
+            });
             scalingMenu.add(scaleBtn);
         }
 

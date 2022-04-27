@@ -48,7 +48,7 @@ public class AnimationBuilder {
         log.log(Level.INFO, "Animations Finished Loading");
     }
 
-    //todo: xml doc note
+    //todo: rewrite this
     private Pose loadPose(final Entry frameNode) throws IOException {
 
         final String imageText = frameNode.getAttribute(schema.getString("Image"));
@@ -62,7 +62,7 @@ public class AnimationBuilder {
         //optional
         final String soundText = frameNode.getAttribute(schema.getString("Sound"));
         final String volumeText = frameNode.getAttribute(schema.getString("Volume")) != null ? frameNode.getAttribute(schema.getString("Volume")) : "0";
-        final int scaling = Main.getInstance().getScaling();
+        final double scaling = Main.getInstance().getScaling();
 
         String imagePairIdentifier = null;
         if (imageText != null) { // if you don't have anchor text defined as well you're going to have a bad time
@@ -85,7 +85,14 @@ public class AnimationBuilder {
         }
 
         final String[] moveCoordinates = moveText.split(",");
-        final Point move = new Point(Integer.parseInt(moveCoordinates[0]) * scaling, Integer.parseInt(moveCoordinates[1]) * scaling);
+        int dx = Integer.parseInt(moveCoordinates[0]);
+        int dy = Integer.parseInt(moveCoordinates[1]);
+        int scaledDx = (int) Math.round(dx * scaling);
+        int scaledDy = (int) Math.round(dy * scaling);
+
+        scaledDx = dx != 0 && scaledDx == 0 ? (dx < 0 ? -1 : 1) : scaledDx; // prevents them from getting stuck
+        scaledDy = dy != 0 && scaledDy == 0 ? (dy < 0 ? -1 : 1) : scaledDy;
+
         final int duration = Integer.parseInt(durationText);
 
         String soundIdentifier = null;
@@ -99,7 +106,7 @@ public class AnimationBuilder {
             }
         }
 
-        final Pose pose = new Pose(imagePairIdentifier, move.x, move.y, duration, soundIdentifier);
+        final Pose pose = new Pose(imagePairIdentifier, scaledDx, scaledDy, duration, soundIdentifier);
 
         log.log(Level.INFO, "ReadPosition({0})", pose);
 

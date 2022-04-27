@@ -231,6 +231,11 @@ public class Mascot implements ScriptableMascot {
         sound = name;
     }
 
+    // not part of the API, please don't call it from scripts
+    public double getScaling() {
+        return Main.getInstance().getScaling();
+    }
+
     public MascotImage getImage() {
         return this.image;
     }

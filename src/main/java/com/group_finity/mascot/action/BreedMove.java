@@ -44,8 +44,6 @@ public class BreedMove extends Move {
     public static final String PARAMETER_BORNINTERVAL = "BornInterval";
     private static final int DEFAULT_BORNINTERVAL = 1;
 
-    private int scaling;
-
     public BreedMove(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
     }
@@ -57,8 +55,6 @@ public class BreedMove extends Move {
         if (getBornInterval() < 1) {
             throw new VariableException("BornInterval must be greater than 0");
         }
-
-        scaling = Main.getInstance().getScaling();
     }
 
     @Override
@@ -88,13 +84,13 @@ public class BreedMove extends Move {
 
         if (getMascot().isLookRight()) {
             newMascot.setAnchor(new Point(
-                    getMascot().getAnchor().x - (getBornX() * scaling),
-                    getMascot().getAnchor().y + (getBornY() * scaling)
+                    getMascot().getAnchor().x - getBornX(),
+                    getMascot().getAnchor().y + getBornY()
             ));
         } else {
             newMascot.setAnchor(new Point(
-                    getMascot().getAnchor().x + (getBornX() * scaling),
-                    getMascot().getAnchor().y + (getBornY() * scaling)
+                    getMascot().getAnchor().x + getBornX(),
+                    getMascot().getAnchor().y + getBornY()
             ));
         }
 
@@ -119,14 +115,16 @@ public class BreedMove extends Move {
      * The X co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
      */
     private int getBornX() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_BORNX), Number.class, DEFAULT_BORNX).intValue();
+        int res = eval(getSchema().getString(PARAMETER_BORNX), Number.class, DEFAULT_BORNX).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     /**
      * The Y co-ordinates where the shimeji is spawned, this is relative to the shimeji creating it.
      */
     private int getBornY() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_BORNY), Number.class, DEFAULT_BORNY).intValue();
+        int res = eval(getSchema().getString(PARAMETER_BORNY), Number.class, DEFAULT_BORNY).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     /**

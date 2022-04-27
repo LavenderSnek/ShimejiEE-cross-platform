@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.environment.Location;
@@ -30,8 +29,6 @@ public class Dragged extends ActionBase {
 
     private int timeToRegist;
 
-    private int scaling;
-
     public Dragged(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
     }
@@ -40,9 +37,7 @@ public class Dragged extends ActionBase {
     public void init(final Mascot mascot) throws VariableException {
         super.init(mascot);
 
-        scaling = Main.getInstance().getScaling();
-
-        setFootX(getEnvironment().getCursor().getX() + getOffsetX() * scaling);
+        setFootX(getEnvironment().getCursor().getX() + getOffsetX());
         setTimeToRegist(250);
 
     }
@@ -62,7 +57,7 @@ public class Dragged extends ActionBase {
 
         final Location cursor = getEnvironment().getCursor();
 
-        if (Math.abs(cursor.getX() - getMascot().getAnchor().x + getOffsetX() * scaling) >= 5) {
+        if (Math.abs(cursor.getX() - getMascot().getAnchor().x + getOffsetX()) >= 5) {
             this.setTime(0);
         }
 
@@ -77,8 +72,8 @@ public class Dragged extends ActionBase {
         getAnimation().next(getMascot(), getTime());
 
         getMascot().setAnchor(new Point(
-                cursor.getX() + getOffsetX() * scaling,
-                cursor.getY() + getOffsetY() * scaling
+                cursor.getX() + getOffsetX(),
+                cursor.getY() + getOffsetY()
         ));
     }
 
@@ -107,11 +102,13 @@ public class Dragged extends ActionBase {
     }
 
     private int getOffsetX() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_OFFSETX), Number.class, DEFAULT_OFFSETX).intValue();
+        int res = eval(getSchema().getString(PARAMETER_OFFSETX), Number.class, DEFAULT_OFFSETX).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
     private int getOffsetY() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_OFFSETY), Number.class, DEFAULT_OFFSETY).intValue();
+        int res = eval(getSchema().getString(PARAMETER_OFFSETY), Number.class, DEFAULT_OFFSETY).intValue();
+        return (int) Math.round(res * getMascot().getScaling());
     }
 
 }
