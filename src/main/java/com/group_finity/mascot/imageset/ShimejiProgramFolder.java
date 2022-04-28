@@ -65,7 +65,6 @@ public record ShimejiProgramFolder(
         final Path confPath = programFolder.resolve(DEFAULT_CONF_DIR);
         final Path soundPath = programFolder.resolve(DEFAULT_SOUND_DIR);
 
-
         boolean isMono = false;
 
         // this isn't a surefire way to check if it's a mono imageSet, but it'll work most of the time
@@ -105,16 +104,14 @@ public record ShimejiProgramFolder(
     }
 
     /**
-     * @param imageSetName name of an imageSet in this program folder,
-     *                     value ignored if {@link #isMonoImageSet()} is true.
+     * @param imageSetName name of an imageSet in this program folder.
      */
     public Path getBehaviorConfPath(String imageSetName) throws FileNotFoundException {
         return getConfFilePath(imageSetName, BEHAVIOR_FILENAMES);
     }
 
     /**
-     * @param imageSetName name of an imageSet in this program folder,
-     *                     value ignored if {@link #isMonoImageSet()} is true.
+     * @param imageSetName name of an imageSet in this program folder.
      */
     public Path getActionConfPath(String imageSetName) throws FileNotFoundException {
         return getConfFilePath(imageSetName, ACTIONS_FILENAMES);
@@ -122,12 +119,10 @@ public record ShimejiProgramFolder(
 
     /**
      * Path of the highest priority sound file found with given name and imageSet
-     * @param imageSetName name of an imageSet in this program folder,
-     *                     value ignored if {@link #isMonoImageSet()} is true.
-     * @param soundFileName name of the sound file to find
+     * @param imageSetName name of an imageSet in this program folder.
+     * @param soundFileName name of the sound file to find.
      */
     public Path getSoundFilePath(String imageSetName, String soundFileName) throws FileNotFoundException {
-        imageSetName = isMonoImageSet ? "" : imageSetName;
         // this is a reversed order from the official code; but it fits better w other file finding in shimeji
         Path[] SOUND_DIRS = {
                 imgPath.resolve(imageSetName).resolve(DEFAULT_SOUND_DIR),
@@ -159,11 +154,9 @@ public record ShimejiProgramFolder(
 
     /**
      * path of an image representing the image set. (ie, the one used in the chooser)
-     * @param imageSetName name of an imageSet in this program folder,
-     *                     value ignored if {@link ShimejiProgramFolder#isMonoImageSet()} is true.
+     * @param imageSetName name of an imageSet in this program folder.
      */
     public Path getIconPathForImageSet(String imageSetName) {
-        imageSetName = isMonoImageSet ? "" : imageSetName;
         Path imageSetPath = imgPath.resolve(imageSetName);
 
         Path iconPath = imageSetPath.resolve(ICON_NAME);
@@ -185,8 +178,6 @@ public record ShimejiProgramFolder(
     }
 
     private Path getConfFilePath(String imageSetName, String[] allowedNames) throws FileNotFoundException {
-        imageSetName = isMonoImageSet ? "" : imageSetName;
-
         Path[] CONF_DIRS = {
                 imgPath.resolve(imageSetName).resolve(DEFAULT_CONF_DIR),
                 confPath.resolve(imageSetName),
