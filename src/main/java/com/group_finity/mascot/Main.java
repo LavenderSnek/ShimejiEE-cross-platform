@@ -1,21 +1,24 @@
 package com.group_finity.mascot;
 
 import com.group_finity.mascot.config.Configuration;
-import com.group_finity.mascot.config.Entry;
-import com.group_finity.mascot.image.ImagePairs;
-import com.group_finity.mascot.sound.Sounds;
+import com.group_finity.mascot.exception.ConfigurationException;
+import com.group_finity.mascot.imageset.ImageSet;
+import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
+import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
@@ -26,6 +29,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The main app instance,
@@ -68,8 +73,7 @@ public final class Main {
 
     private ShimejiProgramFolder programFolder = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
 
-    private final ConcurrentMap<String, Configuration> configurations = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Set<String>> dependencies = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ImageSet> loadedImageSets = new ConcurrentHashMap<>();
     private final List<String> activeImageSets = new ArrayList<>();
 
     private Locale locale = Locale.ENGLISH;
@@ -96,8 +100,13 @@ public final class Main {
         return programFolder;
     }
 
+    public ImageSet getImageSet(String name) {
+        return loadedImageSets.getOrDefault(name, null);
+    }
+
     public Configuration getConfiguration(String imageSet) {
-        return configurations.get(imageSet);
+        var imgSet = getImageSet(imageSet);
+        return imgSet == null ? null : imgSet.getConfiguration();
     }
 
     public Locale getLocale() {return locale;}
@@ -197,90 +206,21 @@ public final class Main {
 
     /**
      * Loads resources for the specified image set.
-     * <p>
-     * If the image sets depends on other image sets, those image sets are also loaded.
-     * This function only loads the image set. It does not add it to the list of selected image sets,
-     * nor does it create a mascot.
      *
      * @return true if the imageSet was successfully loaded
      */
     private boolean loadImageSet(final String imageSet) {
-
         try {
-            Configuration configuration = new Configuration();
-            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-
-            //--actions.xml--/
-            Path actionsFilePath = getProgramFolder().getActionConfPath(imageSet);
-            Entry actionDocEntry = new Entry(docBuilder.parse(actionsFilePath.toFile()).getDocumentElement());
-            configuration.load(actionDocEntry, imageSet);
-
-            //--behaviors.xml--//
-            Path behaviorsFilePath = getProgramFolder().getBehaviorConfPath(imageSet);
-            Entry behaviorDocEntry = new Entry(docBuilder.parse(behaviorsFilePath.toFile()).getDocumentElement());
-            configuration.load(behaviorDocEntry, imageSet);
-
-            //---validate and set config---//
-            configuration.validate();
-            configurations.put(imageSet, configuration);
-
-            // loading dependencies
-            Set<String> deps = new HashSet<>();
-
-            for (final Entry actionList : actionDocEntry.selectChildren("ActionList")) {
-                for (final Entry actionNode : actionList.selectChildren("Action")) {
-                    if (actionNode.getAttributes().containsKey("BornMascot")) {
-                        deps.add(actionNode.getAttribute("BornMascot"));
-                    }
-                    if (actionNode.getAttributes().containsKey("TransformMascot")) {
-                        deps.add(actionNode.getAttribute("TransformMascot"));
-                    }
-                }
-            }
-
-            for (String dep : deps) {
-                if (!configurations.containsKey(dep)) {
-                    boolean loaded = loadImageSet(dep);
-                    if (!loaded) {
-                        deps.remove(dep);
-                    }
-                }
-            }
-
-            dependencies.put(imageSet, deps);
-
+            var imgSet = ShimejiImageSet.loadFrom(getProgramFolder(), imageSet);
+            loadedImageSets.put(imageSet, imgSet);
             return true;
-
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Failed to load configuration files", e);
+        } catch (IOException | ParserConfigurationException | SAXException | ConfigurationException e) {
             e.printStackTrace();
-
-            // error cleanup
-            unloadImageSet(imageSet);
-
             Main.showError(Tr.tr("FailedLoadConfigErrorMessage")
-                    + "\n" + e.getMessage()
-                    + "\n" + Tr.tr("SeeLogForDetails"));
+                           + "\n" + e.getMessage()
+                           + "\n" + Tr.tr("SeeLogForDetails"));
         }
-
         return false;
-    }
-
-    /**
-     * Clears all loaded resources for the specified image set.
-     * <p>
-     * If the image sets is a selected image set, it is removed from selections
-     * and all mascots of that image set are disposed.
-     * <p>
-     * Image sets that depend on this image set are not changed.
-     */
-    private void unloadImageSet(String imageSet) {
-        activeImageSets.remove(imageSet);
-        getManager().remainNone(imageSet);
-        configurations.remove(imageSet);
-        dependencies.remove(imageSet);
-        ImagePairs.removeAllFromImageSet(imageSet);
-        // the sounds just leak since they can be shared between imgSets
     }
 
     /**
@@ -292,12 +232,7 @@ public final class Main {
      * @return A copy of the selected image sets collection
      */
     public Set<String> getActiveImageSets() {
-        if (getProgramFolder().isMonoImageSet()) {
-            return new HashSet<>(Set.of(""));
-        }
-        Set<String> ret = new HashSet<>(activeImageSets);
-        ret.remove("");
-        return ret;
+        return new LinkedHashSet<>(activeImageSets);
     }
 
     /**
@@ -316,7 +251,7 @@ public final class Main {
 
         var toAdd = new ArrayList<String>();
         for (String set : newImageSets) {
-            if (!configurations.containsKey(set) || !activeImageSets.contains(set)) {
+            if (!loadedImageSets.containsKey(set) || !activeImageSets.contains(set)) {
                 toAdd.add(set);
             }
         }
@@ -325,15 +260,7 @@ public final class Main {
         getManager().setExitOnLastRemoved(false);
 
         toAdd.forEach(this::addActiveImageSet);
-
-        // done after loading so that new deps are reflected
-        for (String set : newImageSets) {
-            if (dependencies.containsKey(set)) {
-                toRemove.removeAll(dependencies.get(set));
-            }
-        }
-
-        toRemove.forEach(this::unloadImageSet);
+        toRemove.forEach(this::removeActiveImageSet);
 
         getManager().setExitOnLastRemoved(isExit);
     }
@@ -349,17 +276,30 @@ public final class Main {
      * but a mascot is still created.
      */
     private void addActiveImageSet(String imageSet) {
-        boolean loaded = configurations.containsKey(imageSet);
-        if (!loaded){
-            loaded = loadImageSet(imageSet);
-        }
+        boolean loaded = loadImageSet(imageSet);
 
         if (loaded) {
             if (!activeImageSets.contains(imageSet)) {
                 activeImageSets.add(imageSet);
             }
             createMascot(imageSet);
+        } else {
+            removeActiveImageSet(imageSet);
         }
+    }
+
+    /**
+     * Clears all loaded resources for the specified image set.
+     * <p>
+     * If the image sets is a selected image set, it is removed from selection.
+     * All mascots of that image set are disposed.
+     * <p>
+     * Image sets that depend on this image set are not changed.
+     */
+    private void removeActiveImageSet(String imageSet) {
+        activeImageSets.remove(imageSet);
+        getManager().remainNone(imageSet);
+        loadedImageSets.remove(imageSet);
     }
 
     /**
@@ -371,13 +311,7 @@ public final class Main {
 
         getManager().disposeAll();
 
-        // Wipe all loaded data
-        configurations.clear();
-        dependencies.clear();
-        ImagePairs.clear();
-        Sounds.clear();
-
-        // re-add
+        loadedImageSets.clear();
         getActiveImageSets().forEach(this::addActiveImageSet);
 
         getManager().setExitOnLastRemoved(isExit);
@@ -415,7 +349,7 @@ public final class Main {
         mascot.setLookRight(Math.random() < 0.5);
 
         try {
-            mascot.setBehavior(getConfiguration(imageSet).buildBehavior(null, mascot));
+            mascot.setBehavior(Objects.requireNonNull(getConfiguration(imageSet)).buildBehavior(null, mascot));
             getManager().add(mascot);
         } catch (Exception e) {
             log.log(Level.SEVERE, imageSet + " fatal error, can not be started.", e);
@@ -494,14 +428,16 @@ public final class Main {
 
         var selectionsProp = getSetting(props, "ActiveShimeji");
         if (selectionsProp != null && !programFolder.isMonoImageSet()) {
-            var ims = new HashSet<>(List.of(selectionsProp.split("/")));
+            var ims = Stream
+                    .of(selectionsProp.split("/"))
+                    .map(s -> URLDecoder.decode(s, StandardCharsets.UTF_8))
+                    .filter(s -> {
+                        Path p = Path.of(programFolder.imgPath().toString(), s);
+                        return Files.isDirectory(p);
+                    })
+                    .collect(Collectors.toSet());
+
             ims.remove("");
-            try {
-                ims.retainAll(programFolder.getImageSetNames());
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
             activeImageSets.addAll(ims);
         }
 
@@ -520,7 +456,7 @@ public final class Main {
 
         var sb = new StringBuilder();
         for (String set : getActiveImageSets()) {
-            sb.append(set).append('/');
+            sb.append(URLEncoder.encode(set, StandardCharsets.UTF_8)).append('/');
         }
         props.setProperty("ActiveShimeji", sb.toString());
 

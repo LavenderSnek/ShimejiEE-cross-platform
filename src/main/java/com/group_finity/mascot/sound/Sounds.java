@@ -19,17 +19,13 @@ public class Sounds {
 
     private final static Hashtable<String, Clip> SOUNDS = new Hashtable<>();
 
-    public static void load(final String filename, final Clip clip) {
+    static void load(final String filename, final Clip clip) {
         if (!SOUNDS.containsKey(filename)) {
             SOUNDS.put(filename, clip);
         }
     }
 
-    public static void clear() {
-        SOUNDS.clear();
-    }
-
-    public static boolean contains(String identifier) {
+    static boolean contains(String identifier) {
         return SOUNDS.containsKey(identifier);
     }
 
@@ -40,7 +36,7 @@ public class Sounds {
         return SOUNDS.get(identifier);
     }
 
-    private static ArrayList<Clip> getSoundsIgnoringVolume(String imageSetName, String filename) {
+    public static ArrayList<Clip> getSoundsIgnoringVolume(String imageSetName, String filename) {
         String namePath;
         ArrayList<Clip> ret = new ArrayList<>(5);
         try {
@@ -56,19 +52,6 @@ public class Sounds {
         }
 
         return ret;
-    }
-
-    public static void muteSpecifiedSound(String imageSetName, String filename) {
-        ArrayList<Clip> affectedSounds = getSoundsIgnoringVolume(imageSetName, filename);
-        for (Clip clip : affectedSounds) {
-            if (clip != null && clip.isRunning()) {
-                clip.stop();
-            }
-        }
-    }
-
-    public static void muteAll() {
-        SOUNDS.values().forEach(Clip::stop);
     }
 
 }

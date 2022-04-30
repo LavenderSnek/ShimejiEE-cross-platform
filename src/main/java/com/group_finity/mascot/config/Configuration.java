@@ -13,7 +13,13 @@ import com.group_finity.mascot.script.VariableMap;
 
 import java.awt.Point;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,28 +52,24 @@ public class Configuration {
     private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<>();
     private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<>();
 
-    public void load(final Entry configurationNode, final String imageSet) throws IOException, ConfigurationException {
-        log.log(Level.INFO, "Start Reading Configuration File...");
+    public void load(Entry mascotNode, PoseLoader poseLoader) throws IOException, ConfigurationException {
 
         for (Schema lang : Schema.values()) {
-            if (configurationNode.hasChild(lang.tr("ActionList")) || configurationNode.hasChild(lang.tr("BehaviourList"))) {
+            if (mascotNode.hasChild(lang.tr("ActionList")) || mascotNode.hasChild(lang.tr("BehaviourList"))) {
                 schema = lang;
                 break;
             }
         }
 
-        for (Entry constant : configurationNode.selectChildren(getSchema().getString("Constant"))) {
+        for (Entry constant : mascotNode.selectChildren(getSchema().getString("Constant"))) {
             String name = constant.getAttribute(getSchema().getString("Name"));
             String value = constant.getAttribute(getSchema().getString("Value"));
             getConstants().put(name, value);
         }
 
-        for (final Entry list : configurationNode.selectChildren(getSchema().getString("ActionList"))) {
-            log.log(Level.INFO, "Action List...");
-
-            for (final Entry node : list.selectChildren(getSchema().getString("Action"))) {
-                final ActionBuilder action = new ActionBuilder(this, node, imageSet);
-
+        for (Entry actionListNode : mascotNode.selectChildren(getSchema().getString("ActionList"))) {
+            for (Entry actionNode : actionListNode.selectChildren(getSchema().getString("Action"))) {
+                ActionBuilder action = new ActionBuilder(this, actionNode, poseLoader);
                 if (getActionBuilders().containsKey(action.getName())) {
                     throw new ConfigurationException(Tr.tr("DuplicateActionErrorMessage") + ": " + action.getName());
                 }
@@ -76,23 +78,20 @@ public class Configuration {
             }
         }
 
-        for (final Entry list : configurationNode.selectChildren(getSchema().getString("BehaviourList"))) {
-            log.log(Level.INFO, "Behavior List...");
-
-            loadBehaviors(list, new ArrayList<>());
+        for (Entry behaviourListNode : mascotNode.selectChildren(getSchema().getString("BehaviourList"))) {
+            loadBehaviors(behaviourListNode, new ArrayList<>());
         }
 
-        log.log(Level.INFO, "Behavior List");
     }
 
-    private void loadBehaviors(final Entry list, final List<String> conditions) {
-        for (final Entry node : list.getChildren()) {
+    private void loadBehaviors(Entry behaviourListNode, List<String> conditions) {
+        for (final Entry node : behaviourListNode.getChildren()) {
             if (node.getName().equals(getSchema().getString("Condition"))) {
                 final List<String> newConditions = new ArrayList<>(conditions);
                 newConditions.add(node.getAttribute(getSchema().getString("Condition")));
-
                 loadBehaviors(node, newConditions);
-            } else if (node.getName().equals(getSchema().getString("Behaviour"))) {
+            }
+            else if (node.getName().equals(getSchema().getString("Behaviour"))) {
                 final BehaviorBuilder behavior = new BehaviorBuilder(this, node, conditions);
                 this.getBehaviorBuilders().put(behavior.getName(), behavior);
             }

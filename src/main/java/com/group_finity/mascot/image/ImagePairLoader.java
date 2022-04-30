@@ -22,7 +22,7 @@ public class ImagePairLoader {
      * @param anchor    Anchor point of the image
      * @param scaling   amount of scaling applied to the image, also affects anchor paint
      *
-     * @return The key with which the loaded image pair can be accessed with {@link ImagePairs#getImagePair(String)}
+     * @return The key with which the loaded image pair can be accessed.
      */
     public static String load(String imageSetName, final String leftName, final String rightName, final Point anchor, final double scaling) throws IOException {
         String identifier =

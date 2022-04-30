@@ -25,33 +25,30 @@ public class ActionBuilder implements IActionBuilder {
     private final String type;
     private final String className;
 
-    private final Map<String, String> params = new LinkedHashMap<String, String>();
+    private final Map<String, String> params = new LinkedHashMap<>();
 
-    private final List<AnimationBuilder> animationBuilders = new ArrayList<AnimationBuilder>();
-    private final List<IActionBuilder> actionRefs = new ArrayList<IActionBuilder>();
+    private final List<AnimationBuilder> animationBuilders = new ArrayList<>();
+    private final List<IActionBuilder> actionRefs = new ArrayList<>();
 
-    public ActionBuilder(final Configuration configuration, final Entry actionNode, final String imageSet) throws IOException {
+    public ActionBuilder(Configuration configuration, Entry actionNode, PoseLoader poseLoader) throws IOException {
         schema = configuration.getSchema();
         name = actionNode.getAttribute(schema.getString("Name"));
         type = actionNode.getAttribute(schema.getString("Type"));
         className = actionNode.getAttribute(schema.getString("Class"));
 
-        log.log(Level.INFO, "Read Start Operation({0})", this);
-
         getParams().putAll(actionNode.getAttributes());
         for (final Entry node : actionNode.selectChildren(schema.getString("Animation"))) {
-            getAnimationBuilders().add(new AnimationBuilder(schema, node, imageSet));
+            getAnimationBuilders().add(new AnimationBuilder(schema, node, poseLoader));
         }
 
         for (final Entry node : actionNode.getChildren()) {
             if (node.getName().equals(schema.getString("ActionReference"))) {
                 getActionRefs().add(new ActionRef(configuration, node));
             } else if (node.getName().equals(schema.getString("Action"))) {
-                getActionRefs().add(new ActionBuilder(configuration, node, imageSet));
+                getActionRefs().add(new ActionBuilder(configuration, node, poseLoader));
             }
         }
 
-        log.log(Level.INFO, "Actions Finished Loading");
     }
 
     @Override
@@ -123,15 +120,15 @@ public class ActionBuilder implements IActionBuilder {
     }
 
     private List<Action> createActions() throws ActionInstantiationException {
-        final List<Action> actions = new ArrayList<Action>();
+        final List<Action> actions = new ArrayList<>();
         for (final IActionBuilder ref : this.getActionRefs()) {
-            actions.add(ref.buildAction(new HashMap<String, String>()));
+            actions.add(ref.buildAction(new HashMap<>()));
         }
         return actions;
     }
 
     private List<Animation> createAnimations() throws AnimationInstantiationException {
-        final List<Animation> animations = new ArrayList<Animation>();
+        final List<Animation> animations = new ArrayList<>();
         for (final AnimationBuilder animationFactory : this.getAnimationBuilders()) {
             animations.add(animationFactory.buildAnimation());
         }

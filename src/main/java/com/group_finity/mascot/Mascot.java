@@ -4,10 +4,9 @@ import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
-import com.group_finity.mascot.window.TranslucentWindow;
-import com.group_finity.mascot.sound.Sounds;
 import com.group_finity.mascot.ui.debug.DebugUi;
 import com.group_finity.mascot.ui.debug.DebugWindow;
+import com.group_finity.mascot.window.TranslucentWindow;
 
 import javax.sound.sampled.Clip;
 import java.awt.Point;
@@ -125,8 +124,8 @@ public class Mascot implements ScriptableMascot {
             }
 
             // play sound if requested
-            if (sound != null && Main.getInstance().isSoundAllowed()) {
-                Clip clip = Sounds.getSound(sound);
+            if (getSound() != null && Main.getInstance().isSoundAllowed()) {
+                Clip clip = Main.getInstance().getImageSet(getImageSet()).getSounds().get(getSound());
                 if (clip != null && !clip.isRunning()) {
                     clip.setMicrosecondPosition(0);
                     clip.start();
@@ -233,7 +232,7 @@ public class Mascot implements ScriptableMascot {
 
     // not part of the API, please don't call it from scripts
     public double getScaling() {
-        return Main.getInstance().getScaling();
+        return Main.getInstance().getImageSet(getImageSet()).getImagePairs().getScaling();
     }
 
     public MascotImage getImage() {

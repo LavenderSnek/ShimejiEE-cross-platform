@@ -25,7 +25,7 @@ public class SoundLoader {
      * @param soundFileName Name of the sound file
      * @param volume {@link FloatControl}
      *
-     * @return The key with which the sound can be accessed in {@link Sounds#getSound(String)}
+     * @return The key with which the sound can be accessed.
      * */
     public static String load(String imageSetName, String soundFileName, final float volume) throws IOException, LineUnavailableException, UnsupportedAudioFileException {
 

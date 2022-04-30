@@ -3,8 +3,8 @@ package com.group_finity.mascot.action;
 import com.group_finity.mascot.Main;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
-import com.group_finity.mascot.sound.Sounds;
 
+import javax.sound.sampled.Clip;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -26,9 +26,10 @@ public class Mute extends InstantAction {
     protected void apply() throws VariableException {
         String soundName = getSound();
         if (soundName != null) {
-            Sounds.muteSpecifiedSound(getMascot().getImageSet(), soundName);
-        } else if (Main.getInstance().isSoundAllowed()) {
-            Sounds.muteAll();
+            Main.getInstance()
+                    .getImageSet(getMascot().getImageSet())
+                    .getSounds().getIgnoringVolume(soundName)
+                    .forEach(Clip::stop);
         }
     }
 

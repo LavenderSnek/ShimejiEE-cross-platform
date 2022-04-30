@@ -1,7 +1,8 @@
 package com.group_finity.mascot.animation;
 
+import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
-import com.group_finity.mascot.image.ImagePairs;
+import com.group_finity.mascot.image.MascotImage;
 
 import java.awt.Point;
 
@@ -19,7 +20,12 @@ public record Pose(
                 mascot.getAnchor().y + dy()
         ));
 
-        mascot.setImage(ImagePairs.getImage(imageKey(), mascot.isLookRight()));
+        MascotImage img = Main.getInstance()
+                .getImageSet(mascot.getImageSet())
+                .getImagePairs().get(imageKey())
+                .getImage(mascot.isLookRight());
+
+        mascot.setImage(img);
         mascot.setSound(soundKey());
     }
 
