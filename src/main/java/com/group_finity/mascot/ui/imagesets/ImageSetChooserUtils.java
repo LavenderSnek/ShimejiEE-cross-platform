@@ -11,8 +11,8 @@ public final class ImageSetChooserUtils {
      * @param onSelection consumer for an array of all selected image sets after
      *                    the selection has been completed.
      */
-    public static void askUserForSelection(Consumer<Collection<String>> onSelection) {
-        CompactChooser chooser = new CompactChooser(onSelection);
+    public static void askUserForSelection(Consumer<Collection<String>> onSelection, Collection<String> currentSelection) {
+        CompactChooser chooser = new CompactChooser(onSelection, currentSelection);
         chooser.createGui();
     }
 

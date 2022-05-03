@@ -1,35 +1,31 @@
 package com.group_finity.mascot.imageset;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.config.DefaultPoseLoader;
 import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.exception.ConfigurationException;
-import com.group_finity.mascot.image.ImagePair;
 import com.group_finity.mascot.image.ImagePairLoader;
+import com.group_finity.mascot.image.ImagePairLoaderBuilder;
 import com.group_finity.mascot.image.ImagePairStore;
-import com.group_finity.mascot.image.ImagePairs;
 import com.group_finity.mascot.sound.SoundLoader;
 import com.group_finity.mascot.sound.SoundStore;
-import com.group_finity.mascot.sound.Sounds;
 import org.xml.sax.SAXException;
 
-import javax.sound.sampled.Clip;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Point;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.Map;
 
 public class ShimejiImageSet implements ImageSet {
 
-    private Configuration configuration;
-    private ImagePairStore imagePairs;
-    private SoundStore sounds;
+    private final Configuration configuration;
+    private final ImagePairLoader imagePairs;
+    private final SoundLoader sounds;
 
-    ShimejiImageSet(Configuration configuration, ImagePairStore imagePairs, SoundStore sounds) {
-        this.configuration = configuration;
+    ShimejiImageSet(Configuration loadedConfig, ImagePairLoader imagePairs, SoundLoader sounds) {
+        this.configuration = loadedConfig;
         this.imagePairs = imagePairs;
         this.sounds = sounds;
     }
@@ -49,63 +45,34 @@ public class ShimejiImageSet implements ImageSet {
         return sounds;
     }
 
-    public static ShimejiImageSet loadFrom(ShimejiProgramFolder pf, String name) throws IOException, ParserConfigurationException, SAXException, ConfigurationException {
+    public static ShimejiImageSet loadFrom(ShimejiProgramFolder pf, String name, Map<String, String> settings) throws ParserConfigurationException, IOException, SAXException, ConfigurationException {
+        ImagePairLoaderBuilder ib = new ImagePairLoaderBuilder();
+        String scaleVal = settings.getOrDefault("Scaling", ib.getScaling() + "");
+        try {
+            double scale = Double.parseDouble(scaleVal);
+            ib.setScaling(scale > 0 ? scale : ib.getScaling());
+        } catch (Exception ignored) {}
+
+        ib.setLogicalAnchors(Boolean.parseBoolean(settings.getOrDefault("LogicalAnchors", ib.isLogicalAnchors() + "")))
+                .setAsymmetryNameScheme(Boolean.parseBoolean(settings.getOrDefault("AsymmetryNameScheme", ib.isAsymmetryNameScheme() + "")))
+                .setPixelArtScaling(Boolean.parseBoolean(settings.getOrDefault("PixelArtScaling", ib.isPixelArtScaling() + "")));
+
         DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Path actionsPath = pf.getActionConfPath(name);
+        Path behaviorPath = pf.getBehaviorConfPath(name);
+        Entry actionsEntry = new Entry(docBuilder.parse(actionsPath.toFile()).getDocumentElement());
+        Entry behaviorEntry = new Entry(docBuilder.parse(behaviorPath.toFile()).getDocumentElement());
 
-        var actionsPath = pf.getActionConfPath(name);
-        var behaviorPath = pf.getBehaviorConfPath(name);
+        ImagePairLoader imgLoader = ib.buildForBasePath(pf.imgPath().resolve(name));
 
-        var actionEntry = new Entry(docBuilder.parse(actionsPath.toFile()).getDocumentElement());
-        var behaviorEntry = new Entry(docBuilder.parse(behaviorPath.toFile()).getDocumentElement());
+        SoundLoader soundLoader = new SoundLoader(pf, name);
+        soundLoader.setFixRelativeGlobalSound(Boolean.parseBoolean(settings.getOrDefault("FixRelativeGlobalSound", soundLoader.isFixRelativeGlobalSound() + "")));
 
-        // temporary
-        var imgLoader = new ImagePairStore() {
-            final double scaling = Main.getInstance().getScaling();
+        Configuration config = new Configuration();
+        config.load(new DefaultPoseLoader(imgLoader, soundLoader), actionsEntry, behaviorEntry);
+        config.validate();
 
-            @Override
-            public String load(String imageText, String imageRightText, Point anchor) throws IOException {
-                return ImagePairLoader.load(name, imageText, imageRightText, anchor, scaling);
-            }
-
-            @Override
-            public ImagePair get(String key) {
-                return ImagePairs.getImagePair(key);
-            }
-
-            @Override
-            public double getScaling() {
-                return scaling;
-            }
-        };
-
-
-        var soundLoader = new SoundStore() {
-            @Override
-            public String load(String soundText, float volume) throws Exception {
-                return SoundLoader.load(name, soundText, volume);
-            }
-
-            @Override
-            public Clip get(String key) {
-                return Sounds.getSound(key);
-            }
-
-            @Override
-            public List<Clip> getIgnoringVolume(String name) {
-                return Sounds.getSoundsIgnoringVolume(name, name);
-            }
-        };
-
-
-        var pl = new DefaultPoseLoader(imgLoader, soundLoader);
-
-        var cfg = new Configuration();
-        cfg.load(actionEntry, pl);
-        cfg.load(behaviorEntry, pl);
-
-        cfg.validate();
-
-        return new ShimejiImageSet(cfg, imgLoader, soundLoader);
+        return new ShimejiImageSet(config, imgLoader, soundLoader);
     }
 
 }

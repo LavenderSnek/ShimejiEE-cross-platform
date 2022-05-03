@@ -1,6 +1,5 @@
 package com.group_finity.mascot.image;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.NativeFactory;
 
 import javax.imageio.ImageIO;
@@ -10,42 +9,81 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ImagePairLoader {
+public class ImagePairLoader implements ImagePairStore {
 
-    /**
-     * Loads a pair of images into {@link ImagePairs} if it isn't already loaded
-     *
-     * @param leftName      Path to the image
-     * @param rightName Path to the right facing version of the image, flipped left image will be used if this is null
-     * @param anchor    Anchor point of the image
-     * @param scaling   amount of scaling applied to the image, also affects anchor paint
-     *
-     * @return The key with which the loaded image pair can be accessed.
-     */
-    public static String load(String imageSetName, final String leftName, final String rightName, final Point anchor, final double scaling) throws IOException {
-        String identifier =
-                Path.of(imageSetName, leftName) +
-                (rightName == null ? "" : (":" + Path.of(imageSetName, rightName)));
+    private final Map<String, ImagePair> imagePairs = new ConcurrentHashMap<>(64, 0.75f, 2);
 
-        if (ImagePairs.contains(identifier)) {
-            return identifier;
-        }
+    private final double scaling;
+    private final boolean logicalAnchors;
+    private final boolean asymmetryNameScheme;
+    private final boolean pixelArtScaling;
 
-        Path imgSetFolder = Main.getInstance().getProgramFolder().imgPath().resolve(imageSetName).toAbsolutePath();
+    private final Path basePath;
 
-        Path leftPath = Path.of(imgSetFolder.toString(), leftName); // ignores the leading slashes
-        Path rightPath = rightName == null ? null : Path.of(imgSetFolder.toString(), rightName);
-
-        ImagePair ip = createImagePair(leftPath, rightPath, anchor, scaling);
-        ImagePairs.load(identifier, ip);
-
-        return identifier;
+    ImagePairLoader(ImagePairLoaderBuilder builder, Path basePath) {
+        this.scaling = builder.scaling;
+        this.logicalAnchors = builder.logicalAnchors;
+        this.asymmetryNameScheme = builder.asymmetryNameScheme;
+        this.pixelArtScaling = builder.pixelArtScaling;
+        this.basePath = basePath;
     }
 
-    private static ImagePair createImagePair(Path leftImgPath, Path rightImgPath, Point rawAnchor, double scaling) throws IOException {
+    @Override
+    public String load(String imageText, String imageRightText, Point anchor) throws IOException {
+        String errorText = "image=" + imageText + (imageRightText == null ? "" : ", imageRight=" + imageRightText) + ", anchor=" + anchor;
+        if (anchor == null) {
+            throw  new IOException("Invalid/Missing image anchor: " + errorText);
+        }
+        if (!imageText.startsWith("/") || (imageRightText != null && !imageRightText.startsWith("/"))) {
+            throw new IOException("Image text must start with '/' (slash) for compatibility: " + errorText);
+        }
 
+        imageText = imageText.replaceAll("^/+", "");
+
+        if (imageRightText != null) {
+            imageRightText = imageRightText.replaceAll("^/+", "");
+        }
+        else if (asymmetryNameScheme) {
+            String possibleImgRight = imageText.replaceAll("\\.[a-zA-Z]+$", "-r$0");
+            if (Files.isRegularFile(basePath.resolve(possibleImgRight))) {
+                imageRightText = possibleImgRight;
+            }
+        }
+
+        String key = imageText + (imageRightText == null ? "" : ":" + imageRightText);
+        if (logicalAnchors) {
+            key = anchor.x + "," + anchor.y + ":" + key;
+        }
+
+        if (imagePairs.containsKey(key)) {
+            return key;
+        }
+
+        Path leftPath = basePath.resolve(imageText);
+        Path rightPath = imageRightText == null ? null : basePath.resolve(imageRightText);
+
+        ImagePair ip = createImagePair(leftPath, rightPath, anchor, getScaling());
+        imagePairs.put(key, ip);
+
+        return key;
+    }
+
+    @Override
+    public ImagePair get(String key) {
+        return key == null ? null : imagePairs.get(key);
+    }
+
+    @Override
+    public double getScaling() {
+        return scaling;
+    }
+
+    protected ImagePair createImagePair(Path leftImgPath, Path rightImgPath, Point rawAnchor, double scaling) throws IOException {
         BufferedImage leftImg = transform(ImageIO.read(leftImgPath.toFile()), scaling, false);
         BufferedImage rightImg = rightImgPath == null
                 ? transform(leftImg, 1, true)
@@ -56,7 +94,6 @@ public class ImagePairLoader {
                 (int) Math.round(rawAnchor.y * scaling)
         );
 
-        // todo: native scaling
         MascotImage lMascot = new MascotImage(
                 NativeFactory.getInstance().newNativeImage(leftImg, 1),
                 scaledAnchor,
@@ -72,16 +109,16 @@ public class ImagePairLoader {
         return new ImagePair(lMascot, rMascot);
     }
 
-    private static BufferedImage transform(BufferedImage src, double scaleFactor, boolean flip) {
+    protected BufferedImage transform(BufferedImage src, double scaleFactor, boolean flip) {
         final int fWidth = (int) Math.round(src.getWidth() * scaleFactor);
         final int fHeight = (int) Math.round(src.getHeight() * scaleFactor);
 
         final BufferedImage copy = new BufferedImage(fWidth, fHeight, BufferedImage.TYPE_INT_ARGB_PRE);
 
         Graphics2D g2d = copy.createGraphics();
-        var renderHint = scaleFactor <= 1
-                ? RenderingHints.VALUE_INTERPOLATION_BICUBIC
-                : RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+        var renderHint = pixelArtScaling
+                ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+                : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, renderHint);
         g2d.drawImage(src, (flip ? fHeight : 0), 0, (flip ? -fWidth : fWidth), fHeight, null);

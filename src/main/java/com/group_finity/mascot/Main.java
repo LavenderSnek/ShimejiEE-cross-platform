@@ -4,24 +4,44 @@ import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
-import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
+import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BooleanSupplier;
@@ -77,8 +97,8 @@ public final class Main {
     private final List<String> activeImageSets = new ArrayList<>();
 
     private Locale locale = Locale.ENGLISH;
-    private double scaling = 1;
-    private final ConcurrentMap<String, Boolean> userSwitches = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> userSwitches = new ConcurrentHashMap<>(16, 0.75f, 2);
+    private final Map<String, String> imageSetDefaults = new ConcurrentHashMap<>(8, 0.75f, 2);
 
     private final Manager manager = new Manager();
     private static final Main instance = new Main();
@@ -101,6 +121,18 @@ public final class Main {
     }
 
     public ImageSet getImageSet(String name) {
+        if (loadedImageSets.containsKey(name)) {
+            return loadedImageSets.get(name);
+        }
+        if (!Files.isDirectory(getProgramFolder().imgPath().resolve(name))) {
+            return null;
+        }
+        // sort of deals with dependencies + allows dynamic loading with scripts
+        try {
+            loadImageSet(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return loadedImageSets.getOrDefault(name, null);
     }
 
@@ -122,11 +154,17 @@ public final class Main {
         }
     }
 
-    public double getScaling() {return scaling;}
-    private void setScaling(double scaling) {
-        this.scaling = scaling > 0 ? scaling : 1;
-        reloadImageSets();
-    }
+
+    //--- Bool settings
+    private final String[] USER_SWITCH_KEYS = {
+            "Breeding",
+            "Transients",
+            "Transformation",
+            "Throwing",
+            "Sounds",
+            "AlwaysShowShimejiChooser",
+            "TranslateBehaviorNames"
+    };
 
     public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
     private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
@@ -148,6 +186,19 @@ public final class Main {
 
     public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", false);}
     private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
+
+    private boolean shouldIgnoreImagesetProperties() {return userSwitches.getOrDefault("IgnoreImagesetProperties", false);}
+    private void setShouldIgnoreImagesetProperties(boolean b) {userSwitches.put("IgnoreImagesetProperties", b);}
+
+    //--- image set settings
+
+    private final String[] IMGSET_DEFAULTS_KEYS = {
+            "Scaling"
+    };
+
+    private double getScaling() {return Double.parseDouble(imageSetDefaults.getOrDefault("Scaling", "1"));}
+    private void setScaling(double scaling) {
+        imageSetDefaults.put("Scaling", scaling + "");}
 
     //-------------------------------------//
 
@@ -186,7 +237,7 @@ public final class Main {
             ImageSetChooserUtils.askUserForSelection(c -> {
                 setActiveImageSets(c);
                 getManager().setExitOnLastRemoved(isExit);
-            });
+            }, getActiveImageSets());
         } else {
             selections.forEach(this::addActiveImageSet);
             getManager().setExitOnLastRemoved(isExit);
@@ -206,21 +257,22 @@ public final class Main {
 
     /**
      * Loads resources for the specified image set.
-     *
-     * @return true if the imageSet was successfully loaded
      */
-    private boolean loadImageSet(final String imageSet) {
-        try {
-            var imgSet = ShimejiImageSet.loadFrom(getProgramFolder(), imageSet);
-            loadedImageSets.put(imageSet, imgSet);
-            return true;
-        } catch (IOException | ParserConfigurationException | SAXException | ConfigurationException e) {
-            e.printStackTrace();
-            Main.showError(Tr.tr("FailedLoadConfigErrorMessage")
-                           + "\n" + e.getMessage()
-                           + "\n" + Tr.tr("SeeLogForDetails"));
+    private void loadImageSet(final String imageSet) throws ConfigurationException, ParserConfigurationException, IOException, SAXException {
+        HashMap<String, String> settings = new HashMap<>(imageSetDefaults);
+
+        if (!shouldIgnoreImagesetProperties()) {
+            try {
+                var imgSetPropsPath = getProgramFolder().imgPath()
+                        .resolve(imageSet).resolve("conf").resolve("imageset.properties");
+                settings.putAll(loadProperties(imgSetPropsPath));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        return false;
+
+        var imgSet = ShimejiImageSet.loadFrom(getProgramFolder(), imageSet, settings);
+        loadedImageSets.put(imageSet, imgSet);
     }
 
     /**
@@ -276,15 +328,23 @@ public final class Main {
      * but a mascot is still created.
      */
     private void addActiveImageSet(String imageSet) {
-        boolean loaded = loadImageSet(imageSet);
+        if (!loadedImageSets.containsKey(imageSet)) {
+            try {
+                loadImageSet(imageSet);
+            } catch (ConfigurationException | ParserConfigurationException | SAXException | IOException e) {
+                e.printStackTrace();
+                loadedImageSets.remove(imageSet);
+                Main.showError(Tr.tr("FailedLoadConfigErrorMessage")
+                               + "\n" + e.getMessage()
+                               + "\n" + Tr.tr("SeeLogForDetails"));
+            }
+        }
 
-        if (loaded) {
+        if (loadedImageSets.containsKey(imageSet)) {
             if (!activeImageSets.contains(imageSet)) {
                 activeImageSets.add(imageSet);
             }
             createMascot(imageSet);
-        } else {
-            removeActiveImageSet(imageSet);
         }
     }
 
@@ -365,32 +425,18 @@ public final class Main {
 
     //---------Setting storage/extraction------------//
 
-    private final String[] USER_SWITCH_KEYS = {
-            "Breeding",
-            "Transformation",
-            "Throwing",
-            "Sounds",
-            "Multiscreen",
-            "AlwaysShowShimejiChooser",
-            "TranslateBehaviorNames"
-    };
-
-    private static String getSetting(Properties defaultValues, String key) {
+    private static String getSetting(Map<String, String> defaultValues, String key) {
         var sp = System.getProperty(SP_PREFIX + key);
         if (sp != null) {
             return sp;
         } else if (defaultValues != null) {
-            return defaultValues.getProperty(key);
+            return defaultValues.get(key);
         }
         return null;
     }
 
     private void loadAllSettings(Path inputFilePath) {
-        var props = new Properties();
-        try (var input = new InputStreamReader(new FileInputStream(inputFilePath.toFile()), StandardCharsets.UTF_8)) {
-            props.load(input);
-        } catch (Exception ignored) {
-        }
+        var props = loadProperties(inputFilePath);
 
         for (String key : USER_SWITCH_KEYS) {
             var s = getSetting(props, key);
@@ -399,14 +445,16 @@ public final class Main {
             }
         }
 
+        for (String key: IMGSET_DEFAULTS_KEYS) {
+            var s = getSetting(props, key);
+            if (s != null) {
+                imageSetDefaults.put(key, s);
+            }
+        }
+
         var localeProp = getSetting(props, "Language");
         if (localeProp != null) {
             locale = Locale.forLanguageTag(localeProp);
-        }
-
-        var scaleProp = getSetting(props, "Scaling");
-        if (scaleProp != null) {
-            scaling = Double.parseDouble(scaleProp);
         }
 
         var pfProp = getSetting(props, "ProgramFolder");
@@ -427,45 +475,70 @@ public final class Main {
                 altMonoSp != null ? Boolean.parseBoolean(altMonoSp) : basePf.isMonoImageSet());
 
         var selectionsProp = getSetting(props, "ActiveShimeji");
-        if (selectionsProp != null && !programFolder.isMonoImageSet()) {
+        if (selectionsProp != null) {
             var ims = Stream
                     .of(selectionsProp.split("/"))
                     .map(s -> URLDecoder.decode(s, StandardCharsets.UTF_8))
                     .filter(s -> {
-                        Path p = Path.of(programFolder.imgPath().toString(), s);
+                        Path p = programFolder.imgPath().resolve(s);
                         return Files.isDirectory(p);
                     })
                     .collect(Collectors.toSet());
 
-            ims.remove("");
+            if (!programFolder.isMonoImageSet()) {
+                ims.remove("");
+            }
             activeImageSets.addAll(ims);
         }
 
     }
 
     private void writeAllSettings(Path outputFilePath) {
-        var props = new Properties();
+        Map<String, String> props = new HashMap<>();
 
-        userSwitches.forEach((k,v) -> props.setProperty(k, String.valueOf(v)));
+        userSwitches.forEach((k,v) -> props.put(k, v + ""));
         if (getScaling() != 1) {
-            props.setProperty("Scaling", String.valueOf(getScaling()));
+            props.put("Scaling", getScaling() + "");
         }
+
         if (!getLocale().equals(Locale.ENGLISH)) {
-            props.setProperty("Language", getLocale().toLanguageTag());
+            props.put("Language", getLocale().toLanguageTag());
         }
 
         var sb = new StringBuilder();
         for (String set : getActiveImageSets()) {
             sb.append(URLEncoder.encode(set, StandardCharsets.UTF_8)).append('/');
         }
-        props.setProperty("ActiveShimeji", sb.toString());
+        props.put("ActiveShimeji", sb.toString());
 
         // program folder excluded on purpose since there's not going to be a gui for it
 
-        try (var out = new OutputStreamWriter(new FileOutputStream(outputFilePath.toFile()), StandardCharsets.UTF_8)) {
+        writeProperties(props, outputFilePath);
+    }
+
+    private static Map<String, String> loadProperties(Path propsPath) {
+        var props = new Properties();
+
+        if (propsPath != null && Files.isRegularFile(propsPath)) {
+            try (var input = new InputStreamReader(new FileInputStream(propsPath.toFile()), StandardCharsets.UTF_8)) {
+                props.load(input);
+            } catch (Exception ignored) {
+            }
+        }
+
+        Map<String, String> ret = new HashMap<>();
+        props.forEach((k,v) -> ret.put((String) k, (String) v));
+
+        return ret;
+    }
+
+    private static void writeProperties(Map<String, String> propsMap, Path outPath) {
+        var props = new Properties(propsMap.size());
+        props.putAll(propsMap);
+        try (var out = new OutputStreamWriter(new FileOutputStream(outPath.toFile()), StandardCharsets.UTF_8)) {
             props.store(out, "ShimejiEE preferences");
         } catch (Exception e) {
-            log.log(Level.WARNING, "Unable to write settings:" + outputFilePath, e);
+            log.log(Level.WARNING, "Unable to write settings:" + outPath, e);
         }
     }
 
@@ -569,9 +642,10 @@ public final class Main {
         final var transientToggle = getToggleItem("BreedingTransient", this::isTransientBreedingAllowed, this::setTransientBreedingAllowed);
         final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
         final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
+        final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
         final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
         final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviorNames, this::setShouldTranslateBehaviorNames);
-        final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
+        final var ignoreImagesetPropsToggle = getToggleItem("IgnoreImagesetProperties", this::shouldIgnoreImagesetProperties, this::setShouldIgnoreImagesetProperties);
 
         togglesMenu.add(breedingToggle);
         togglesMenu.add(transientToggle);
@@ -580,12 +654,15 @@ public final class Main {
         togglesMenu.add(soundToggle);
         togglesMenu.add(chooserAtStartToggle);
         togglesMenu.add(behaviorTranslationToggle);
+        togglesMenu.add(ignoreImagesetPropsToggle);
 
         //----------------------//
 
         //image set chooser
         final MenuItem chooseShimeji = new MenuItem(Tr.tr("ChooseShimeji"));
-        chooseShimeji.addActionListener(e -> ImageSetChooserUtils.askUserForSelection(this::setActiveImageSets));
+        chooseShimeji.addActionListener(e -> {
+            ImageSetChooserUtils.askUserForSelection(this::setActiveImageSets, getActiveImageSets());
+        });
 
         //reload button
         final MenuItem reloadMascot = new MenuItem(Tr.tr("ReloadMascots"));

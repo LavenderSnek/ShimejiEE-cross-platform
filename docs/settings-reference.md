@@ -14,23 +14,45 @@ java -Dcom.group_finity.mascot.prefs.Sounds=false -jar ShimejiEE.jar
 
 Properties set from the command line take priority over those read from the settings file.
 
-### Booleans
+### Toggles
 
-| Name                       | Description                                                     | Default |
-|----------------------------|-----------------------------------------------------------------|---------|
-| `Breeding`                 | Allow shimeji to spawn other shimeji                            | `true`  |
-| `Transformation`           | Allow shimeji to transform between image sets                   | `true`  |
-| `Throwing`                 | Allow shimeji to move/throw windows                             | `true`  |
-| `Sounds`                   | Allow shimeji to play sound                                     | `true`  |
-| `AlwaysShowShimejiChooser` | Show the image set chooser on startup regardless of selections  | `false` |
-| `TranslateBehaviorNames`   | Translate behaviour names to more readable forms in menus       | `false` |
+| Name                       | Description                                                            | Default |
+|----------------------------|------------------------------------------------------------------------|---------|
+| `Breeding`                 | Allow shimeji to spawn other shimeji                                   | `true`  |
+| `Transients`               | Allow shimeji to spawn other if the new shimeji is marked as transient | `true`  |
+| `Transformation`           | Allow shimeji to transform between image sets                          | `true`  |
+| `Throwing`                 | Allow shimeji to move/throw windows                                    | `true`  |
+| `Sounds`                   | Allow shimeji to play sound                                            | `true`  |
+| `AlwaysShowShimejiChooser` | Show the image set chooser on startup regardless of selections         | `false` |
+| `TranslateBehaviorNames`   | Translate behaviour names to more readable forms in menus              | `false` |
+| `IgnoreImagesetProperties` | Ignore any settings in `imageset.properties` files.                    | `false` |
+
+### ImageSet specific
+
+All of these are (except `Scaling`) are not written back to any of the settings files. Reloading mascots is necessary 
+for these changes to take effect.
+
+To use these options, make a file called `imageset.properties` in the image set's isolated conf folder
+(i.e `<image set name>/conf/imageset.properties`).
+If these options are specified through the command line, they are only treated as defaults and the contents of
+the `imageset.properties` file still take precedence unless `IgnoreImagesetProperties` is enabled.
+
+| Name                     | Description                                                                                | Default |
+|--------------------------|--------------------------------------------------------------------------------------------|---------|
+| `Scaling`                | Sets the scale factor applies to the images and anchors. Needs to be > 0, Can be a decimal | `1`     |
+| `LogicalAnchors`         | Whether different anchors for the same image pairs are loaded.                             | `false` |
+| `AsymmetryNameScheme`    | Uses the `-r` suffix to find a separate ImageRight (if no ImageRight is provided).         | `false` |
+| `PixelArtScaling`        | Enable this to use nearest neighbour interpolation for scaling.                            | `false` |
+| `FixRelativeGlobalSound` | Whether to automatically fix missing sound files when they begin with `/../../sound/`      | `false` |
 
 ### Misc.
 
-| Name                 | Description                                                                                                                                                                                                                                                                               |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Language`           | The language tag for the UI locale. Default value is english (`en`).                                                                                                                                                                                                                      |
-| `ActiveShimeji`      | A slash separated list of selected image sets from the current img folder. For example the value `ImageSet1/abcd/loremipsum/`  would select `ImageSet1`, `abcd`, and `loremipsum`. If an image set can't be loaded for any reason,  it is discarded from the list of selected image sets. |
+| Name                 | Description                                                                                                                                                                                                                                                                                                 |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Language`           | The language tag for the UI locale. Default value is english (`en`).                                                                                                                                                                                                                                        |
+| `ActiveShimeji`      | A slash separated + url encoded list of selected image sets from the current img folder. For example the value `ImageSet1/abcd/lorem%2Fipsum/`  would select `ImageSet1`, `abcd`, and `lorem/ipsum`. If an image set can't be loaded for any reason,  it is discarded from the list of selected image sets. |
+
+
 
 ### Program Folder
 

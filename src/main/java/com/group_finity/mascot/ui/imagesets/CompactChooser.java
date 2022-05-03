@@ -22,6 +22,7 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,9 +38,11 @@ class CompactChooser {
     private JList<CompactImageSetPreview> imageSetJlist;
 
     private final Consumer<Collection<String>> onSelection;
+    private final Collection<String> currentlySelected;
 
-    CompactChooser(Consumer<Collection<String>> onSelection) {
+    CompactChooser(Consumer<Collection<String>> onSelection, Collection<String> currentlySelected) {
         this.onSelection = onSelection;
+        this.currentlySelected = currentlySelected;
     }
 
     /**
@@ -86,7 +89,7 @@ class CompactChooser {
             return;
         }
 
-        Set<String> selected = Main.getInstance().getActiveImageSets();
+        Set<String> selected = new HashSet<>(currentlySelected);
 
         Collection<CompactImageSetPreview> data = new ArrayList<>(allImageSets.length);
         for (String imgSet : allImageSets) {

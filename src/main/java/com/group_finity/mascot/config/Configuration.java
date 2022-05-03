@@ -52,7 +52,13 @@ public class Configuration {
     private final Map<String, ActionBuilder> actionBuilders = new LinkedHashMap<>();
     private final Map<String, BehaviorBuilder> behaviorBuilders = new LinkedHashMap<>();
 
-    public void load(Entry mascotNode, PoseLoader poseLoader) throws IOException, ConfigurationException {
+    public void load(PoseLoader poseLoader, Entry... mascotNodes) throws ConfigurationException, IOException {
+        for (Entry mascotNode : mascotNodes) {
+            load(poseLoader, mascotNode);
+        }
+    }
+
+    public void load(PoseLoader poseLoader, Entry mascotNode) throws IOException, ConfigurationException {
 
         for (Schema lang : Schema.values()) {
             if (mascotNode.hasChild(lang.tr("ActionList")) || mascotNode.hasChild(lang.tr("BehaviourList"))) {
