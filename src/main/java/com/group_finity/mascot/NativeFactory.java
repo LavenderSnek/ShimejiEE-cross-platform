@@ -51,7 +51,7 @@ public abstract class NativeFactory {
 
     public abstract NativeEnvironment getEnvironment();
 
-    public abstract NativeImage newNativeImage(BufferedImage src, int scaling);
+    public abstract NativeImage newNativeImage(BufferedImage src);
 
     public abstract TranslucentWindow newTransparentWindow();
 

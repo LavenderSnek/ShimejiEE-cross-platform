@@ -95,13 +95,13 @@ public class ImagePairLoader implements ImagePairStore {
         );
 
         MascotImage lMascot = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(leftImg, 1),
+                NativeFactory.getInstance().newNativeImage(leftImg),
                 scaledAnchor,
                 new Dimension(leftImg.getWidth(), leftImg.getHeight())
         );
 
         MascotImage rMascot = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(rightImg, 1),
+                NativeFactory.getInstance().newNativeImage(rightImg),
                 new Point(rightImg.getWidth() - scaledAnchor.x, scaledAnchor.y),
                 new Dimension(rightImg.getWidth(), rightImg.getHeight())
         );

@@ -37,7 +37,7 @@ public class NativeFactoryImpl extends NativeFactory {
     }
 
     @Override
-    public NativeImage newNativeImage(BufferedImage src, int scaling) {
+    public NativeImage newNativeImage(BufferedImage src) {
         return new MacJniNativeImage(src);
     }
 
