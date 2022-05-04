@@ -193,7 +193,11 @@ public final class Main {
     //--- image set settings
 
     private final String[] IMGSET_DEFAULTS_KEYS = {
-            "Scaling"
+            "Scaling",
+            "LogicalAnchors",
+            "AsymmetryNameScheme",
+            "PixelArtScaling",
+            "FixRelativeGlobalSound"
     };
 
     private double getScaling() {return Double.parseDouble(imageSetDefaults.getOrDefault("Scaling", "1"));}
