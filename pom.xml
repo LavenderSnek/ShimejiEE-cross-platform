@@ -29,10 +29,23 @@
             <artifactId>nashorn-core</artifactId>
             <version>15.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!--     tests       -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
+            </plugin>
+
             <!--     jni header generation      -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
