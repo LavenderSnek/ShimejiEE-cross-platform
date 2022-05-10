@@ -36,7 +36,8 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
         }
     };
 
-    protected BaseNativeEnvironment() {
+    @Override
+    public void init() {
         updateDisplayBounds();
         tick();
     }
@@ -83,8 +84,8 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
     /**
      * Refreshes all cached info relating to display bounds.
      * <p>
-     * This method is called in the constructor and should be called by
-     * subclasses when the display configuration has changed.
+     * This method should be called after the object is constructed and
+     * when the display configuration changes.
      *
      * @see #getNewDisplayBoundsList()
      */

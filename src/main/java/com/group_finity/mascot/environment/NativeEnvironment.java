@@ -7,6 +7,17 @@ import java.awt.Point;
  */
 public interface NativeEnvironment {
 
+    /**
+     * Completes any setup needed before accurate info can be provided.
+     * <p>
+     * Call this before using the environment.
+     * <p>
+     * This method can be used to set up the initial display bounds and/or to start
+     * a thread to periodically update the display bounds. This method should be called only after
+     * the object is constructed.
+     */
+    default void init() {}
+
     //---desktop
 
     /**

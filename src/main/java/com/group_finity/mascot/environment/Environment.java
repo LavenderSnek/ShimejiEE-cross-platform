@@ -66,7 +66,8 @@ public abstract class Environment implements NativeEnvironment {
 	private final ComplexArea complexScreen = new ComplexArea();
 	private final Location cursor = new Location();
 
-    protected Environment() {
+    @Override
+    public void init() {
         tick();
     }
 
