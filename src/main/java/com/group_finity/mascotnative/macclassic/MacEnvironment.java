@@ -17,7 +17,7 @@ import java.util.Set;
  *
  * @author nonowarn
  */
-class MacEnvironment extends BaseNativeEnvironment {
+public class MacEnvironment extends BaseNativeEnvironment {
 
     // this might still break on the new notched macs
     private static final int MENUBAR_HEIGHT = 24;

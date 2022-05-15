@@ -5,6 +5,7 @@ import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascotnative.macclassic.MacEnvironment;
 
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -29,7 +30,12 @@ public class NativeFactoryImpl extends NativeFactory {
         }
     }
 
-    private final NativeEnvironment environment = new MacJniEnvironment();
+    private final NativeEnvironment environment;
+    {
+        environment =  Boolean.getBoolean("com.group_finity.mascotnative.macjni.ClassicEnv")
+                ? new MacEnvironment()
+                : new MacJniEnvironment();
+    }
 
     @Override
     public NativeEnvironment getEnvironment() {
