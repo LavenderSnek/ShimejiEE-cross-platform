@@ -21,7 +21,7 @@ public class Transform extends Animate {
     private static final String DEFAULT_TRANSFORMBEHAVIOUR = "";
 
     public static final String PARAMETER_TRANSFORMMASCOT = "TransformMascot";
-    private static final String DEFAULT_TRANSFORMMASCOT = "";
+    private static final String DEFAULT_TRANSFORMMASCOT = null;
 
     public Transform(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap params) {
         super(schema, animations, params);

@@ -31,7 +31,7 @@ public class BreedMove extends Move {
     private static final String DEFAULT_BORNBEHAVIOUR = "";
 
     public static final String PARAMETER_BORNMASCOT = "BornMascot";
-    private static final String DEFAULT_BORNMASCOT = "";
+    private static final String DEFAULT_BORNMASCOT = null;
 
     public static final String PARAMETER_BORNTRANSIENT = "BornTransient";
     private static final boolean DEFAULT_BORNTRANSIENT = false;

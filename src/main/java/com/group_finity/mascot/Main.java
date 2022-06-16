@@ -137,6 +137,9 @@ public final class Main {
     }
 
     public Configuration getConfiguration(String imageSet) {
+        if (imageSet == null) {
+            return null;
+        }
         var imgSet = getImageSet(imageSet);
         return imgSet == null ? null : imgSet.getConfiguration();
     }

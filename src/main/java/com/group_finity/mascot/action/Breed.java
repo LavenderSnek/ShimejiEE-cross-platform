@@ -46,7 +46,7 @@ public class Breed extends Animate {
      * @see Breed#getBornMascot()
      */
     public static final String PARAMETER_BORNMASCOT = "BornMascot";
-    private static final String DEFAULT_BORNMASCOT = "";
+    private static final String DEFAULT_BORNMASCOT = null;
 
     /**
      * @see Breed#getBornTransient()
