@@ -165,8 +165,9 @@ public final class Main {
             "Transformation",
             "Throwing",
             "Sounds",
+            "TranslateBehaviorNames",
             "AlwaysShowShimejiChooser",
-            "TranslateBehaviorNames"
+            "IgnoreImagesetProperties"
     };
 
     public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
@@ -184,11 +185,11 @@ public final class Main {
     public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
     private void setSoundAllowed(boolean allowed) {userSwitches.put("Sounds", allowed);}
 
+    public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", true);}
+    private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
+
     private boolean shouldShowChooserAtStart() {return userSwitches.getOrDefault("AlwaysShowShimejiChooser", false);}
     private void setShouldShowChooserAtStart(boolean b) {userSwitches.put("AlwaysShowShimejiChooser", b);}
-
-    public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", false);}
-    private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
 
     private boolean shouldIgnoreImagesetProperties() {return userSwitches.getOrDefault("IgnoreImagesetProperties", false);}
     private void setShouldIgnoreImagesetProperties(boolean b) {userSwitches.put("IgnoreImagesetProperties", b);}
@@ -650,8 +651,8 @@ public final class Main {
         final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
         final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
         final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
-        final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
         final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviorNames, this::setShouldTranslateBehaviorNames);
+        final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
         final var ignoreImagesetPropsToggle = getToggleItem("IgnoreImagesetProperties", this::shouldIgnoreImagesetProperties, this::setShouldIgnoreImagesetProperties);
 
         togglesMenu.add(breedingToggle);
@@ -659,8 +660,8 @@ public final class Main {
         togglesMenu.add(transformToggle);
         togglesMenu.add(windowThrowToggle);
         togglesMenu.add(soundToggle);
-        togglesMenu.add(chooserAtStartToggle);
         togglesMenu.add(behaviorTranslationToggle);
+        togglesMenu.add(chooserAtStartToggle);
         togglesMenu.add(ignoreImagesetPropsToggle);
 
         //----------------------//
