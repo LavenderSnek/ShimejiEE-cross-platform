@@ -35,12 +35,11 @@ public class ImagePairLoader implements ImagePairStore {
 
     @Override
     public String load(String imageText, String imageRightText, Point anchor) throws IOException {
-        String errorText = "image=" + imageText + (imageRightText == null ? "" : ", imageRight=" + imageRightText) + ", anchor=" + anchor;
         if (anchor == null) {
-            throw  new IOException("Invalid/Missing image anchor: " + errorText);
+            throw  new IOException("Invalid/Missing image anchor.");
         }
         if (!imageText.startsWith("/") || (imageRightText != null && !imageRightText.startsWith("/"))) {
-            throw new IOException("Image text must start with '/' (slash) for compatibility: " + errorText);
+            throw new IOException("Image text must start with '/' (slash) for compatibility.");
         }
 
         imageText = imageText.replaceAll("^/+", "");

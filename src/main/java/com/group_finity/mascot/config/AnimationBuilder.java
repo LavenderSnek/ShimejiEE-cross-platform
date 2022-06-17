@@ -24,7 +24,13 @@ public class AnimationBuilder {
                 : animationNode.getAttribute(schema.getString("Condition"));
 
         for (Entry poseNode : animationNode.selectChildren(schema.getString("Pose"))) {
-            getPoses().add(poseLoader.loadPose(schema, poseNode));
+            Pose pose;
+            try {
+                pose = poseLoader.loadPose(schema, poseNode);
+            } catch (Exception e) {
+                throw new IOException(e.getMessage() + "\nUnable to load pose" + poseNode.getAttributes(), e);
+            }
+            getPoses().add(pose);
         }
     }
 
