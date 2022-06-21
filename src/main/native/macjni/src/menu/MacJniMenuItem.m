@@ -14,14 +14,8 @@ jmethodID JMID_MacJniMenuItem_onClick;
 + (void)initialize {
 
     if (self == [JniMenuItem class]) {
-        [JniHelper getEnvAndPerform:^(JNIEnv* env){
-            jclass localClsRef = (*env)->FindClass(env, "com/group_finity/mascotnative/macjni/menu/MacJniMenuItem");
-            JC_MacJniMenuItem = (*env)->NewGlobalRef(env, localClsRef);
-            (*env)->DeleteLocalRef(env, localClsRef);
-
-            JMID_MacJniMenuItem_onClick =
-            (*env)->GetMethodID(env, JC_MacJniMenuItem, "_onClick", "()V");
-        }];
+        JC_MacJniMenuItem = [JniHelper makeGlobalClassRefOf:"com/group_finity/mascotnative/macjni/menu/MacJniMenuItem"];
+        JMID_MacJniMenuItem_onClick = [JniHelper getMethodIdFromClass:JC_MacJniMenuItem ofMethodNamed:"_onClick" withSignature:"()V"];
     }
 
 }

@@ -44,7 +44,6 @@
 
 #pragma mark -Peer Window
 
-// todo : release this global ref at the end
 jclass JC_MacJniShimejiWindow;
 jmethodID JMID_MacJniShimejiWindow_onLeftMouseDown;
 jmethodID JMID_MacJniShimejiWindow_onLeftMouseUp;
@@ -57,22 +56,10 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
 + (void)initialize
 {
     if (self == [ShimejiWindow class]) {
-        [JniHelper getEnvAndPerform:^(JNIEnv* env){
-            jclass tmpClassRef;
-            
-            tmpClassRef = (*env)->FindClass(env, "com/group_finity/mascotnative/macjni/MacJniShimejiWindow");
-            JC_MacJniShimejiWindow = (*env)->NewGlobalRef(env, tmpClassRef);
-            (*env)->DeleteLocalRef(env, tmpClassRef);
-
-            JMID_MacJniShimejiWindow_onLeftMouseDown =
-            (*env)->GetMethodID(env, JC_MacJniShimejiWindow, "_onLeftMouseDown", "()V");
-
-            JMID_MacJniShimejiWindow_onLeftMouseUp =
-            (*env)->GetMethodID(env, JC_MacJniShimejiWindow, "_onLeftMouseUp", "()V");
-
-            JMID_MacJniShimejiWindow_getNSMenuPtrForPopup =
-            (*env)->GetMethodID(env, JC_MacJniShimejiWindow, "_getNSMenuPtrForPopup", "()J");
-        }];
+        JC_MacJniShimejiWindow = [JniHelper makeGlobalClassRefOf:"com/group_finity/mascotnative/macjni/MacJniShimejiWindow"];
+        JMID_MacJniShimejiWindow_onLeftMouseDown = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseDown" withSignature:"()V"];
+        JMID_MacJniShimejiWindow_onLeftMouseUp = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseUp" withSignature:"()V"];
+        JMID_MacJniShimejiWindow_getNSMenuPtrForPopup = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_getNSMenuPtrForPopup" withSignature:"()J"];
     }
 }
 
@@ -86,6 +73,7 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
         [self setContentView:cv];
         [self setBackgroundColor:NSColor.clearColor];
         [self setLevel:NSStatusWindowLevel];
+        [self setCollectionBehavior:NSWindowCollectionBehaviorStationary | NSWindowCollectionBehaviorMoveToActiveSpace | NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorFullScreenAuxiliary];
         self->javaRep = javaRep;
     }
     return self;

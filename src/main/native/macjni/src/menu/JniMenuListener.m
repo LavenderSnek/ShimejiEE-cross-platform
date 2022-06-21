@@ -2,9 +2,9 @@
 #import "JniMenuListener.h"
 #import "JniHelper.h"
 
-jclass JC_MacJniMneu;
-jmethodID JMID_MacJniMneu_onOpen;
-jmethodID JMID_MacJniMneu_onClose;
+jclass JC_MacJniMenu;
+jmethodID JMID_MacJniMenu_onOpen;
+jmethodID JMID_MacJniMenu_onClose;
 
 @implementation JniMenuListener {
     jobject javaRep;
@@ -12,17 +12,9 @@ jmethodID JMID_MacJniMneu_onClose;
 
 + (void)initialize {
     if (self == [JniMenuListener class]) {
-        [JniHelper getEnvAndPerform:^(JNIEnv* env){
-            jclass localClsRef = (*env)->FindClass(env, "com/group_finity/mascotnative/macjni/menu/MacJniMenu");
-            JC_MacJniMneu = (*env)->NewGlobalRef(env, localClsRef);
-            (*env)->DeleteLocalRef(env, localClsRef);
-
-            JMID_MacJniMneu_onOpen =
-            (*env)->GetMethodID(env, JC_MacJniMneu, "_onOpen", "()V");
-
-            JMID_MacJniMneu_onClose =
-            (*env)->GetMethodID(env, JC_MacJniMneu, "_onClose", "()V");
-        }];
+        JC_MacJniMenu = [JniHelper makeGlobalClassRefOf:"com/group_finity/mascotnative/macjni/menu/MacJniMenu"];
+        JMID_MacJniMenu_onOpen = [JniHelper getMethodIdFromClass:JC_MacJniMenu ofMethodNamed:"_onOpen" withSignature:"()V"];
+        JMID_MacJniMenu_onClose = [JniHelper getMethodIdFromClass:JC_MacJniMenu ofMethodNamed:"_onClose" withSignature:"()V"];
     }
 }
 
@@ -40,13 +32,13 @@ jmethodID JMID_MacJniMneu_onClose;
 
 - (void)menuWillOpen:(NSMenu*)menu {
     [JniHelper getEnvAndPerform:^(JNIEnv* env) {
-        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniMneu_onOpen);
+        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniMenu_onOpen);
     }];
 }
 
 - (void)menuDidClose:(NSMenu *)menu {
     [JniHelper getEnvAndPerform:^(JNIEnv* env) {
-        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniMneu_onClose);
+        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniMenu_onClose);
     }];
 }
 
