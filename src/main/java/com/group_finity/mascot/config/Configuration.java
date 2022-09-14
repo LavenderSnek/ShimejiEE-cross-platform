@@ -188,7 +188,10 @@ public class Configuration {
     }
 
     public Behavior buildBehavior(final String name) throws BehaviorInstantiationException {
-        return this.getBehaviorBuilders().get(name).buildBehavior();
+        if (getBehaviorBuilders().containsKey(name)) {
+            return this.getBehaviorBuilders().get(name).buildBehavior();
+        }
+        throw new BehaviorInstantiationException(Tr.tr("NoBehaviourFoundErrorMessage") + ": Behaviour=" + name);
     }
 
     private Map<String, String> getConstants() {
