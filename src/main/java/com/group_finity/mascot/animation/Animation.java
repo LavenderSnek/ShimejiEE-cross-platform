@@ -7,17 +7,20 @@ import com.group_finity.mascot.script.VariableMap;
 
 public class Animation {
 
-    private Variable condition;
+    private final Variable condition;
 
     private final Pose[] poses;
 
-    public Animation(final Variable condition, final Pose... poses) {
+    private final Hotspot[] hotspots;
+
+    public Animation(Variable condition, Pose[] poses, Hotspot[] hotspots) {
         if (poses.length == 0) {
             throw new IllegalArgumentException("poses.length == 0");
         }
 
         this.condition = condition;
         this.poses = poses;
+        this.hotspots = hotspots;
     }
 
     public boolean isEffective(final VariableMap variables) throws VariableException {
@@ -64,6 +67,10 @@ public class Animation {
 
     private Pose[] getPoses() {
         return this.poses;
+    }
+
+    public Hotspot[] getHotspots() {
+        return hotspots;
     }
 
 }

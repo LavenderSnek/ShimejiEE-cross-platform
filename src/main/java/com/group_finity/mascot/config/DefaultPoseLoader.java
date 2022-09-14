@@ -39,14 +39,12 @@ public class DefaultPoseLoader implements PoseLoader {
             imageKey = getImagePairStore().load(imageText, imageRightText, anchor);
         }
 
-        final double scaling = getImagePairStore().getScaling();
-
         String[] velocityCoords = velocityText.split(",");
         int dx = Integer.parseInt(velocityCoords[0]);
         int dy = Integer.parseInt(velocityCoords[1]);
 
-        int scaledDx = (int) Math.round(dx * scaling);
-        int scaledDy = (int) Math.round(dy * scaling);
+        int scaledDx = (int) Math.round(dx * getScaling());
+        int scaledDy = (int) Math.round(dy * getScaling());
         scaledDx = dx != 0 && scaledDx == 0 ? (dx < 0 ? -1 : 1) : scaledDx; // prevents them from getting stuck
         scaledDy = dy != 0 && scaledDy == 0 ? (dy < 0 ? -1 : 1) : scaledDy;
 
@@ -63,6 +61,11 @@ public class DefaultPoseLoader implements PoseLoader {
         }
 
         return new Pose(imageKey, scaledDx, scaledDy, duration, soundKey);
+    }
+
+    @Override
+    public double getScaling() {
+        return getImagePairStore().getScaling();
     }
 
     private ImagePairStore getImagePairStore() {

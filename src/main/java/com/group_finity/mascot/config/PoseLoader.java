@@ -9,4 +9,6 @@ public interface PoseLoader {
 
     Pose loadPose(ResourceBundle schema, Entry poseNode) throws IOException;
 
+    double getScaling();
+
 }
