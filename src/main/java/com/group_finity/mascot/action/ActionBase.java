@@ -2,6 +2,7 @@ package com.group_finity.mascot.action;
 
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.animation.Animation;
+import com.group_finity.mascot.animation.Hotspot;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 
 /**
  * An abstract class that implements the common functionality of actions.
- * */
+ */
 public abstract class ActionBase implements Action {
 
     private static final Logger log = Logger.getLogger(ActionBase.class.getName());
@@ -102,10 +103,24 @@ public abstract class ActionBase implements Action {
     @Override
     public void next() throws LostGroundException, VariableException {
         initFrame();
-        // clear affordances
+        refreshHotspots();
         getMascot().getAffordances().clear();
         tick();
     }
+
+    protected void refreshHotspots() {
+        getMascot().getHotspots().clear();
+        try {
+            if (getAnimation() != null) {
+                for (final Hotspot hotspot : getAnimation().getHotspots()) {
+                    getMascot().getHotspots().add(hotspot);
+                }
+            }
+        } catch (VariableException ex) {
+            getMascot().getHotspots().clear();
+        }
+    }
+
 
     private void initFrame() {
         getVariables().initFrame();

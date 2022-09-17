@@ -1,5 +1,6 @@
 package com.group_finity.mascot;
 
+import com.group_finity.mascot.animation.Hotspot;
 import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
@@ -11,8 +12,10 @@ import com.group_finity.mascot.window.TranslucentWindow;
 import javax.sound.sampled.Clip;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,13 +53,17 @@ public class Mascot implements ScriptableMascot {
     private Point anchor = new Point(0, 0);
     private boolean lookRight = false;
 
-    private MascotEventHandler eventHandler = new MascotEventHandler(this);
+    private final List<Hotspot> hotspots = new ArrayList<>(5);
+    private Point hotspotCursor = null;
+    private boolean dragging = false;
+
     private DebugUi debugUi = null;
 
     public Mascot(final String imageSet) {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
+        MascotEventHandler eventHandler = new MascotEventHandler(this);
         getWindow().setEventHandler(eventHandler);
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
@@ -261,6 +268,31 @@ public class Mascot implements ScriptableMascot {
     @Override
     public void setLookRight(boolean lookRight) {
         this.lookRight = lookRight;
+    }
+
+    @Override
+    public List<Hotspot> getHotspots() {
+        return hotspots;
+    }
+
+    @Override
+    public boolean isDragging() {
+        return dragging;
+    }
+
+    @Override
+    public void setDragging(boolean dragging) {
+        this.dragging = dragging;
+    }
+
+    @Override
+    public Point getCursorPosition() {
+        return hotspotCursor;
+    }
+
+    @Override
+    public void setCursorPosition(Point position) {
+        hotspotCursor = position;
     }
 
 }

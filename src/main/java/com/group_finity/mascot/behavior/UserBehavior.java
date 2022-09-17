@@ -4,6 +4,7 @@ import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.action.Action;
 import com.group_finity.mascot.action.ActionBase;
+import com.group_finity.mascot.animation.Hotspot;
 import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.BehaviorInstantiationException;
@@ -78,24 +79,29 @@ public class UserBehavior implements Behavior {
      */
     public synchronized void mousePressed(TranslucentWindowEvent event) throws CantBeAliveException {
 
-        // check if this action has dragging disabled
-        boolean draggable = true;
-        if (action != null && action instanceof ActionBase) {
-            try {
-                draggable = ((ActionBase) action).isDraggable();
-            } catch (VariableException ex) {
-                throw new CantBeAliveException(Tr.tr("FailedDragActionInitialiseErrorMessage"), ex);
+        for (Hotspot hotspot : getMascot().getHotspots()) {
+            if (hotspot.contains(getMascot(), event.getRelativeLocation())) {
+                try {
+                    getMascot().setCursorPosition(event.getRelativeLocation());
+                    getMascot().setBehavior(configuration.buildBehavior(hotspot.getBehaviour()));
+                    return; // return early if hotspot found
+                } catch (final BehaviorInstantiationException e) {
+                    throw new CantBeAliveException(Tr.tr("FailedInitialiseFollowingBehaviourErrorMessage") + ": Behavior=" + hotspot.getBehaviour(), e);
+                }
             }
         }
 
-        if (draggable) {
-            // Begin dragging
+        // proceed with default dragging action if no hotspots are found
+        if (getAction() instanceof ActionBase a) {
             try {
-                getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_DRAGGED)));
-            } catch (final BehaviorInstantiationException e) {
+                if (a.isDraggable()) {
+                    getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_DRAGGED)));
+                }
+            } catch (VariableException | BehaviorInstantiationException e) {
                 throw new CantBeAliveException(Tr.tr("FailedDragActionInitialiseErrorMessage"), e);
             }
         }
+
     }
 
     /**
@@ -104,24 +110,19 @@ public class UserBehavior implements Behavior {
      */
     public synchronized void mouseReleased(TranslucentWindowEvent event) throws CantBeAliveException {
 
-        // check if this action has dragging disabled
-        boolean draggable = true;
-        if (action != null && action instanceof ActionBase) {
-            try {
-                draggable = ((ActionBase) action).isDraggable();
-            } catch (VariableException ex) {
-                throw new CantBeAliveException(Tr.tr("FailedDropActionInitialiseErrorMessage"), ex);
-            }
+        if (getMascot().isHotspotClicked()) {
+            getMascot().setCursorPosition(null);
         }
 
-        if (draggable) {
-            // Termination of drag
+        if (getMascot().isDragging()) {
             try {
-                getMascot().setBehavior(this.getConfiguration().buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_THROWN)));
+                getMascot().setDragging(false);
+                getMascot().setBehavior(configuration.buildBehavior(configuration.getSchema().getString(BEHAVIOURNAME_THROWN)));
             } catch (final BehaviorInstantiationException e) {
                 throw new CantBeAliveException(Tr.tr("FailedDropActionInitialiseErrorMessage"), e);
             }
         }
+
     }
 
     @Override

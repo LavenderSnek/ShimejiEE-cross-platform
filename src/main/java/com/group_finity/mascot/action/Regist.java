@@ -30,6 +30,8 @@ public class Regist extends ActionBase {
 
     @Override
     protected void tick() throws LostGroundException, VariableException {
+        getMascot().setDragging(true);
+
         final Animation animation = getAnimation();
         animation.next(getMascot(), getTime());
 
@@ -39,6 +41,12 @@ public class Regist extends ActionBase {
             log.log(Level.INFO, "Lost Ground ({0},{1})", new Object[]{getMascot(), this});
             throw new LostGroundException();
         }
+    }
+
+    @Override
+    protected void refreshHotspots() {
+        // hotspots unsupported for action
+        getMascot().getHotspots().clear();
     }
 
 }

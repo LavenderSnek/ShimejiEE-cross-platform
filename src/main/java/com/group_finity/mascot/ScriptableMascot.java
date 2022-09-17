@@ -1,10 +1,12 @@
 package com.group_finity.mascot;
 
+import com.group_finity.mascot.animation.Hotspot;
 import com.group_finity.mascot.environment.MascotEnvironment;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * API for mascot in scripts
@@ -123,5 +125,33 @@ public interface ScriptableMascot {
      * @see com.group_finity.mascot.action.Look
      */
     void setLookRight(boolean lookRight);
+
+    /**
+     * Currently active hotspots of this mascot.
+     */
+    List<Hotspot> getHotspots();
+
+    boolean isDragging();
+
+    void setDragging(boolean dragging);
+
+    /**
+     * Whether a hotspot is currently clicked.
+     */
+    default boolean isHotspotClicked() {
+        return getCursorPosition() != null;
+    }
+
+    /**
+     * Relative position of the current hotspot click.
+     * @return relative position of hotspot click or null if no hotspots are clicked.
+     */
+    Point getCursorPosition();
+
+    /**
+     * Sets the relative position of the current hotspot clicked.
+     * @param position relative position of hotspot click or null if no hotspots are clicked.
+     */
+    void setCursorPosition(Point position);
 
 }

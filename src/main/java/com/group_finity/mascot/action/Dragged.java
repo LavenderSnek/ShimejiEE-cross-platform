@@ -54,6 +54,7 @@ public class Dragged extends ActionBase {
     @Override
     protected void tick() throws LostGroundException, VariableException {
         getMascot().setLookRight(false);
+        getMascot().setDragging(true);
 
         final Location cursor = getEnvironment().getCursor();
 
@@ -75,6 +76,12 @@ public class Dragged extends ActionBase {
                 cursor.getX() + getOffsetX(),
                 cursor.getY() + getOffsetY()
         ));
+    }
+
+    @Override
+    protected void refreshHotspots() {
+        // hotspots unsupported for action
+        getMascot().getHotspots().clear();
     }
 
     private void setFootX(final double footX) {
