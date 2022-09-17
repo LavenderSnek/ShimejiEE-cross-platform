@@ -588,7 +588,9 @@ public final class Main {
                         {"tiếng Việt", "vi-VN"},//Vietnamese
                         {"简体中文", "zh-CN"},//Chinese(simplified)
                         {"繁體中文", "zh-TW"},//Chinese(traditional)
-                        {"한국어", "ko-KR"}};//Korean
+                        {"한국어", "ko-KR"},// Korean
+                        {"\u0639\u0631\u0628\u064A","ar"}//arabic
+                };
 
         //------------------------------------//
 
