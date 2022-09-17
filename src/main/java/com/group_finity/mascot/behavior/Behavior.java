@@ -2,8 +2,7 @@ package com.group_finity.mascot.behavior;
 
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.exception.CantBeAliveException;
-
-import java.awt.event.MouseEvent;
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 
 /**
  * Controls the long-term behavior of a mascot by controlling
@@ -26,16 +25,16 @@ public interface Behavior {
     /**
      * Called when the left mouse presses down on the mascot.
      *
-     * @param e left for compatibility, it is not used and can be left null
+     * @param e the click event which triggered this action.
      */
-    void mousePressed(MouseEvent e) throws CantBeAliveException;
+    void mousePressed(TranslucentWindowEvent e) throws CantBeAliveException;
 
     /**
      * Called when the left mouse is released from the mascot.
      *
-     * @param e left for compatibility, it is not used and can be left null
+     * @param e the click event which triggered this action.
      */
-    void mouseReleased(MouseEvent e) throws CantBeAliveException;
+    void mouseReleased(TranslucentWindowEvent e) throws CantBeAliveException;
 
     boolean isHidden();
 

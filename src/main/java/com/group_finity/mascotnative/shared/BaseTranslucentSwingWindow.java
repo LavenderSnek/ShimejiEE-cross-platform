@@ -3,6 +3,7 @@ package com.group_finity.mascotnative.shared;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 
 import javax.swing.JPopupMenu;
@@ -49,14 +50,14 @@ public abstract class BaseTranslucentSwingWindow<T extends NativeImage> extends 
                 if (SwingUtilities.isRightMouseButton(e)) {
                     showPopupMenu(e);
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    getEventHandler().onDragBegin();
+                    getEventHandler().onDragBegin(new TranslucentWindowEvent(e.getPoint()));
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    getEventHandler().onDragEnd();
+                    getEventHandler().onDragEnd(new TranslucentWindowEvent(e.getPoint()));
                 }
             }
         });

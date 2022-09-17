@@ -3,9 +3,11 @@ package com.group_finity.mascotnative.macjni;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 import com.group_finity.mascotnative.macjni.menu.MacJniPopupUtil;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 // might need to make a base jni translucent window eventually for x11
@@ -85,14 +87,17 @@ class MacJniShimejiWindow implements TranslucentWindow {
 
     //--- native callbacks---//
 
-    private void _onLeftMouseDown() {
-        eventHandler.onDragBegin();
+    @SuppressWarnings("unused")
+    private void _onLeftMouseDown(int relX, int relY) {
+        eventHandler.onDragBegin(new TranslucentWindowEvent(new Point(relX, relY)));
     }
 
-    private void _onLeftMouseUp() {
-        eventHandler.onDragEnd();
+    @SuppressWarnings("unused")
+    private void _onLeftMouseUp(int relX, int relY) {
+        eventHandler.onDragEnd(new TranslucentWindowEvent(new Point(relX, relY)));
     }
 
+    @SuppressWarnings("unused")
     private long _getNSMenuPtrForPopup() {
         TopLevelMenuRep topLevelMenuRep = eventHandler.getContextMenuRep();
         if (topLevelMenuRep != null) {

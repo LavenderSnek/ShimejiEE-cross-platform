@@ -10,9 +10,9 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 
 import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,7 +76,7 @@ public class UserBehavior implements Behavior {
      * Called when the left mouse is pressed.
      * Starts dragging action, if the current action is draggable.
      */
-    public synchronized void mousePressed(final MouseEvent event) throws CantBeAliveException {
+    public synchronized void mousePressed(TranslucentWindowEvent event) throws CantBeAliveException {
 
         // check if this action has dragging disabled
         boolean draggable = true;
@@ -102,7 +102,7 @@ public class UserBehavior implements Behavior {
      * Called when the left mouse is released.
      * Ends dragging.
      */
-    public synchronized void mouseReleased(final MouseEvent event) throws CantBeAliveException {
+    public synchronized void mouseReleased(TranslucentWindowEvent event) throws CantBeAliveException {
 
         // check if this action has dragging disabled
         boolean draggable = true;

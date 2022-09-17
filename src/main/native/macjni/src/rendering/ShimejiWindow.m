@@ -57,8 +57,8 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
 {
     if (self == [ShimejiWindow class]) {
         JC_MacJniShimejiWindow = [JniHelper makeGlobalClassRefOf:"com/group_finity/mascotnative/macjni/MacJniShimejiWindow"];
-        JMID_MacJniShimejiWindow_onLeftMouseDown = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseDown" withSignature:"()V"];
-        JMID_MacJniShimejiWindow_onLeftMouseUp = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseUp" withSignature:"()V"];
+        JMID_MacJniShimejiWindow_onLeftMouseDown = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseDown" withSignature:"(II)V"];
+        JMID_MacJniShimejiWindow_onLeftMouseUp = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_onLeftMouseUp" withSignature:"(II)V"];
         JMID_MacJniShimejiWindow_getNSMenuPtrForPopup = [JniHelper getMethodIdFromClass:JC_MacJniShimejiWindow ofMethodNamed:"_getNSMenuPtrForPopup" withSignature:"()J"];
     }
 }
@@ -85,13 +85,17 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
 
 - (void)mouseDown:(NSEvent *)event {
     [JniHelper getEnvAndPerform:^(JNIEnv* env){
-        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniShimejiWindow_onLeftMouseDown);
+        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniShimejiWindow_onLeftMouseDown,
+                               (int) [event locationInWindow].x,
+                               (int) ([self frame].size.height - [event locationInWindow].y));
     }];
 }
 
 - (void)mouseUp:(NSEvent *)event {
     [JniHelper getEnvAndPerform:^(JNIEnv* env){
-        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniShimejiWindow_onLeftMouseUp);
+        (*env)->CallVoidMethod(env, self->javaRep, JMID_MacJniShimejiWindow_onLeftMouseUp,
+                               (int) [event locationInWindow].x,
+                               (int) ([self frame].size.height - [event locationInWindow].y));
     }];
 }
 

@@ -5,6 +5,7 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
 import com.group_finity.mascot.ui.contextmenu.MenuRep;
 import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 
 import java.util.ArrayList;
@@ -19,10 +20,10 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
     }
 
     @Override
-    public void onDragBegin() {
+    public void onDragBegin(TranslucentWindowEvent event) {
         if (mascot.getBehavior() != null) {
             try {
-                mascot.getBehavior().mousePressed(null);
+                mascot.getBehavior().mousePressed(event);
             } catch (final CantBeAliveException e) {
                 Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
                                + "\n" + e.getMessage()
@@ -33,10 +34,10 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
     }
 
     @Override
-    public void onDragEnd() {
+    public void onDragEnd(TranslucentWindowEvent event) {
         if (mascot.getBehavior() != null) {
             try {
-                mascot.getBehavior().mouseReleased(null);
+                mascot.getBehavior().mouseReleased(event);
             } catch (final CantBeAliveException e) {
                 Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
                                + "\n" + e.getMessage()
