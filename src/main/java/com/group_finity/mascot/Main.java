@@ -206,7 +206,9 @@ public final class Main {
 
     private double getScaling() {return Double.parseDouble(imageSetDefaults.getOrDefault("Scaling", "1"));}
     private void setScaling(double scaling) {
-        imageSetDefaults.put("Scaling", scaling + "");}
+        imageSetDefaults.put("Scaling", scaling + "");
+        reloadImageSets();
+    }
 
     //-------------------------------------//
 
