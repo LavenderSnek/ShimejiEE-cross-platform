@@ -120,7 +120,7 @@ public class ImagePairLoader implements ImagePairStore {
                 : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, renderHint);
-        g2d.drawImage(src, (flip ? fHeight : 0), 0, (flip ? -fWidth : fWidth), fHeight, null);
+        g2d.drawImage(src, (flip ? fWidth : 0), 0, (flip ? -fWidth : fWidth), fHeight, null);
         g2d.dispose();
 
         return copy;
