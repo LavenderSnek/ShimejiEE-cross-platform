@@ -25,7 +25,6 @@ class WindowsNativeImage implements NativeImage {
                 : OsArchitecture.x86;
     }
 
-    private final BufferedImage managedImage;
     private final Pointer nativeHandle;
 
     /**
@@ -102,13 +101,12 @@ class WindowsNativeImage implements NativeImage {
 
     public WindowsNativeImage(final BufferedImage image, int scaling) {
 
-        this.managedImage = image;
-        int imageWidth = getManagedImage().getWidth();
-        int imageHeight = getManagedImage().getHeight();
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
 
         this.nativeHandle = createNative(imageWidth * scaling, imageHeight * scaling);
 
-        int[] rbgValues = this.getManagedImage()
+        int[] rbgValues = image
                 .getRGB(0, 0, imageWidth, imageHeight, null, 0, imageWidth);
 
         flushToNative(this.getNativeHandle(), rbgValues, scaling);
@@ -124,8 +122,5 @@ class WindowsNativeImage implements NativeImage {
         return this.nativeHandle;
     }
 
-    private BufferedImage getManagedImage() {
-        return this.managedImage;
-    }
 
 }
