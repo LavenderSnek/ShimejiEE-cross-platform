@@ -12,10 +12,7 @@ import com.group_finity.mascot.window.TranslucentWindow;
 import javax.sound.sampled.Clip;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,7 +129,9 @@ public class Mascot implements ScriptableMascot {
 
             // play sound if requested
             if (getSound() != null && Main.getInstance().isSoundAllowed()) {
-                Clip clip = Main.getInstance().getImageSet(getImageSet()).getSounds().get(getSound());
+                Clip clip = Objects.requireNonNull(Main.getInstance().getImageSet(getImageSet()))
+                        .getSounds()
+                        .get(getSound());
                 if (clip != null && !clip.isRunning()) {
                     clip.setMicrosecondPosition(0);
                     clip.start();
@@ -229,6 +228,7 @@ public class Mascot implements ScriptableMascot {
         imageSet = set;
     }
 
+    @Override
     public String getSound() {
         return sound;
     }
@@ -239,7 +239,9 @@ public class Mascot implements ScriptableMascot {
 
     // not part of the API, please don't call it from scripts
     public double getScaling() {
-        return Main.getInstance().getImageSet(getImageSet()).getImagePairs().getScaling();
+        return Objects.requireNonNull(Main.getInstance().getImageSet(getImageSet()))
+                .getImagePairs()
+                .getScaling();
     }
 
     public MascotImage getImage() {

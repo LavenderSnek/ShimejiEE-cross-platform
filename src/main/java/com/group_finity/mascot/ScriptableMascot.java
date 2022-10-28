@@ -18,6 +18,8 @@ public interface ScriptableMascot {
 
     /**
      * Destroys the mascot.
+     * <p>
+     * To play an animation before, use the {@link com.group_finity.mascot.action.SelfDestruct SelfDestruct} action.
      *
      * @see com.group_finity.mascot.action.SelfDestruct
      */
@@ -59,7 +61,7 @@ public interface ScriptableMascot {
     }
 
     /**
-     * The currently broadcast affordances of this mascot.
+     * The currently broadcasting affordances of this mascot.
      * <p>
      * This collection is cleared each tick.
      *
@@ -82,7 +84,7 @@ public interface ScriptableMascot {
     String getImageSet();
 
     /**
-     * Do not use directly in scripts as it can have unpredictable results when sharing image sets
+     * Do not use directly in scripts as the correct input can change based on platform.
      * <p>
      * To covert to a different imageSet properly,
      * use the {@link com.group_finity.mascot.action.Transform Transform} action.
@@ -90,6 +92,13 @@ public interface ScriptableMascot {
      * @see com.group_finity.mascot.action.Transform
      */
     void setImageSet(String set);
+
+    /**
+     * The identifier of the current sound.
+     * <p>
+     * This value can change based on platform and should mostly be used for debugging.
+     */
+    String getSound();
 
     /**
      * The location of the mascot's anchor on the screen.
@@ -131,8 +140,19 @@ public interface ScriptableMascot {
      */
     List<Hotspot> getHotspots();
 
+    /**
+     * Whether the currently running action is a dragging action.
+     */
     boolean isDragging();
 
+    /**
+     * Indicate whether the current action is a dragging action.
+     * <p>
+     * Setting dragging to true means that a mouse release event will lead to the Thrown action.
+     * This method can be used to implement custom dragging actions.
+     *
+     * @param dragging Whether the currently running action is a dragging action.
+     */
     void setDragging(boolean dragging);
 
     /**

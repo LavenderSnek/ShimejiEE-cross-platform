@@ -1,10 +1,9 @@
 package com.group_finity.mascot.environment;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.NativeFactory;
 
-import java.awt.Point;
+import java.awt.*;
 
 public class MascotEnvironment {
 
@@ -30,7 +29,6 @@ public class MascotEnvironment {
         return getWorkArea(false);
     }
 
-
     /**
      * @hidden
      */
@@ -48,6 +46,7 @@ public class MascotEnvironment {
     /**
      * @hidden
      */
+    @SuppressWarnings("unused")
     public ComplexArea getComplexScreen() {
         return impl.getComplexScreen();
     }
@@ -151,7 +150,10 @@ public class MascotEnvironment {
     //---IE
 
     /**
-     * @see NativeEnvironment#getActiveIE()
+     * The bounds of the current IE (interactive environment)
+     * <p>
+     * The IE is generally the "frontmost window" but this can be platform dependent.
+     * If there is no IE the {@link Area#isVisible() isVisible()} method of the returned Area will return false.
      */
     public Area getActiveIE() {
         return impl.getActiveIE();
@@ -167,7 +169,10 @@ public class MascotEnvironment {
     }
 
     /**
-     * @see NativeEnvironment#moveActiveIE(Point)
+     * Tries to set the top left corner of the current IE to specified location.
+     * <p>
+     * If the point is an invalid location, the IE is simply not moved.
+     * @param point The destination in screen coordinates.
      */
     public void moveActiveIE(Point point) {
         impl.moveActiveIE(point);
@@ -182,6 +187,7 @@ public class MascotEnvironment {
         return impl.getCursor();
     }
 
+    //---unused
     // TODO: add proper logging
 
     /**
@@ -199,6 +205,8 @@ public class MascotEnvironment {
      */
     @Deprecated
     public void refreshWorkArea() {}
+
+    //---private
 
     private boolean isScreenTopBottom() {
         return impl.isScreenTopBottom(mascot.getAnchor());
