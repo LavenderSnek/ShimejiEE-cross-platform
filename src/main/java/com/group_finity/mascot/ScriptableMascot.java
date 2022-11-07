@@ -49,7 +49,7 @@ public interface ScriptableMascot {
      */
     @SuppressWarnings("unused")
     default int getCount() {
-        return getManager().getCount(getImageSet());
+        return getManager() == null ? 0 : getManager().getCount(getImageSet());
     }
 
     /**
@@ -57,7 +57,7 @@ public interface ScriptableMascot {
      */
     @SuppressWarnings("unused")
     default int getTotalCount() {
-        return getManager().getCount();
+        return getManager() == null ? 0 : getCount();
     }
 
     /**
