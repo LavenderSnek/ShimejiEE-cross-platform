@@ -84,7 +84,7 @@ public class CompactImageSetPreview {
     private static BufferedImage makeThumbnail(BufferedImage imageToScale, int size) {
         BufferedImage scaledImage = null;
         if (imageToScale != null) {
-            scaledImage = new BufferedImage(size, size, imageToScale.getType());
+            scaledImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB_PRE); // https://github.com/usnistgov/pyramidio/issues/7
             Graphics2D graphics2D = scaledImage.createGraphics();
             graphics2D.drawImage(imageToScale, 0, 0, size, size, null);
             graphics2D.dispose();
