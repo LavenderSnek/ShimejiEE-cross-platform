@@ -1,4 +1,4 @@
-package com.group_finity.mascotnative.win.jna;
+package com.group_finity.mascotnative.win.jnalegacy;
 
 import com.sun.jna.Structure;
 import com.sun.jna.Structure.FieldOrder;

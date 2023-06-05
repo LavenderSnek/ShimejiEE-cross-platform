@@ -1,9 +1,9 @@
 package com.group_finity.mascotnative.win;
 
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascotnative.win.jna.BITMAP;
-import com.group_finity.mascotnative.win.jna.BITMAPINFOHEADER;
-import com.group_finity.mascotnative.win.jna.Gdi32;
+import com.group_finity.mascotnative.win.jnalegacy.BITMAP;
+import com.group_finity.mascotnative.win.jnalegacy.BITMAPINFOHEADER;
+import com.group_finity.mascotnative.win.jnalegacy.Gdi32;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 

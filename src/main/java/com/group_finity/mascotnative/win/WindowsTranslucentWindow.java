@@ -2,7 +2,7 @@ package com.group_finity.mascotnative.win;
 
 import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascotnative.shared.BaseTranslucentSwingWindow;
-import com.group_finity.mascotnative.win.jna.*;
+import com.group_finity.mascotnative.win.jnalegacy.*;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 

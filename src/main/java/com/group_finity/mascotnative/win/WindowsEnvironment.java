@@ -2,10 +2,10 @@ package com.group_finity.mascotnative.win;
 
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.Environment;
-import com.group_finity.mascotnative.win.jna.Dwmapi;
-import com.group_finity.mascotnative.win.jna.Gdi32;
-import com.group_finity.mascotnative.win.jna.RECT;
-import com.group_finity.mascotnative.win.jna.User32;
+import com.group_finity.mascotnative.win.jnalegacy.Dwmapi;
+import com.group_finity.mascotnative.win.jnalegacy.Gdi32;
+import com.group_finity.mascotnative.win.jnalegacy.RECT;
+import com.group_finity.mascotnative.win.jnalegacy.User32;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.LongByReference;
