@@ -42,8 +42,6 @@ public interface User32 extends StdCallLibrary {
 
     int GetWindowTextW(Pointer hWnd, char[] lpString, int nMaxCount);
 
-    int GetClassNameW(Pointer hWnd, char[] lpString, int nMaxCount);
-
     int GetWindowRect(Pointer hWnd, RECT lpRect);
 
     int ERROR = 0;
@@ -53,17 +51,6 @@ public interface User32 extends StdCallLibrary {
     int MoveWindow(Pointer hWnd, int X, int Y, int nWidth, int nHeight, int bRepaint);
 
     int BringWindowToTop(Pointer hWnd);
-
-    Pointer GetDC(Pointer hWnd);
-
-    int ReleaseDC(Pointer hWnd, Pointer hDC);
-
-    int ULW_ALPHA = 2;
-
-    int UpdateLayeredWindow(Pointer hWnd, Pointer hdcDst,
-                            POINT pptDst, SIZE psize,
-                            Pointer hdcSrc, POINT pptSrc, int crKey,
-                            BLENDFUNCTION pblend, int dwFlags);
 
     interface WNDENUMPROC extends StdCallCallback {
         /**

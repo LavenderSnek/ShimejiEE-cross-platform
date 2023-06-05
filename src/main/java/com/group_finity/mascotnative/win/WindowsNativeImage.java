@@ -1,13 +1,15 @@
 package com.group_finity.mascotnative.win;
 
 import com.group_finity.mascot.image.NativeImage;
-import com.group_finity.mascotnative.win.jnalegacy.BITMAP;
-import com.group_finity.mascotnative.win.jnalegacy.BITMAPINFOHEADER;
-import com.group_finity.mascotnative.win.jnalegacy.Gdi32;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
+import com.group_finity.mascotnative.win.jna.GDI32;
 
 import java.awt.image.BufferedImage;
+
+import static com.sun.jna.platform.win32.WinDef.HBITMAP;
+import static com.sun.jna.platform.win32.WinGDI.BITMAP;
+import static com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
+import static com.sun.jna.platform.win32.WinGDI.BITMAPINFOHEADER;
+import static com.sun.jna.platform.win32.WinGDI.DIB_RGB_COLORS;
 
 /**
  * An alpha-valued image that can be used with {@link WindowsTranslucentWindow}.
@@ -17,63 +19,58 @@ import java.awt.image.BufferedImage;
  */
 class WindowsNativeImage implements NativeImage {
 
-    private static final OsArchitecture ARCHITECTURE;
+    private final HBITMAP bmpHandle;
 
-    static {
-        ARCHITECTURE = System.getProperty("sun.arch.data.model").equals("64")
-                ? OsArchitecture.x86_64
-                : OsArchitecture.x86;
+    public WindowsNativeImage(BufferedImage src, int scaling) {
+        bmpHandle = createBitmap(src, scaling);
     }
 
-    private final Pointer nativeHandle;
-
-    /**
-     * Creates the windows bitmap
-     *
-     * @param width  width of the bitmap.
-     * @param height the height of the bitmap.
-     * @return tThe pointer to the newly created bitmap
-     */
-    private static Pointer createNative(final int width, final int height) {
-
-        final BITMAPINFOHEADER bmi = new BITMAPINFOHEADER();
-        bmi.biSize = 40;
-        bmi.biWidth = width;
-        bmi.biHeight = height;
-        bmi.biPlanes = 1;
-        bmi.biBitCount = 32;
-
-        return Gdi32.INSTANCE.CreateDIBSection(Pointer.NULL, bmi, Gdi32.DIB_RGB_COLORS, Pointer.NULL, Pointer.NULL, 0);
+    public HBITMAP getBmpHandle() {
+        return bmpHandle;
     }
 
-    /**
-     * Fill a native windows bitmap with the specified pixel data
-     *
-     * @param nativeHandle bitmap handle.
-     * @param rgb          unscaled ARGB pixels to transfer.
-     * @param scaling      amount of scaling to apply when transferring the image.
-     */
-    private static void flushToNative(final Pointer nativeHandle, final int[] rgb, final int scaling) {
+    public void dispose() {
+        GDI32.INSTANCE.DeleteObject(getBmpHandle());
+    }
 
-        final BITMAP bmp = new BITMAP();
-        Gdi32.INSTANCE.GetObjectW(nativeHandle, ARCHITECTURE.getBitmapSize() + Native.POINTER_SIZE, bmp);
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        dispose();
+    }
 
-        // Copy at the pixel level. These dimensions are already scaled
-        int width = bmp.bmWidth;
-        int height = bmp.bmHeight;
-        final int destPitch = ((bmp.bmWidth * bmp.bmBitsPixel) + 31) / 32 * 4;
+
+    //=== Util
+
+    private static HBITMAP createBitmap(BufferedImage image, int scaling) {
+
+        int[] unscaledRgb = image.getRGB(0,0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+
+        int width = image.getWidth() * scaling;
+        int height = image.getHeight() * scaling;
+
+        HBITMAP handle = createNative(width, height);
+
+        BITMAP bmp = new BITMAP();
+        GDI32.INSTANCE.GetObjectW(handle, bmp.size(), bmp.getPointer());
+        bmp.read();
+
+        final int destPitch = ((width * bmp.bmBitsPixel) + 31) / 32 * 4;
         int destIndex = destPitch * (height - 1);
         int srcColIndex = 0;
         int srcRowIndex = 0;
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                //UpdateLayeredWindow and Photoshop seem to be incompatible
-                //UpdateLayeredWindow has a bug that the alpha value is ignored when the RGB value is #FFFFFF.
-                //Photoshop sets the RGB value to 0 where the alpha value is 0.
 
-                bmp.bmBits.setInt(destIndex + x * 4L,
-                        (rgb[srcColIndex / scaling] & 0xFF000000) == 0 ? 0 : rgb[srcColIndex / scaling]);
+                long offset = destIndex + x * 4L;
+                int value = unscaledRgb[srcColIndex/scaling];
+
+                if ((value & 0xFF000000) == 0) {
+                    value = 0;
+                }
+
+                bmp.bmBits.setInt(offset,value);
 
                 ++srcColIndex;
             }
@@ -89,38 +86,28 @@ class WindowsNativeImage implements NativeImage {
             }
         }
 
+        return handle;
     }
 
     /**
-     * Disposes native bitmap
-     * @param nativeHandle native bitmap to dispose.
+     * Creates the empty windows bitmap
+     *
+     * @param width  width of the bitmap.
+     * @param height the height of the bitmap.
+     * @return tThe pointer to the newly created bitmap
      */
-    private static void freeNative(final Pointer nativeHandle) {
-        Gdi32.INSTANCE.DeleteObject(nativeHandle);
+    private static HBITMAP createNative(final int width, final int height) {
+        final BITMAPINFOHEADER header = new BITMAPINFOHEADER();
+        header.biSize = 40;
+        header.biWidth = width;
+        header.biHeight = height;
+        header.biPlanes = 1;
+        header.biBitCount = 32;
+
+        BITMAPINFO bmi = new BITMAPINFO();
+        bmi.bmiHeader = header;
+
+        return GDI32.INSTANCE.CreateDIBSection(null, bmi, DIB_RGB_COLORS, null, null, 0);
     }
-
-    public WindowsNativeImage(final BufferedImage image, int scaling) {
-
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-
-        this.nativeHandle = createNative(imageWidth * scaling, imageHeight * scaling);
-
-        int[] rbgValues = image
-                .getRGB(0, 0, imageWidth, imageHeight, null, 0, imageWidth);
-
-        flushToNative(this.getNativeHandle(), rbgValues, scaling);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        freeNative(this.getNativeHandle());
-    }
-
-    Pointer getNativeHandle() {
-        return this.nativeHandle;
-    }
-
 
 }
