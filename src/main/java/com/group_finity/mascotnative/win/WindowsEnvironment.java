@@ -1,229 +1,155 @@
 package com.group_finity.mascotnative.win;
 
 import com.group_finity.mascot.environment.Area;
-import com.group_finity.mascot.environment.Environment;
-import com.group_finity.mascotnative.win.jnalegacy.Dwmapi;
-import com.group_finity.mascotnative.win.jnalegacy.Gdi32;
-import com.group_finity.mascotnative.win.jnalegacy.RECT;
-import com.group_finity.mascotnative.win.jnalegacy.User32;
-import com.sun.jna.NativeLong;
+import com.group_finity.mascot.environment.BaseNativeEnvironment;
+import com.group_finity.mascotnative.win.WindowsIe.IeStatus;
+import com.group_finity.mascotnative.win.jna.Dwmapi;
+import com.group_finity.mascotnative.win.jna.User32;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.LongByReference;
-
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import static com.sun.jna.platform.win32.WinDef.HWND;
+import static com.sun.jna.platform.win32.WinDef.RECT;
+import static com.sun.jna.platform.win32.WinUser.HMONITOR;
+import static com.sun.jna.platform.win32.WinUser.MONITORINFO;
+import static com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 
-class WindowsEnvironment extends Environment {
+class WindowsEnvironment extends BaseNativeEnvironment {
 
-    /**
-     * Get the work area. This area is the display area with the taskbar removed.
-     */
-    private static Rectangle getWorkAreaRect() {
-        final RECT rect = new RECT();
-        User32.INSTANCE.SystemParametersInfoW(User32.SPI_GETWORKAREA, 0, rect, 0);
-        return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+    @Override
+    protected List<Rectangle> getNewDisplayBoundsList() {
+        List<Rectangle> ret = new ArrayList<>(5);
+        User32.INSTANCE.EnumDisplayMonitors(null, null,
+                (hMonitor, hdcMonitor, lprcMonitor, dwData) -> {
+                    ret.add(getBoundsOf(hMonitor));
+                    return 1;
+                }, null);
+        return ret;
     }
 
-    private static final HashMap<Pointer, Boolean> ieCache = new LinkedHashMap<>();
+    //======== IE stuff ==========//
 
-    public static Area workArea = new Area();
-    public static Area activeIE = new Area();
+    private WindowsIe currentIe = new WindowsIe(null, IeStatus.PASS_THROUGH);
 
-    private enum IEResult {INVALID, NOT_IE, IE_OUT_OF_BOUNDS, IE}
-
-    private static boolean isIE(final Pointer ie) {
-        final Boolean cachedValue = ieCache.get(ie);
-
-        if (cachedValue != null) {
-            return cachedValue;
+    private WindowsIe createIeOf(HWND hWnd) {
+        if (!User32.INSTANCE.IsWindowVisible(hWnd) || User32.INSTANCE.IsIconic(hWnd) || isWindowCloaked(hWnd)) {
+            return new WindowsIe(hWnd, IeStatus.PASS_THROUGH);
         }
 
-        final char[] title = new char[1024];
-
-        final int titleLength = User32.INSTANCE.GetWindowTextW(ie, title, 1024);
-
-        final String ieTitle = new String(title, 0, titleLength);
-
-        // optimisation to remove empty windows from consideration without the loop.
-        // Program Manager hard coded exception as there's issues if we mess with it
-        if (ieTitle.isEmpty() || ieTitle.equals("Program Manager")) {
-            ieCache.put(ie, false);
-            return false;
+        if (User32.INSTANCE.IsZoomed(hWnd)) {
+            return new WindowsIe(hWnd, IeStatus.INVALID);
         }
 
-        ieCache.put(ie, true);
-        return true;
+        String title = getTitleOf(hWnd);
+        if (title.isEmpty() || title.equals("Program Manager")) {
+            return new WindowsIe(hWnd, IeStatus.PASS_THROUGH);
+        }
+
+        RECT rect = new RECT();
+        User32.INSTANCE.GetWindowRect(hWnd, rect);
+        Rectangle shadowedRectangle = rect.toRectangle();
+
+        if (!shadowedRectangle.intersects(getScreen().toRectangle())) {
+            return new WindowsIe(hWnd, IeStatus.OUT_OF_BOUNDS, shadowedRectangle, title);
+        }
+
+        return new WindowsIe(hWnd, IeStatus.VALID, shadowedRectangle, title);
     }
 
-    private static IEResult isViableIE(Pointer ie) {
-        if (User32.INSTANCE.IsWindowVisible(ie) == 0) {
-            return IEResult.NOT_IE;
-        }
+    @Override
+    protected void updateIe(Area ieToUpdate) {
+        User32.INSTANCE.EnumWindows((hWnd, data) -> {
+            WindowsIe ieObj = createIeOf(hWnd);
 
-        int flags = User32.INSTANCE.GetWindowLongW(ie, User32.GWL_STYLE);
-        if ((flags & User32.WS_MAXIMIZE) != 0) {
-            return IEResult.INVALID;
-        }
-
-        // metro apps can be closed or minimised and still be considered "visible" by User32
-        // have to consider the new cloaked variable instead
-        LongByReference flagsRef = new LongByReference();
-        NativeLong result = Dwmapi.INSTANCE.DwmGetWindowAttribute(ie, Dwmapi.DWMWA_CLOAKED, flagsRef, 8);
-        // unsupported on 7 so skip the check
-        if (result.longValue() != 0x80070057 && (result.longValue() != 0 || flagsRef.getValue() != 0)) {
-            return IEResult.INVALID;
-        }
-
-        if (!isIE(ie) || (User32.INSTANCE.IsIconic(ie) != 0)) {
-            return IEResult.NOT_IE;
-        }
-
-        Rectangle ieRect = getIERect(ie);
-        if (!ieRect.intersects(getScreenRect())) {
-            return IEResult.IE_OUT_OF_BOUNDS;
-        }
-
-        return IEResult.IE;
-    }
-
-    private static Pointer findActiveIE() {
-
-        Pointer ie = User32.INSTANCE.GetWindow(User32.INSTANCE.GetForegroundWindow(), User32.GW_HWNDFIRST);
-        boolean continueFlag = true;
-
-        while (continueFlag && User32.INSTANCE.IsWindow(ie) != 0) {
-
-            switch (isViableIE(ie)) {
-                case IE:
-                    return ie;
-                case IE_OUT_OF_BOUNDS:
-                case NOT_IE: // Valid window but not interactive according to user settings
-                    ie = User32.INSTANCE.GetWindow(ie, User32.GW_HWNDNEXT);
-                    break;
-                case INVALID: // Something invalid is the foreground object
-                    continueFlag = false;
-                    break;
+            switch (ieObj.status()) {
+                case VALID, INVALID -> {
+                    currentIe = ieObj;
+                    return false;
+                }
+                case PASS_THROUGH, OUT_OF_BOUNDS -> {return true;}
+                default -> throw new RuntimeException("Unrecognized IE status");
             }
-        }
+        }, null);
 
-        return null;
-    }
-
-    private static Rectangle getIERect(Pointer ie) {
-        final RECT out = new RECT();
-        User32.INSTANCE.GetWindowRect(ie, out);
-        final RECT in = new RECT();
-        if (getWindowRgnBox(ie, in) == User32.ERROR) {
-            in.left = 0;
-            in.top = 0;
-            in.right = out.right - out.left;
-            in.bottom = out.bottom - out.top;
-        }
-        return new Rectangle(out.left + in.left, out.top + in.top, in.Width(), in.Height());
-    }
-
-    private static int getWindowRgnBox(final Pointer window, final RECT rect) {
-
-        Pointer hRgn = Gdi32.INSTANCE.CreateRectRgn(0, 0, 0, 0);
-        try {
-            if (User32.INSTANCE.GetWindowRgn(window, hRgn) == User32.ERROR) {
-                return User32.ERROR;
-            }
-            Gdi32.INSTANCE.GetRgnBox(hRgn, rect);
-            return 1;
-        } finally {
-            Gdi32.INSTANCE.DeleteObject(hRgn);
+        if (currentIe.status() == IeStatus.VALID) {
+            ieToUpdate.set(currentIe.shadowedRect());
+            ieToUpdate.setVisible(true);
+        } else {
+            ieToUpdate.set(new Rectangle());
+            ieToUpdate.setVisible(false);
         }
     }
 
-    private static boolean moveIE(final Pointer ie, final Rectangle rect) {
-
-        if (ie == null) {
-            return false;
-        }
-
-        final RECT out = new RECT();
-        User32.INSTANCE.GetWindowRect(ie, out);
-        final RECT in = new RECT();
-        if (getWindowRgnBox(ie, in) == User32.ERROR) {
-            in.left = 0;
-            in.top = 0;
-            in.right = out.right - out.left;
-            in.bottom = out.bottom - out.top;
-        }
-
-        User32.INSTANCE.MoveWindow(ie, rect.x - in.left, rect.y - in.top, rect.width + out.Width() - in.Width(),
-                rect.height + out.Height() - in.Height(), 1);
-
-        return true;
+    @Override
+    public String getActiveIETitle() {
+        return currentIe.title();
     }
 
-    private static void restoreAllIEs() {
-        User32.INSTANCE.EnumWindows(new User32.WNDENUMPROC() {
-            int offset = 25;
+    //---IE movement
+
+    @Override
+    public void moveActiveIE(Point point) {
+        HWND hWnd = currentIe.hWnd();
+
+        // minimal checks
+        if (currentIe.status() != IeStatus.VALID
+            || User32.INSTANCE.IsZoomed(hWnd)
+            || !User32.INSTANCE.IsWindowVisible(hWnd)) {
+            return;
+        }
+
+        Rectangle rect = currentIe.shadowedRect();
+
+        User32.INSTANCE.MoveWindow(hWnd, point.x, point.y, rect.width, rect.height, true);
+    }
+
+    @Override
+    public void restoreIE() {
+        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
+            int offset = 5;
 
             @Override
-            public boolean callback(Pointer ie, Pointer data) {
-                IEResult result = isViableIE(ie);
-                if (result == IEResult.IE_OUT_OF_BOUNDS) {
-                    final RECT workArea = new RECT();
-                    User32.INSTANCE.SystemParametersInfoW(User32.SPI_GETWORKAREA, 0, workArea, 0);
-                    final RECT rect = new RECT();
-                    User32.INSTANCE.GetWindowRect(ie, rect);
+            public boolean callback(HWND hWnd, Pointer data) {
+                WindowsIe ieObj = createIeOf(hWnd);
 
-                    rect.OffsetRect(workArea.left + offset - rect.left, workArea.top + offset - rect.top);
-                    User32.INSTANCE.MoveWindow(ie, rect.left, rect.top, rect.Width(), rect.Height(), 1);
-                    User32.INSTANCE.BringWindowToTop(ie);
+                if (ieObj.status() == IeStatus.OUT_OF_BOUNDS) {
+                    Rectangle nb = ieObj.shadowedRect().getBounds();
+                    nb.setLocation(offset, 0);
+
+                    User32.INSTANCE.MoveWindow(ieObj.hWnd(), nb.x, nb.y, nb.width, nb.height, true);
+                    User32.INSTANCE.BringWindowToTop(ieObj.hWnd());
 
                     offset += 25;
                 }
-
                 return true;
             }
         }, null);
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        workArea.set(getWorkAreaRect());
+    // == Util == //
 
-        final Rectangle ieRect = getIERect(findActiveIE());
-        activeIE.setVisible((ieRect != null) && ieRect.intersects(getScreen().toRectangle()));
-        activeIE.set(ieRect == null ? new Rectangle(-1, -1, 0, 0) : ieRect);
-
+    private static Rectangle getBoundsOf(HMONITOR hMonitor) {
+        MONITORINFO info = new MONITORINFO();
+        User32.INSTANCE.GetMonitorInfo(hMonitor, info);
+        return info.rcWork.toRectangle();
     }
 
-    @Override
-    public void moveActiveIE(final Point point) {
-        moveIE(findActiveIE(), new Rectangle(point.x, point.y, activeIE.getWidth(), activeIE.getHeight()));
+    private static boolean isWindowCloaked(HWND hWnd) {
+        // doesn't support win 7, but this uses jdk 17 so win 7 is unlikely
+        LongByReference flags = new LongByReference();
+        var result = Dwmapi.INSTANCE.DwmGetWindowAttribute(hWnd, Dwmapi.DWMWA_CLOAKED, flags.getPointer(), 8);
+        return result.equals(WinNT.S_OK) && flags.getValue() != 0;
     }
 
-    @Override
-    public void restoreIE() {
-        restoreAllIEs();
-    }
+    private static String getTitleOf(HWND hWnd) {
+        char[] title = new char[1024];
+        int titleLen = User32.INSTANCE.GetWindowText(hWnd, title, 1024);
 
-    @Override
-    public Area getWorkArea() {
-        return workArea;
-    }
-
-    @Override
-    public Area getActiveIE() {
-        return activeIE;
-    }
-
-    @Override
-    public String getActiveIETitle() {
-        final Pointer ie = findActiveIE();
-
-        final char[] title = new char[1024];
-        final int titleLength = User32.INSTANCE.GetWindowTextW(ie, title, 1024);
-
-        return new String(title, 0, titleLength);
+        return new String(title, 0, titleLen);
     }
 
 }
