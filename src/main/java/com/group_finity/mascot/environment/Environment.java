@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 /**
  * Provides information regarding the desktop environment such as screen size,
  * cursor info, and window interaction related things.
