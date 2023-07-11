@@ -137,7 +137,7 @@ public abstract class BaseNativeEnvironment implements NativeEnvironment {
      * Updates the cursor and activeIE info
      * <p>
      * The default implementation of this function calls {@link #updateIe(Area)}
-     * and {@link #updateIe(Area)}
+     * and {@link #updateCursorLocation()}
      */
     @Override
     public void tick() {
