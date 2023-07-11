@@ -18,14 +18,7 @@ class MacTranslucentWindow extends BaseTranslucentSwingWindow<MacNativeImage> {
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(final Graphics g) {
-                int imgWidth = getImage().getManagedImage().getWidth();
-                int imgHeight = getImage().getManagedImage().getHeight();
-                g.drawImage(
-                        getImage().getManagedImage(),
-                        0, 0, getWidth(), getHeight(),
-                        0, 0, imgWidth, imgHeight,
-                        null
-                );
+                g.drawImage(getImage().bufferedImage(), 0,0, null);
             }
         };
 

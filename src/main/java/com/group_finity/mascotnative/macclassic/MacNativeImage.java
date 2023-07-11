@@ -7,16 +7,5 @@ import java.awt.image.BufferedImage;
 /**
  * Not actually a native image, this is just to separate it from the generic code
  */
-class MacNativeImage implements NativeImage {
-
-    private final BufferedImage managedImage;
-
-    public MacNativeImage(final BufferedImage image) {
-        this.managedImage = image;
-    }
-
-    BufferedImage getManagedImage() {
-        return this.managedImage;
-    }
-
+record MacNativeImage(BufferedImage bufferedImage) implements NativeImage {
 }
