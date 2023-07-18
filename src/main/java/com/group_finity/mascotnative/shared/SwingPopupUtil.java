@@ -12,9 +12,9 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.Container;
 
-class SwingPopupUtil {
+public class SwingPopupUtil {
 
-    static JPopupMenu createJPopupmenuFrom(TopLevelMenuRep topMenuRep) {
+    public static JPopupMenu createJPopupmenuFrom(TopLevelMenuRep topMenuRep) {
         JPopupMenu mainPopup = new JPopupMenu(topMenuRep.getTitle());
         mainPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
