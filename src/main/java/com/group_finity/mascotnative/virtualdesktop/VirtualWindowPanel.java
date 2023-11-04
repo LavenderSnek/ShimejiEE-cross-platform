@@ -9,16 +9,26 @@ import com.group_finity.mascotnative.shared.SwingPopupUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 public class VirtualWindowPanel extends JPanel implements TranslucentWindow {
 
     protected static final Color CLEAR = new Color(0, 0, 0, 0);
-
     private TranslucentWindowEventHandler eventHandler = TranslucentWindowEventHandler.DEFAULT;
-
     private VirtualImage image;
+
+    private final MouseAdapter parentListener = new MouseAdapter() {
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (dragging) {
+                super.mouseReleased(e);
+                var p = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), VirtualWindowPanel.this);
+                endDrag(new TranslucentWindowEvent(p));
+            }
+        }
+    };
+
+    private boolean dragging = false;
 
     public VirtualWindowPanel() {
         super();
@@ -31,17 +41,35 @@ public class VirtualWindowPanel extends JPanel implements TranslucentWindow {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     showPopupMenu(e);
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    getEventHandler().onDragBegin(new TranslucentWindowEvent(e.getPoint()));
+                    beginDrag(new TranslucentWindowEvent(e.getPoint()));
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    getEventHandler().onDragEnd(new TranslucentWindowEvent(e.getPoint()));
+                    endDrag(new TranslucentWindowEvent(e.getPoint()));
                 }
             }
         });
+    }
+
+    private void beginDrag(TranslucentWindowEvent e) {
+        if (dragging) {return;}
+        getEventHandler().onDragBegin(e);
+        dragging = true;
+    }
+
+    private void endDrag(TranslucentWindowEvent e) {
+        if (!dragging) {return;}
+        getEventHandler().onDragEnd(e);
+        dragging = false;
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        getParent().addMouseListener(parentListener);
     }
 
     protected void showPopupMenu(MouseEvent e) {
@@ -55,6 +83,7 @@ public class VirtualWindowPanel extends JPanel implements TranslucentWindow {
 
     @Override
     protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         g.drawImage(image.bufferedImage(), 0, 0, null);
     }
 
@@ -86,6 +115,7 @@ public class VirtualWindowPanel extends JPanel implements TranslucentWindow {
             if (parent != null) {
                 parent.remove(this);
                 parent.repaint();
+                parent.removeMouseListener(parentListener);
             }
         });
     }

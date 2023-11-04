@@ -2,8 +2,7 @@ package com.group_finity.mascotnative.virtualdesktop.display;
 
 import com.group_finity.mascotnative.virtualdesktop.VirtualWindowPanel;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class VirtualEnvironmentDisplay {
     private final JFrame frame;
 
     public VirtualEnvironmentDisplay() {
-        frame = new JFrame("Shimeji");
+        frame = new JFrame("ShimejiEE");
         frame.getContentPane().setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         frame.getContentPane().setLayout(null);
         frame.getContentPane().setBackground(BG_COLOR);
@@ -40,6 +39,7 @@ public class VirtualEnvironmentDisplay {
     public void addShimejiWindow(VirtualWindowPanel panel) {
         SwingUtilities.invokeLater(() -> {
             frame.getContentPane().add(panel);
+            frame.validate();
         });
     }
 
