@@ -20,7 +20,9 @@ public record Pose(
                 mascot.getAnchor().y + dy()
         ));
 
-        MascotImage img = Main.getInstance()
+        // ignore if key is null (happens when pose has no image)
+        MascotImage img = imageKey() == null ? null :
+                Main.getInstance()
                 .getImageSet(mascot.getImageSet())
                 .getImagePairs().get(imageKey())
                 .getImage(mascot.isLookRight());
