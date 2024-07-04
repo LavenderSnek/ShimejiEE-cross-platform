@@ -1,1 +1,0 @@
-native libraries are placed in this directory

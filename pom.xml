@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.main>com.group_finity.mascot.Main</project.main>
         <project.finalShimejiOut>${project.build.directory}/${project.name}</project.finalShimejiOut>
+        <project.headerDir>src/main/native/headers</project.headerDir>
     </properties>
 
     <dependencies>
@@ -37,31 +38,95 @@
         </dependency>
     </dependencies>
 
+    <!--   Native Build     -->
+    <profiles>
+        <profile>
+            <id>mac</id>
+            <activation><os><family>mac</family></os></activation>
+            <properties>
+                <project.nativeBaseDir>src/main/native/macjni</project.nativeBaseDir>
+                <project.nativeBuildDir>${project.build.directory}/cmake-build-macjni</project.nativeBuildDir>
+            </properties>
+        </profile>
+
+        <!--    Cmake Common    -->
+        <profile>
+            <id>cmake</id>
+            <activation><os><family>mac</family></os></activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>cmake</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>
+                                    cmake \
+                                    -G Ninja \
+                                    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${project.finalShimejiOut}/lib \
+                                    -S ${project.nativeBaseDir} \
+                                    -B ${project.nativeBuildDir};
+                                    cmake --build ${project.nativeBuildDir}
+                                </argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+    <!--  Common build  -->
     <build>
         <plugins>
-            <!--     tests       -->
+            <!--    Clean headers    -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M6</version>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.headerDir}</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
 
-            <!--     jni header generation      -->
+            <!--     Run tests       -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+
+            <!--     Compile with header generation      -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <compilerArgs>
                         <arg>-h</arg>
-                        <arg>src/main/headers</arg>
+                        <arg>${project.headerDir}</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
 
-            <!--   Copy external resources to build folder   -->
+            <!--   Copy external resources   -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>copy-ext-resources</id>
@@ -87,11 +152,11 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!--     create shaded jar       -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -123,6 +188,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 

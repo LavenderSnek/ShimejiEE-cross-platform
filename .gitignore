@@ -5,6 +5,7 @@ out/
 target/
 *.iml
 *.ppf
+cmake-build-*/
 
 # Misc.
 *.class
@@ -24,7 +25,7 @@ nb-configuration.xml
 
 # native
 *.xcodeproj/
-src/main/headers/
+src/main/native/headers/
 
 # Windows
 Thumbs.db
