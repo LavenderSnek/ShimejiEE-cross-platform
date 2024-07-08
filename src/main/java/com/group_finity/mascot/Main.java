@@ -237,6 +237,9 @@ public final class Main {
         // optional
         createTrayIcon();
 
+        // init environment
+        NativeFactory.getInstance().getEnvironment().init();
+
         //because the chooser is async
         boolean isExit = getManager().isExitOnLastRemoved();
         getManager().setExitOnLastRemoved(false);

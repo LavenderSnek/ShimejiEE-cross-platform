@@ -74,8 +74,6 @@ public class Manager implements ScriptableManager {
             return;
         }
 
-        NativeFactory.getInstance().getEnvironment().init();
-
         thread = new Thread(() -> {
             long prev = System.nanoTime() / 1000000;
 
