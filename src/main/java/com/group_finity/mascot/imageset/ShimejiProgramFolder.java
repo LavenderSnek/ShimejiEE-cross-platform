@@ -75,9 +75,9 @@ public record ShimejiProgramFolder(
                 return isFile && isImage;
             }
             ).size() > MONO_CHECK_THRESHOLD;
-        } catch (Exception e) {
-            // ignore and assume it's multi image set
-            e.printStackTrace();
+        } catch (Exception ignored) {
+            // we're not actually verifying that these exist, so this is fine
+            // we just assume it's multi image set
         }
 
         return new ShimejiProgramFolder(confPath, imgPath, soundPath, isMono);

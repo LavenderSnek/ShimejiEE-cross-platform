@@ -14,12 +14,17 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.main>com.group_finity.mascot.Main</project.main>
+        <project.main>com.group_finity.mascotapp.ShimejiEE</project.main>
         <project.finalShimejiOut>${project.build.directory}/${project.name}</project.finalShimejiOut>
         <project.headerDir>src/main/native/headers</project.headerDir>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.6</version>
+        </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
@@ -111,12 +116,20 @@
                 <version>3.3.0</version>
             </plugin>
 
-            <!--     Compile with header generation      -->
+            <!--     Compile with header/cli generation      -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>info.picocli</groupId>
+                            <artifactId>picocli-codegen</artifactId>
+                            <version>4.7.6</version>
+                        </path>
+                    </annotationProcessorPaths>
                     <compilerArgs>
+                        <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                         <arg>-h</arg>
                         <arg>${project.headerDir}</arg>
                     </compilerArgs>

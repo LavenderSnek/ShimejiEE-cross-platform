@@ -170,23 +170,30 @@ public final class Main {
             "IgnoreImagesetProperties"
     };
 
+    // who knows
     public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
     private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
-
     public boolean isTransientBreedingAllowed() {return userSwitches.getOrDefault("Transients", true);}
     private void setTransientBreedingAllowed(boolean allowed) {userSwitches.put("Transients", allowed);}
 
+    // :( maybe goes to mascot/image set specific settings (since it currently doesnt stop ppl from setting imageset anyway)
     public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
     private void setTransformationAllowed(boolean allowed) {userSwitches.put("Transformation", allowed);}
 
+    // this can go to environment? it'll change the behaviour slightly but i kinda would prefer it
     public boolean isIEMovementAllowed() {return userSwitches.getOrDefault("Throwing", true);}
     private void setIEMovementAllowed(boolean allowed) {userSwitches.put("Throwing", allowed);}
+    // there can also be an extra pref for ie visibility (maybe a cli only pref for a regex or smth)
 
+    // maybe this goes to a soundplayer class/lambda??
     public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
     private void setSoundAllowed(boolean allowed) {userSwitches.put("Sounds", allowed);}
 
+    // ctx menu stuff will (prolly) move to ui (but idk, do i want native to depend on mascotapp?)
     public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", true);}
     private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
+
+    //----
 
     private boolean shouldShowChooserAtStart() {return userSwitches.getOrDefault("AlwaysShowShimejiChooser", false);}
     private void setShouldShowChooserAtStart(boolean b) {userSwitches.put("AlwaysShowShimejiChooser", b);}
