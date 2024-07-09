@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * The {@link #tick()} method gets the latest environmental information.
  * It then moves all the mascots
  */
-public class Manager implements ScriptableManager {
+public class Manager implements MascotManager {
 
     private static final Logger log = Logger.getLogger(Manager.class.getName());
 
@@ -158,6 +158,7 @@ public class Manager implements ScriptableManager {
 
     }
 
+    @Override
     public void add(final Mascot mascot) {
         synchronized (this.getAdded()) {
             this.getAdded().add(mascot);
@@ -166,6 +167,7 @@ public class Manager implements ScriptableManager {
         mascot.setManager(this);
     }
 
+    @Override
     public void remove(final Mascot mascot) {
         synchronized (this.getAdded()) {
             this.getAdded().remove(mascot);
@@ -193,57 +195,12 @@ public class Manager implements ScriptableManager {
         }
     }
 
-    public void setBehaviorAll(final Configuration configuration, final String name, String imageSet) {
-        synchronized (this.getMascots()) {
-            for (final Mascot mascot : this.getMascots()) {
-                try {
-                    if (mascot.getImageSet().equals(imageSet)) {
-                        mascot.setBehavior(configuration.buildBehavior(configuration.getSchema().getString(name)));
-                    }
-                } catch (final BehaviorInstantiationException e) {
-                    log.log(Level.SEVERE, "Failed to initialize the following actions", e);
-                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
-                    mascot.dispose();
-                } catch (final CantBeAliveException e) {
-                    log.log(Level.SEVERE, "Fatal Error", e);
-                    Main.showError(Tr.tr("FailedSetBehaviourErrorMessage") + "\n" + e.getMessage() + "\n" + Tr.tr("SeeLogForDetails"));
-                    mascot.dispose();
-                }
-            }
-        }
-    }
 
     public void remainOne() {
         synchronized (this.getMascots()) {
             int totalMascots = this.getMascots().size();
             for (int i = totalMascots - 1; i > 0; --i) {
                 this.getMascots().get(i).dispose();
-            }
-        }
-    }
-
-    public void remainOne(Mascot mascot) {
-        synchronized (this.getMascots()) {
-            int totalMascots = this.getMascots().size();
-            for (int i = totalMascots - 1; i >= 0; --i) {
-                if (!this.getMascots().get(i).equals(mascot)) {
-                    this.getMascots().get(i).dispose();
-                }
-            }
-        }
-    }
-
-    public void remainOne(String imageSet) {
-        synchronized (this.getMascots()) {
-            int totalMascots = this.getMascots().size();
-            boolean isFirst = true;
-            for (int i = totalMascots - 1; i >= 0; --i) {
-                Mascot m = this.getMascots().get(i);
-                if (m.getImageSet().equals(imageSet) && isFirst) {
-                    isFirst = false;
-                } else if (m.getImageSet().equals(imageSet) && !isFirst) {
-                    m.dispose();
-                }
             }
         }
     }

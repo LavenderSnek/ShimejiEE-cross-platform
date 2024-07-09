@@ -53,17 +53,21 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
                 new MenuItemRep(Tr.tr("CallAnother"), () -> Main.getInstance().createMascot(mascot.getImageSet())),
                 MenuItemRep.SEPARATOR,
                 new MenuItemRep(Tr.tr("FollowCursor"), () -> {
-                    var config = Main.getInstance().getConfiguration(mascot.getImageSet());
-                    mascot.getManager().setBehaviorAll(config, Main.BEHAVIOR_GATHER, mascot.getImageSet());
-                }),
+//                    var config = Main.getInstance().getConfiguration(mascot.getImageSet());
+//                    mascot.getManager().setBehaviorAll(config, Main.BEHAVIOR_GATHER, mascot.getImageSet());
+                }, false),
                 new MenuItemRep(Tr.tr("RestoreWindows"), () -> NativeFactory.getInstance().getEnvironment().restoreIE()),
                 new MenuItemRep(Tr.tr("RevealStatistics"), mascot::startDebugUi),
                 MenuItemRep.SEPARATOR,
                 createBehaviourSubmenu(Tr.tr("SetBehaviour")),
                 MenuItemRep.SEPARATOR,
                 new MenuItemRep(Tr.tr("Dismiss"), mascot::dispose),
-                new MenuItemRep(Tr.tr("DismissOthers"), () -> mascot.getManager().remainOne(mascot.getImageSet())),
-                new MenuItemRep(Tr.tr("DismissAllOthers"), () -> mascot.getManager().remainOne(mascot)),
+                new MenuItemRep(Tr.tr("DismissOthers"), () -> {
+//                    mascot.getManager().remainOne(mascot.getImageSet());
+                }, false),
+                new MenuItemRep(Tr.tr("DismissAllOthers"), () -> {
+//                    mascot.getManager().remainOne(mascot);
+                }, false),
                 new MenuItemRep(Tr.tr("DismissAll"), () -> System.exit(0))
         );
 
@@ -74,7 +78,7 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
     }
 
     private MenuRep createBehaviourSubmenu(String title) {
-        var config = Main.getInstance().getConfiguration(mascot.getImageSet());
+        var config = mascot.getOwnImageSet().getConfiguration();
         boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
 
         List<MenuItemRep> behaviorItems = new ArrayList<>();

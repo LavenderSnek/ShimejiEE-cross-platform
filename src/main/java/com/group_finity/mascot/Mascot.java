@@ -5,6 +5,7 @@ import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
+import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.ui.debug.DebugUi;
 import com.group_finity.mascot.ui.debug.DebugWindow;
 import com.group_finity.mascot.window.TranslucentWindow;
@@ -30,14 +31,14 @@ public class Mascot implements ScriptableMascot {
 
     private static final AtomicInteger lastId = new AtomicInteger();
 
-    private final int id;
+    public final int id;
 
     private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();
 
     private int time = 0;
     private boolean animating = true;
 
-    private Manager manager = null;
+    private MascotManager manager = null;
     private Behavior behavior = null;
     private final Collection<String> affordances = new HashSet<>(5);
 
@@ -87,7 +88,7 @@ public class Mascot implements ScriptableMascot {
         }
     }
 
-    void tick() {
+    public void tick() {
         if (isAnimating()) {
             if (getBehavior() != null) {
                 try {
@@ -128,8 +129,8 @@ public class Mascot implements ScriptableMascot {
             }
 
             // play sound if requested
-            if (getSound() != null && Main.getInstance().isSoundAllowed()) {
-                Clip clip = Objects.requireNonNull(Main.getInstance().getImageSet(getImageSet()))
+            if (getSound() != null && soundAllowed()) {
+                Clip clip = Objects.requireNonNull(getOwnImageSet())
                         .getSounds()
                         .get(getSound());
                 if (clip != null && !clip.isRunning()) {
@@ -200,11 +201,11 @@ public class Mascot implements ScriptableMascot {
     }
 
     @Override
-    public Manager getManager() {
+    public MascotManager getManager() {
         return this.manager;
     }
 
-    public void setManager(final Manager manager) {
+    public void setManager(final MascotManager manager) {
         this.manager = manager;
     }
 
@@ -235,13 +236,6 @@ public class Mascot implements ScriptableMascot {
 
     public void setSound(String name) {
         sound = name;
-    }
-
-    // not part of the API, please don't call it from scripts
-    public double getScaling() {
-        return Objects.requireNonNull(Main.getInstance().getImageSet(getImageSet()))
-                .getImagePairs()
-                .getScaling();
     }
 
     public MascotImage getImage() {
@@ -295,6 +289,24 @@ public class Mascot implements ScriptableMascot {
     @Override
     public void setCursorPosition(Point position) {
         hotspotCursor = position;
+    }
+
+
+    // not part of the API, please don't call these from scripts
+    // and this is bad- but it really is more of a stepping stone to de-Main-ify this
+
+    public double getScaling() {
+        return Objects.requireNonNull(getOwnImageSet())
+                .getImagePairs()
+                .getScaling();
+    }
+
+    public boolean soundAllowed() {
+        return Main.getInstance().isSoundAllowed();
+    }
+
+    public ImageSet getOwnImageSet() {
+        return Main.getInstance().getImageSet(getImageSet());
     }
 
 }
