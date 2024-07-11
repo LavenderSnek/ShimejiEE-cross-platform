@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
@@ -26,8 +25,7 @@ public class Mute extends InstantAction {
     protected void apply() throws VariableException {
         String soundName = getSound();
         if (soundName != null) {
-            Main.getInstance()
-                    .getImageSet(getMascot().getImageSet())
+            getMascot().getOwnImageSet()
                     .getSounds().getIgnoringVolume(soundName)
                     .forEach(Clip::stop);
         }

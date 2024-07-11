@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
@@ -67,8 +66,8 @@ public class BreedMove extends Move {
 
         boolean allowed =
                 getBornTransient()
-                        ? Main.getInstance().isTransientBreedingAllowed()
-                        : Main.getInstance().isBreedingAllowed();
+                        ? getMascot().isTransientBreedingAllowed()
+                        : getMascot().isBreedingAllowed();
 
         if (allowed) {
             breed();
@@ -76,9 +75,10 @@ public class BreedMove extends Move {
     }
 
     private void breed() throws VariableException {
-        String childType = Main.getInstance().getConfiguration(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
+        String childType = getMascot().getImageSetNamed(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
 
-        final Mascot newMascot = new Mascot(childType);
+        final Mascot newMascot = Mascot.createBlankFrom(getMascot());
+        getMascot().setImageSet(childType);
 
         log.log(Level.INFO, "Breed Mascot ({0},{1},{2})", new Object[]{getMascot(), this, newMascot});
 
@@ -97,17 +97,13 @@ public class BreedMove extends Move {
         newMascot.setLookRight(getMascot().isLookRight());
 
         try {
-            newMascot.setBehavior(Main.getInstance().getConfiguration(childType).buildBehavior(getBornBehaviour()));
+            newMascot.setBehavior(newMascot.getOwnImageSet().getConfiguration().buildBehavior(getBornBehaviour()));
             getMascot().getManager().add(newMascot);
 
         } catch (final BehaviorInstantiationException | CantBeAliveException e) {
             log.log(Level.SEVERE, "Fatal Exception", e);
-            Main.showError(
-                    Tr.tr("FailedCreateNewShimejiErrorMessage")
-                            + "\n" + e.getMessage()
-                            + "\n" + Tr.tr("SeeLogForDetails")
-            );
             newMascot.dispose();
+            throw new VariableException(Tr.tr("FailedSetBehaviourErrorMessage"), e);
         }
     }
 

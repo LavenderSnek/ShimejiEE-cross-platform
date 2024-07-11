@@ -1,6 +1,5 @@
 package com.group_finity.mascot.animation;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.image.MascotImage;
 
@@ -22,8 +21,7 @@ public record Pose(
 
         // ignore if key is null (happens when pose has no image)
         MascotImage img = imageKey() == null ? null :
-                Main.getInstance()
-                .getImageSet(mascot.getImageSet())
+                mascot.getOwnImageSet()
                 .getImagePairs().get(imageKey())
                 .getImage(mascot.isLookRight());
 

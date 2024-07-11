@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.exception.BehaviorInstantiationException;
@@ -31,23 +30,22 @@ public class Transform extends Animate {
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
 
-        if (getTime() == getAnimation().getDuration() - 1 && Main.getInstance().isTransformationAllowed()) {
+        if (getTime() == getAnimation().getDuration() - 1 && getMascot().isTransformationAllowed()) {
             transform();
         }
     }
 
     private void transform() throws VariableException {
-        String childType = Main.getInstance().getConfiguration(getTransformMascot()) != null ? getTransformMascot() : getMascot().getImageSet();
+        String childType = getMascot().getImageSetNamed(getTransformMascot()) != null ? getTransformMascot() : getMascot().getImageSet();
 
         try {
             getMascot().setImageSet(childType);
-            getMascot().setBehavior(Main.getInstance().getConfiguration(childType).buildBehavior(getTransformBehavior()));
+            getMascot().setBehavior(getMascot().getOwnImageSet().getConfiguration().buildBehavior(getTransformBehavior()));
 
         } catch (final BehaviorInstantiationException | CantBeAliveException e) {
             log.log(Level.SEVERE, "Fatal Exception", e);
-            Main.showError(Tr.tr("FailedCreateNewShimejiErrorMessage")
-                    + "\n" + e.getMessage()
-                    + "\n" + Tr.tr("SeeLogForDetails"));
+            // not the right exception but that's for the logging/error handling rewrite
+            throw new VariableException(Tr.tr("FailedCreateNewShimejiErrorMessage"), e);
         }
     }
 

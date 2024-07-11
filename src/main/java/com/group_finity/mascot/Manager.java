@@ -99,6 +99,8 @@ public class Manager implements MascotManager {
                 }
 
             } catch (final InterruptedException ignored) {
+            } catch (CantBeAliveException e) {
+                throw new RuntimeException(e);
             }
 
         });
@@ -121,7 +123,7 @@ public class Manager implements MascotManager {
     /**
      * Advance the mascot one frame.
      */
-    private void tick() {
+    private void tick() throws CantBeAliveException {
 
         // Update the environmental information
         NativeFactory.getInstance().getEnvironment().tick();
@@ -180,7 +182,7 @@ public class Manager implements MascotManager {
         synchronized (this.getMascots()) {
             for (final Mascot mascot : this.getMascots()) {
                 try {
-                    Configuration conf = Main.getInstance().getConfiguration(mascot.getImageSet());
+                    Configuration conf = mascot.getOwnImageSet().getConfiguration();
                     mascot.setBehavior(conf.buildBehavior(conf.getSchema().getString(name)));
                 } catch (final BehaviorInstantiationException e) {
                     log.log(Level.SEVERE, "Failed to initialize the following actions", e);

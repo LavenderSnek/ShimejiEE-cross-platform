@@ -1,6 +1,5 @@
 package com.group_finity.mascotnative.macjni;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.environment.BaseNativeEnvironment;
@@ -22,7 +21,7 @@ public class NativeFactoryImpl extends NativeFactory {
         // Native code crashes if the toolkit hasn't been loaded first
         Toolkit.getDefaultToolkit();
         try {
-            System.load(Main.JAR_PARENT_DIR.resolve("lib").resolve(LIB_FILENAME).toAbsolutePath().toString());
+            System.load(LIB_DIR.resolve(LIB_FILENAME).toAbsolutePath().toString());
         } catch (UnsatisfiedLinkError error) {
             throw new RuntimeException(
                     "Unable to load library for macjni."

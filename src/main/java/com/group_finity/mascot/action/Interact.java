@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.exception.BehaviorInstantiationException;
@@ -35,16 +34,11 @@ public class Interact extends Animate {
 
         if (getTime() == getAnimation().getDuration() - 1 && !getBehavior().trim().isEmpty()) {
             try {
-                getMascot().setBehavior(Main.getInstance().getConfiguration(getMascot()
-                                .getImageSet()).buildBehavior(getBehavior()));
+                getMascot().setBehavior(getMascot().getOwnImageSet().getConfiguration().buildBehavior(getBehavior()));
 
             } catch (final BehaviorInstantiationException | CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Exception", e);
-                Main.showError(
-                        Tr.tr("FailedCreateNewShimejiErrorMessage")
-                                + "\n" + e.getMessage()
-                                + "\n" + Tr.tr("SeeLogForDetails")
-                );
+                throw new VariableException(Tr.tr("FailedSetBehaviourErrorMessage"), e);
             }
         }
     }

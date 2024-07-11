@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.animation.Animation;
@@ -98,16 +97,12 @@ public class ScanMove extends BorderedAction {
 
         if (noMoveX && noMoveY) {
             try {
-                getMascot().setBehavior(Main.getInstance().getConfiguration(getMascot().getImageSet()).buildBehavior(getBehavior()));
-                target.get().setBehavior(Main.getInstance().getConfiguration(target.get().getImageSet()).buildBehavior(getTargetBehavior()));
+                getMascot().setBehavior(getMascot().getOwnImageSet().getConfiguration().buildBehavior(getBehavior()));
+                target.get().setBehavior(target.get().getOwnImageSet().getConfiguration().buildBehavior(getTargetBehavior()));
 
             } catch (final NullPointerException | BehaviorInstantiationException | CantBeAliveException e) {
                 log.log(Level.SEVERE, "Fatal Exception", e);
-                Main.showError(
-                        Tr.tr("FailedSetBehaviourErrorMessage")
-                                + "\n" + e.getMessage()
-                                + "\n" + Tr.tr("SeeLogForDetails")
-                );
+                throw new VariableException(Tr.tr("FailedSetBehaviourErrorMessage"), e);
             }
         }
     }

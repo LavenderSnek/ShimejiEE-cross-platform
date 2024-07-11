@@ -25,10 +25,8 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
             try {
                 mascot.getBehavior().mousePressed(event);
             } catch (final CantBeAliveException e) {
-                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                               + "\n" + e.getMessage()
-                               + "\n" + Tr.tr("SeeLogForDetails"));
                 mascot.dispose();
+                throw new RuntimeException(e);
             }
         }
     }
@@ -39,18 +37,19 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
             try {
                 mascot.getBehavior().mouseReleased(event);
             } catch (final CantBeAliveException e) {
-                Main.showError(Tr.tr("SevereShimejiErrorErrorMessage")
-                               + "\n" + e.getMessage()
-                               + "\n" + Tr.tr("SeeLogForDetails"));
                 mascot.dispose();
+                throw new RuntimeException(e);
             }
         }
     }
 
+    // todo: this isnt really an event handling thing. maybe replace w something like onContextMenuRequest
     @Override
     public TopLevelMenuRep getContextMenuRep() {
         TopLevelMenuRep mainMenu = new TopLevelMenuRep("Shimeji Popup",
-                new MenuItemRep(Tr.tr("CallAnother"), () -> Main.getInstance().createMascot(mascot.getImageSet())),
+                new MenuItemRep(Tr.tr("CallAnother"), () -> {
+//                    Main.getInstance().createMascot(mascot.getImageSet())
+                }, false),
                 MenuItemRep.SEPARATOR,
                 new MenuItemRep(Tr.tr("FollowCursor"), () -> {
 //                    var config = Main.getInstance().getConfiguration(mascot.getImageSet());
@@ -79,7 +78,7 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
 
     private MenuRep createBehaviourSubmenu(String title) {
         var config = mascot.getOwnImageSet().getConfiguration();
-        boolean translateNames = Main.getInstance().shouldTranslateBehaviorNames();
+        boolean translateNames = mascot.shouldTranslateBehaviours();
 
         List<MenuItemRep> behaviorItems = new ArrayList<>();
         Behavior behaviour;
@@ -91,10 +90,8 @@ class MascotEventHandler implements TranslucentWindowEventHandler {
                     behaviorItems.add(new MenuItemRep(lblName, () -> {
                         try {
                             mascot.setBehavior(config.buildBehavior(behaviorName));
-                        } catch (Exception err) {
-                            Main.showError(Tr.tr("CouldNotSetBehaviourErrorMessage")
-                                           + "\n" + err.getMessage()
-                                           + "\n" + Tr.tr("SeeLogForDetails"));
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
                     }));
                 }

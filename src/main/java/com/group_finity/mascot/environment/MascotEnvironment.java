@@ -3,7 +3,7 @@ package com.group_finity.mascot.environment;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.NativeFactory;
 
-import java.awt.*;
+import java.awt.Point;
 
 public class MascotEnvironment {
 
@@ -171,11 +171,14 @@ public class MascotEnvironment {
     /**
      * Tries to set the top left corner of the current IE to specified location.
      * <p>
-     * If the point is an invalid location, the IE is simply not moved.
+     * If the point is an invalid location, or the mascot is not allowed to move IEs,
+     * the IE is simply not moved.
      * @param point The destination in screen coordinates.
      */
     public void moveActiveIE(Point point) {
-        impl.moveActiveIE(point);
+        if (mascot.isIEMovementAllowed()) {
+            impl.moveActiveIE(point);
+        }
     }
 
     //---cursor

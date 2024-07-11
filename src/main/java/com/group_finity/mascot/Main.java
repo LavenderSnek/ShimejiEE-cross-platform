@@ -1,6 +1,5 @@
 package com.group_finity.mascot;
 
-import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
@@ -58,13 +57,15 @@ import java.util.stream.Stream;
  *
  * @author see readme
  */
-public final class Main {
+public final class Main implements MascotPrefProvider {
     private static final Logger log = Logger.getLogger(Main.class.getName());
 
     // Action that matches the followCursor action
     static final String BEHAVIOR_GATHER = "ChaseMouse";
 
     private static final String SP_PREFIX = "com.group_finity.mascot.prefs.";
+
+    private static final String USER_BEHAVIORNAMES_FILE = "user-behaviornames.properties";
 
     public static final Path JAR_PARENT_DIR;
 
@@ -108,23 +109,18 @@ public final class Main {
 
     //------------Getters/Setters-------------//
 
-    public static Main getInstance() {
+    private static Main getInstance() {
         return instance;
     }
 
-    private Manager getManager() {
-        return this.manager;
-    }
-
-    public ShimejiProgramFolder getProgramFolder() {
-        return programFolder;
-    }
-
-    public ImageSet getImageSet(String name) {
+    private ImageSet getImageSet(String name) {
+        if (name == null) {
+            return null;
+        }
         if (loadedImageSets.containsKey(name)) {
             return loadedImageSets.get(name);
         }
-        if (!Files.isDirectory(getProgramFolder().imgPath().resolve(name))) {
+        if (!Files.isDirectory(programFolder.imgPath().resolve(name))) {
             return null;
         }
         // sort of deals with dependencies + allows dynamic loading with scripts
@@ -136,19 +132,10 @@ public final class Main {
         return loadedImageSets.getOrDefault(name, null);
     }
 
-    public Configuration getConfiguration(String imageSet) {
-        if (imageSet == null) {
-            return null;
-        }
-        var imgSet = getImageSet(imageSet);
-        return imgSet == null ? null : imgSet.getConfiguration();
-    }
-
-    public Locale getLocale() {return locale;}
-    private void setLocale(Locale locale) {
-        if (!getLocale().equals(locale)) {
-            this.locale = locale;
-            Tr.loadLanguage();
+    private void setLocale(Locale newLocale) {
+        if (!locale.equals(newLocale)) {
+            locale = newLocale;
+            Tr.loadLanguage(newLocale);
             //reload tray icon if it exists
             if (SystemTray.isSupported()) {
                 SystemTray.getSystemTray().remove(SystemTray.getSystemTray().getTrayIcons()[0]);
@@ -170,28 +157,23 @@ public final class Main {
             "IgnoreImagesetProperties"
     };
 
-    // who knows
-    public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
+    @Override public boolean isBreedingAllowed() {return userSwitches.getOrDefault("Breeding", true);}
     private void setBreedingAllowed(boolean allowed) {userSwitches.put("Breeding", allowed);}
-    public boolean isTransientBreedingAllowed() {return userSwitches.getOrDefault("Transients", true);}
+
+    @Override public boolean isTransientBreedingAllowed() {return userSwitches.getOrDefault("Transients", true);}
     private void setTransientBreedingAllowed(boolean allowed) {userSwitches.put("Transients", allowed);}
 
-    // :( maybe goes to mascot/image set specific settings (since it currently doesnt stop ppl from setting imageset anyway)
-    public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
+    @Override public boolean isTransformationAllowed() {return userSwitches.getOrDefault("Transformation", true);}
     private void setTransformationAllowed(boolean allowed) {userSwitches.put("Transformation", allowed);}
 
-    // this can go to environment? it'll change the behaviour slightly but i kinda would prefer it
-    public boolean isIEMovementAllowed() {return userSwitches.getOrDefault("Throwing", true);}
+    @Override public boolean isIEMovementAllowed() {return userSwitches.getOrDefault("Throwing", true);}
     private void setIEMovementAllowed(boolean allowed) {userSwitches.put("Throwing", allowed);}
-    // there can also be an extra pref for ie visibility (maybe a cli only pref for a regex or smth)
 
-    // maybe this goes to a soundplayer class/lambda??
-    public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
+    @Override public boolean isSoundAllowed() {return userSwitches.getOrDefault("Sounds", true);}
     private void setSoundAllowed(boolean allowed) {userSwitches.put("Sounds", allowed);}
 
-    // ctx menu stuff will (prolly) move to ui (but idk, do i want native to depend on mascotapp?)
-    public boolean shouldTranslateBehaviorNames() {return userSwitches.getOrDefault("TranslateBehaviorNames", true);}
-    private void setShouldTranslateBehaviorNames(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
+    @Override public boolean shouldTranslateBehaviours() {return userSwitches.getOrDefault("TranslateBehaviorNames", true);}
+    private void setShouldTranslateBehaviors(boolean b) {userSwitches.put("TranslateBehaviorNames", b);}
 
     //----
 
@@ -225,21 +207,24 @@ public final class Main {
     public static void main(final String[] args) {
         try {
             getInstance().run();
-        } catch (OutOfMemoryError error) {
-            log.log(Level.SEVERE, "Out of Memory.", error);
-            Main.showError("Out of Memory.");
+        } catch (Exception | Error error) {
+            log.log(Level.SEVERE, error.getMessage(), error);
+            Main.showError(error.getMessage());
             System.exit(0);
         }
     }
 
-    public void run() {
+    private void run() {
         String settingsPathProp = System.getProperty(SP_PREFIX + "SettingsPath");
         final Path SETTINGS_PATH = settingsPathProp != null
                 ? Path.of(settingsPathProp)
                 : JAR_PARENT_DIR.resolve(Path.of("conf","settings.properties"));
 
         loadAllSettings(SETTINGS_PATH);
-        Tr.loadLanguage();
+        Tr.loadLanguage(locale);
+        Tr.setCustomBehaviorTranslations(loadProperties(
+                JAR_PARENT_DIR.resolve(Path.of("conf", USER_BEHAVIORNAMES_FILE))
+        ));
 
         // optional
         createTrayIcon();
@@ -248,28 +233,29 @@ public final class Main {
         NativeFactory.getInstance().getEnvironment().init();
 
         //because the chooser is async
-        boolean isExit = getManager().isExitOnLastRemoved();
-        getManager().setExitOnLastRemoved(false);
+        boolean isExit = manager.isExitOnLastRemoved();
+        manager.setExitOnLastRemoved(false);
 
         Set<String> selections = getActiveImageSets();
 
         if (selections.isEmpty() || shouldShowChooserAtStart()) {
             ImageSetChooserUtils.askUserForSelection(c -> {
                 setActiveImageSets(c);
-                getManager().setExitOnLastRemoved(isExit);
-            }, getActiveImageSets());
+                manager.setExitOnLastRemoved(isExit);
+            }, getActiveImageSets(), programFolder);
         } else {
             selections.forEach(this::addActiveImageSet);
-            getManager().setExitOnLastRemoved(isExit);
+            manager.setExitOnLastRemoved(isExit);
         }
 
-        getManager().start();
+        manager.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> writeAllSettings(SETTINGS_PATH)));
     }
 
     private static final JFrame frame = new JFrame();
-    public static void showError(String message) {
+
+    static void showError(String message) {
         JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
@@ -283,7 +269,7 @@ public final class Main {
 
         if (!shouldIgnoreImagesetProperties()) {
             try {
-                var imgSetPropsPath = getProgramFolder().imgPath()
+                var imgSetPropsPath = programFolder.imgPath()
                         .resolve(imageSet).resolve("conf").resolve("imageset.properties");
                 settings.putAll(loadProperties(imgSetPropsPath));
             } catch (Exception e) {
@@ -291,7 +277,7 @@ public final class Main {
             }
         }
 
-        var imgSet = ShimejiImageSet.loadFrom(getProgramFolder(), imageSet, settings);
+        var imgSet = ShimejiImageSet.loadFrom(programFolder, imageSet, settings);
         loadedImageSets.put(imageSet, imgSet);
     }
 
@@ -303,7 +289,7 @@ public final class Main {
      *
      * @return A copy of the selected image sets collection
      */
-    public Set<String> getActiveImageSets() {
+    private Set<String> getActiveImageSets() {
         return new LinkedHashSet<>(activeImageSets);
     }
 
@@ -328,13 +314,13 @@ public final class Main {
             }
         }
 
-        boolean isExit = getManager().isExitOnLastRemoved();
-        getManager().setExitOnLastRemoved(false);
+        boolean isExit = this.manager.isExitOnLastRemoved();
+        manager.setExitOnLastRemoved(false);
 
         toAdd.forEach(this::addActiveImageSet);
         toRemove.forEach(this::removeActiveImageSet);
 
-        getManager().setExitOnLastRemoved(isExit);
+        manager.setExitOnLastRemoved(isExit);
     }
 
     /**
@@ -378,7 +364,7 @@ public final class Main {
      */
     private void removeActiveImageSet(String imageSet) {
         activeImageSets.remove(imageSet);
-        getManager().remainNone(imageSet);
+        manager.remainNone(imageSet);
         loadedImageSets.remove(imageSet);
     }
 
@@ -386,15 +372,15 @@ public final class Main {
      * Clears all image set data and reloads all selected image sets
      */
     private void reloadImageSets() {
-        boolean isExit = getManager().isExitOnLastRemoved();
-        getManager().setExitOnLastRemoved(false);
+        boolean isExit = manager.isExitOnLastRemoved();
+        manager.setExitOnLastRemoved(false);
 
-        getManager().disposeAll();
+        manager.disposeAll();
 
         loadedImageSets.clear();
         getActiveImageSets().forEach(this::addActiveImageSet);
 
-        getManager().setExitOnLastRemoved(isExit);
+        manager.setExitOnLastRemoved(isExit);
     }
 
     //----------mascot creation-----------//
@@ -402,8 +388,8 @@ public final class Main {
     /**
      * Randomly picks an image set from {@link #activeImageSets} and creates a mascot
      */
-    public void createMascot() {
-        if (getProgramFolder().isMonoImageSet()) {
+    private void createMascot() {
+        if (programFolder.isMonoImageSet()) {
             createMascot("");
         } else {
             int length = activeImageSets.size();
@@ -417,10 +403,9 @@ public final class Main {
      * <p>
      * Fails if the image set has not been loaded.
      */
-    public void createMascot(String imageSet) {
-
+    private void createMascot(String imageSet) {
         // Create one mascot
-        final Mascot mascot = new Mascot(imageSet);
+        final Mascot mascot = new Mascot(imageSet, this, this::getImageSet);
 
         // Create it outside the bounds of the screen
         mascot.setAnchor(new Point(-4000, -4000));
@@ -429,8 +414,8 @@ public final class Main {
         mascot.setLookRight(Math.random() < 0.5);
 
         try {
-            mascot.setBehavior(Objects.requireNonNull(getConfiguration(imageSet)).buildBehavior(null, mascot));
-            getManager().add(mascot);
+            mascot.setBehavior(mascot.getOwnImageSet().getConfiguration().buildBehavior(null, mascot));
+            this.manager.add(mascot);
         } catch (Exception e) {
             log.log(Level.SEVERE, imageSet + " fatal error, can not be started.", e);
             Main.showError(
@@ -521,8 +506,8 @@ public final class Main {
             props.put("Scaling", getScaling() + "");
         }
 
-        if (!getLocale().equals(Locale.ENGLISH)) {
-            props.put("Language", getLocale().toLanguageTag());
+        if (!locale.equals(Locale.ENGLISH)) {
+            props.put("Language", locale.toLanguageTag());
         }
 
         var sb = new StringBuilder();
@@ -612,11 +597,11 @@ public final class Main {
 
         // chase mouse
         final MenuItem followCursor = new MenuItem(Tr.tr("FollowCursor"));
-        followCursor.addActionListener(event -> getManager().setBehaviorAll(Main.BEHAVIOR_GATHER));
+        followCursor.addActionListener(event -> this.manager.setBehaviorAll(Main.BEHAVIOR_GATHER));
 
         // Reduce to One
         final MenuItem reduceToOne = new MenuItem(Tr.tr("ReduceToOne"));
-        reduceToOne.addActionListener(event -> getManager().remainOne());
+        reduceToOne.addActionListener(event -> this.manager.remainOne());
 
         // Undo window interaction
         final MenuItem restoreWindows = new MenuItem(Tr.tr("RestoreWindows"));
@@ -665,7 +650,7 @@ public final class Main {
         final var transformToggle = getToggleItem("Transformation", this::isTransformationAllowed, this::setTransformationAllowed);
         final var windowThrowToggle = getToggleItem("ThrowingWindows", this::isIEMovementAllowed, this::setIEMovementAllowed);
         final var soundToggle = getToggleItem("SoundEffects", this::isSoundAllowed, this::setSoundAllowed);
-        final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviorNames, this::setShouldTranslateBehaviorNames);
+        final var behaviorTranslationToggle = getToggleItem("TranslateBehaviorNames", this::shouldTranslateBehaviours, this::setShouldTranslateBehaviors);
         final var chooserAtStartToggle = getToggleItem("AlwaysShowShimejiChooser", this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart);
         final var ignoreImagesetPropsToggle = getToggleItem("IgnoreImagesetProperties", this::shouldIgnoreImagesetProperties, this::setShouldIgnoreImagesetProperties);
 
@@ -683,7 +668,7 @@ public final class Main {
         //image set chooser
         final MenuItem chooseShimeji = new MenuItem(Tr.tr("ChooseShimeji"));
         chooseShimeji.addActionListener(e -> {
-            ImageSetChooserUtils.askUserForSelection(this::setActiveImageSets, getActiveImageSets());
+            ImageSetChooserUtils.askUserForSelection(this::setActiveImageSets, getActiveImageSets(), programFolder);
         });
 
         //reload button
@@ -716,7 +701,7 @@ public final class Main {
 
         try {
             //adding the tray icon
-            Path trayIconPath = getProgramFolder().getIconPath();
+            Path trayIconPath = programFolder.getIconPath();
             Image trayIconImg = null;
             try {
                 if (trayIconPath != null) {
