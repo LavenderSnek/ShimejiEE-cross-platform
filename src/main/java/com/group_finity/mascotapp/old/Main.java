@@ -1,5 +1,9 @@
-package com.group_finity.mascot;
+package com.group_finity.mascotapp.old;
 
+import com.group_finity.mascot.Mascot;
+import com.group_finity.mascot.MascotPrefProvider;
+import com.group_finity.mascot.NativeFactory;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ShimejiImageSet;

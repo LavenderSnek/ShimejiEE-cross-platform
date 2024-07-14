@@ -1,5 +1,9 @@
-package com.group_finity.mascot;
+package com.group_finity.mascotapp.old;
 
+import com.group_finity.mascot.Mascot;
+import com.group_finity.mascot.MascotManager;
+import com.group_finity.mascot.NativeFactory;
+import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.exception.BehaviorInstantiationException;
 import com.group_finity.mascot.exception.CantBeAliveException;

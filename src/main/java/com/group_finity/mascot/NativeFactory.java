@@ -22,7 +22,7 @@ public abstract class NativeFactory {
         //---init lib folder path
         Path jarDir;
         try {
-            jarDir = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+            jarDir = Path.of(NativeFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
