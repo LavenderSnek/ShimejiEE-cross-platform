@@ -61,7 +61,7 @@ public abstract class BorderedAction extends ActionBase {
      * <p>
      * Options, (see schema properties for true values):
      * <ul>
-     *   <li>{@value BORDERTYPE_CEILING}/li>
+     *   <li>{@value BORDERTYPE_CEILING}</li>
      *   <li>{@value BORDERTYPE_WALL}</li>
      *   <li>{@value BORDERTYPE_FLOOR}</li>
      * </ul>
