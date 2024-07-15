@@ -6,6 +6,7 @@ import com.group_finity.mascot.environment.MascotEnvironment;
 import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.imageset.ImageSet;
+import com.group_finity.mascot.imageset.ImageSetStore;
 import com.group_finity.mascot.ui.debug.DebugUi;
 import com.group_finity.mascot.ui.debug.DebugWindow;
 import com.group_finity.mascot.window.TranslucentWindow;
@@ -19,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,14 +63,14 @@ public class Mascot implements ScriptableMascot {
     private DebugUi debugUi = null;
 
     private final MascotPrefProvider prefProvider;
-    private final Function<String, ImageSet> imageSetProvider;
+    private final ImageSetStore imageSetStore;
 
-    public Mascot(final String imageSet, MascotPrefProvider prefProvider, Function<String, ImageSet> imageSetProvider) {
+    public Mascot(final String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore) {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
         this.prefProvider = prefProvider;
-        this.imageSetProvider = imageSetProvider;
+        this.imageSetStore = imageSetStore;
 
         MascotEventHandler eventHandler = new MascotEventHandler(this);
         getWindow().setEventHandler(eventHandler);
@@ -233,7 +233,7 @@ public class Mascot implements ScriptableMascot {
     // will need an eventual rewrite to make this work with per imageset config and breeding
 
     public static Mascot createBlankFrom(Mascot mascot) {
-        return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetProvider);
+        return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetStore);
     }
 
     public double getScaling() {
@@ -241,7 +241,7 @@ public class Mascot implements ScriptableMascot {
     }
 
     public ImageSet getOwnImageSet() {
-        return getImageSetNamed(getImageSet());
+        return imageSetStore.get(getImageSet());
     }
 
     public boolean isIEMovementAllowed() { return prefProvider.isIEMovementAllowed(getImageSet()); }
@@ -251,7 +251,7 @@ public class Mascot implements ScriptableMascot {
     public boolean isSoundAllowed() { return prefProvider.isSoundAllowed(getImageSet()); }
     public boolean shouldTranslateBehaviours() { return prefProvider.shouldTranslateBehaviours(getImageSet()); }
 
-    public ImageSet getImageSetNamed(String name) {
-        return imageSetProvider.apply(name);
+    public ImageSet getImageSetDependency(String name) {
+        return imageSetStore.getAsDependency(name, getImageSet());
     }
 }

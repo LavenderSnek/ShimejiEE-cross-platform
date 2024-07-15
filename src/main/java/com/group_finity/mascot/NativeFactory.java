@@ -12,26 +12,33 @@ import java.nio.file.Path;
  */
 public abstract class NativeFactory {
 
-    private static final NativeFactory instance;
+    private static final String NATIVE_PKG = "com.group_finity.mascotnative";
 
-    private static final String NATIVE_PKG_PROP = "com.group_finity.mascotnative";
+    private static NativeFactory instance;
 
-    protected static final Path LIB_DIR;
+    protected static Path LIB_DIR;
 
-    static {
-        //---init lib folder path
-        Path jarDir;
+    static void init(String subpkg, Path libDir) {
+        LIB_DIR = libDir;
+
         try {
-            jarDir = Path.of(NativeFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (Exception e) {
+            @SuppressWarnings("unchecked")
+            final Class<? extends NativeFactory> impl = (Class<? extends NativeFactory>) Class
+                    .forName(NATIVE_PKG + "." + subpkg + ".NativeFactoryImpl");
+
+            instance = impl.getDeclaredConstructor().newInstance();
+
+        } catch (Error | Exception e) {
+            System.err.println("ERROR: could not load native code package");
             throw new RuntimeException(e);
         }
-        LIB_DIR = jarDir.resolve("lib");
+    }
 
+    static void init() {
         //---pick native pkg
         final String os = System.getProperty("os.name").toLowerCase();
 
-        String subpkg = System.getProperty(NATIVE_PKG_PROP);
+        String subpkg = System.getProperty(NATIVE_PKG);
         if (subpkg == null) {
             if (os.startsWith("windows")) {
                 subpkg = "win";
@@ -42,18 +49,20 @@ public abstract class NativeFactory {
             }
         }
 
-        //---load native pkg
+        //---init lib folder path
+        Path jarDir;
         try {
-            @SuppressWarnings("unchecked")
-            final Class<? extends NativeFactory> impl = (Class<? extends NativeFactory>) Class
-                    .forName(NATIVE_PKG_PROP + "." + subpkg + ".NativeFactoryImpl");
-
-            instance = impl.getDeclaredConstructor().newInstance();
-
-        } catch (final Exception e) {
-            System.err.println("ERROR: could not load native code package");
+            jarDir = Path.of(NativeFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        } catch (Error | Exception e) {
             throw new RuntimeException(e);
         }
+
+        //---init
+        init(subpkg, jarDir.resolve("lib"));
+    }
+
+    static {
+        init();
     }
 
     public static NativeFactory getInstance() {
@@ -65,5 +74,7 @@ public abstract class NativeFactory {
     public abstract NativeImage newNativeImage(BufferedImage src);
 
     public abstract TranslucentWindow newTransparentWindow();
+
+    protected void shutdown() {}
 
 }

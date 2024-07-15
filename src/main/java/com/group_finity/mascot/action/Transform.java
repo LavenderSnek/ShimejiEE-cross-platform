@@ -36,7 +36,7 @@ public class Transform extends Animate {
     }
 
     private void transform() throws VariableException {
-        String childType = getMascot().getImageSetNamed(getTransformMascot()) != null ? getTransformMascot() : getMascot().getImageSet();
+        String childType = getMascot().getImageSetDependency(getTransformMascot()) != null ? getTransformMascot() : getMascot().getImageSet();
 
         try {
             getMascot().setImageSet(childType);

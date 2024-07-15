@@ -75,7 +75,7 @@ public class BreedMove extends Move {
     }
 
     private void breed() throws VariableException {
-        String childType = getMascot().getImageSetNamed(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
+        String childType = getMascot().getImageSetDependency(getBornMascot()) != null ? getBornMascot() : getMascot().getImageSet();
 
         final Mascot newMascot = Mascot.createBlankFrom(getMascot());
         getMascot().setImageSet(childType);

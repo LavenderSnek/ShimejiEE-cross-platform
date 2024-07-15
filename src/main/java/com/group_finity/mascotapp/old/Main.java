@@ -4,16 +4,25 @@ import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.MascotPrefProvider;
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.Tr;
+import com.group_finity.mascot.config.Configuration;
+import com.group_finity.mascot.config.DefaultPoseLoader;
+import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.exception.ConfigurationException;
+import com.group_finity.mascot.image.ImagePairLoader;
+import com.group_finity.mascot.image.ImagePairLoaderBuilder;
 import com.group_finity.mascot.imageset.ImageSet;
-import com.group_finity.mascot.imageset.ShimejiImageSet;
+import com.group_finity.mascot.imageset.ImageSetStore;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
+import com.group_finity.mascot.imageset.ShimejiImageSet;
+import com.group_finity.mascot.sound.SoundLoader;
 import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
@@ -281,7 +290,7 @@ public final class Main implements MascotPrefProvider {
             }
         }
 
-        var imgSet = ShimejiImageSet.loadFrom(programFolder, imageSet, settings);
+        var imgSet = loadImageSetFrom(programFolder, imageSet, settings);
         loadedImageSets.put(imageSet, imgSet);
     }
 
@@ -385,6 +394,36 @@ public final class Main implements MascotPrefProvider {
         getActiveImageSets().forEach(this::addActiveImageSet);
 
         manager.setExitOnLastRemoved(isExit);
+    }
+
+    private static ImageSet loadImageSetFrom(ShimejiProgramFolder pf, String name, Map<String, String> settings) throws ParserConfigurationException, IOException, SAXException, ConfigurationException {
+        ImagePairLoaderBuilder ib = new ImagePairLoaderBuilder();
+        String scaleVal = settings.getOrDefault("Scaling", ib.getScaling() + "");
+        try {
+            double scale = Double.parseDouble(scaleVal);
+            ib.setScaling(scale > 0 ? scale : ib.getScaling());
+        } catch (Exception ignored) {}
+
+        ib.setLogicalAnchors(Boolean.parseBoolean(settings.getOrDefault("LogicalAnchors", ib.isLogicalAnchors() + "")))
+                .setAsymmetryNameScheme(Boolean.parseBoolean(settings.getOrDefault("AsymmetryNameScheme", ib.isAsymmetryNameScheme() + "")))
+                .setPixelArtScaling(Boolean.parseBoolean(settings.getOrDefault("PixelArtScaling", ib.isPixelArtScaling() + "")));
+
+        DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Path actionsPath = pf.getActionConfPath(name);
+        Path behaviorPath = pf.getBehaviorConfPath(name);
+        Entry actionsEntry = new Entry(docBuilder.parse(actionsPath.toFile()).getDocumentElement());
+        Entry behaviorEntry = new Entry(docBuilder.parse(behaviorPath.toFile()).getDocumentElement());
+
+        ImagePairLoader imgLoader = ib.buildForBasePath(pf.imgPath().resolve(name));
+
+        SoundLoader soundLoader = new SoundLoader(pf, name);
+        soundLoader.setFixRelativeGlobalSound(Boolean.parseBoolean(settings.getOrDefault("FixRelativeGlobalSound", soundLoader.isFixRelativeGlobalSound() + "")));
+
+        Configuration config = new Configuration();
+        config.load(new DefaultPoseLoader(imgLoader, soundLoader), actionsEntry, behaviorEntry);
+        config.validate();
+
+        return new ShimejiImageSet(config, imgLoader, soundLoader);
     }
 
     //----------mascot creation-----------//

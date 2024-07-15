@@ -5,24 +5,29 @@ import com.group_finity.mascot.MascotManager;
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.exception.CantBeAliveException;
 
-import java.awt.*;
+import java.awt.Point;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 // maybe this can start deal with image sets too??? im basically moving the nicer parts of main here?
 // making manager kinda worse to fix main ig
 public class Manager implements MascotManager {
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
-    // todo: will have to change the interface to account for transformation (maybe throw the transform/breed off here)
-    private ConcurrentMap<String, ConcurrentSkipListSet<Integer>> imageSetMascots = new ConcurrentHashMap<>();
     private ConcurrentMap<Integer, Mascot> mascots = new ConcurrentSkipListMap<>();
 
-    public static final int TICK_INTERVAL_MS = 40;
+    public static final int TICK_INTERVAL_MILLIS = 40;
 
-    public void start() {
-        scheduler.scheduleAtFixedRate(this::tick, 0, TICK_INTERVAL_MS, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> start() throws ExecutionException, InterruptedException {
+        return scheduler.scheduleAtFixedRate(this::tick, 0, TICK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
@@ -44,33 +49,55 @@ public class Manager implements MascotManager {
         mascots.forEach((id, mascot) -> mascot.apply());
     }
 
+    // i'll deal w any threading issues if/when they happen
+    // the original implementation also deleted while iterating so hopefully its fine??
+
+    public void disposeAll() {
+        mascots.values().forEach(Mascot::dispose);
+    }
+
+    public void disposeIf(Predicate<Mascot> predicate) {
+        mascots.values().stream().filter(predicate).forEach(Mascot::dispose);
+    }
+
+    public void trySetBehaviorAll(String name) {
+        mascots.values().forEach(m -> {
+            try {
+                var bv = m.getOwnImageSet().getConfiguration().buildBehavior(name);
+                m.setBehavior(bv);
+            } catch (Exception ignored) {
+                // this removes enforcement of ChaseMouse having to exist
+                // technically a compatibility break for errors
+            }
+        });
+    }
+
     // remove these later and replace them w proper breed/spawn
     @Override
     public void add(Mascot mascot) {
-        imageSetMascots.putIfAbsent(mascot.getImageSet(), new ConcurrentSkipListSet<>());
-        imageSetMascots.computeIfPresent(mascot.getImageSet(), (s, l) -> {
+        scheduler.submit(() -> {
             mascot.setManager(this);
-            l.add(mascot.id);
-            return l;
+            mascots.putIfAbsent(mascot.id, mascot);
         });
-        mascots.putIfAbsent(mascot.id, mascot);
     }
 
     @Override
     public void remove(Mascot mascot) {
-        imageSetMascots.computeIfPresent(mascot.getImageSet(), (s, l) -> {
+        scheduler.submit(() -> {
+            mascots.remove(mascot.id);
             mascot.setManager(null);
-            l.remove(mascot.id);
-            return l;
         });
-        mascots.remove(mascot.id);
     }
 
     @Override
     public int getCount(String imageSet) {
-        return imageSet == null
-                ? mascots.size()
-                : imageSetMascots.get(imageSet).size();
+        if (imageSet == null) {
+            return mascots.size();
+        }
+        // yeah this is awful
+        return (int) mascots.values().stream()
+                .filter(m -> m.getImageSet().equals(imageSet))
+                .count();
     }
 
     @Override

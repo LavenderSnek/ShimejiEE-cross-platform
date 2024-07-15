@@ -33,11 +33,11 @@ public class ProgramFolderOptions {
      * @return newly created program folder
      */
     public ShimejiProgramFolder toProgramFolder(Path defaultBase) {
-        var pf = ShimejiProgramFolder.fromFolder(base.orElse(defaultBase));
+        var basePf = ShimejiProgramFolder.fromFolder(this.base.orElse(defaultBase));
         return new ShimejiProgramFolder(
-                conf.orElse(pf.confPath()),
-                img.orElse(pf.imgPath()),
-                sound.orElse(pf.soundPath()),
+                conf.orElse(basePf.confPath()),
+                img.orElse(basePf.imgPath()),
+                sound.orElse(basePf.soundPath()),
                 mono
         );
     }
