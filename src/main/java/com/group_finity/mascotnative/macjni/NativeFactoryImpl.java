@@ -21,7 +21,7 @@ public class NativeFactoryImpl extends NativeFactory {
         // Native code crashes if the toolkit hasn't been loaded first
         Toolkit.getDefaultToolkit();
         try {
-            System.load(LIB_DIR.resolve(LIB_FILENAME).toAbsolutePath().toString());
+            System.load(nativeLibDir.resolve(LIB_FILENAME).toAbsolutePath().toString());
         } catch (UnsatisfiedLinkError error) {
             throw new RuntimeException(
                     "Unable to load library for macjni."

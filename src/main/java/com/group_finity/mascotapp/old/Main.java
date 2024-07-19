@@ -11,11 +11,11 @@ import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.image.ImagePairLoader;
 import com.group_finity.mascot.image.ImagePairLoaderBuilder;
 import com.group_finity.mascot.imageset.ImageSet;
-import com.group_finity.mascot.imageset.ImageSetStore;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.sound.SoundLoader;
 import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
+import com.group_finity.mascotapp.Constants;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
@@ -243,6 +243,7 @@ public final class Main implements MascotPrefProvider {
         createTrayIcon();
 
         // init environment
+        NativeFactory.init(Constants.NATIVE_PKG_DEFAULT, Constants.NATIVE_LIB_DIR);
         NativeFactory.getInstance().getEnvironment().init();
 
         //because the chooser is async

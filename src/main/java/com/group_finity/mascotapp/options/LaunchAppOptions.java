@@ -1,5 +1,7 @@
 package com.group_finity.mascotapp.options;
 
+import com.group_finity.mascotapp.Constants;
+
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -19,15 +21,6 @@ public class LaunchAppOptions {
     public Optional<Path> trayIcon = Optional.empty();
 
     // native
-
-    public enum NativePackage {
-        virtualdesktop,
-        generic,
-        macclassic,
-        macjni,
-        win;
-    }
-
-    @Option(names = {"--native"}, description = "Renderer/environment: ${COMPLETION-CANDIDATES}")
-    public Optional<NativePackage> nativePkg = Optional.empty();
+    @Option(names = {"--native"}, description = "Renderer/environment")
+    public String nativePkg = Constants.NATIVE_PKG_DEFAULT;
 }

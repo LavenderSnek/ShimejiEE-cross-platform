@@ -1,16 +1,13 @@
 package com.group_finity.mascotapp.options;
 
 
-import java.util.Map;
+import com.group_finity.mascot.MascotPrefProvider;
 
 import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Help;
 
-// these should all either be image set specific or global
-// (at-least theoretically; the toggles still need lots of refactoring, gonna go write some atrocious lambdas later)
-public class ImageSetOptions {
+public class ImageSetOptions implements MascotPrefProvider {
 
-    // img set loading
+    //---img set loading
     @Option(names = {"--scale"},  description = "Scaling applied, if any")
     public double scaling = 1.0;
 
@@ -29,8 +26,7 @@ public class ImageSetOptions {
     @Option(names = {"--rip"}, negatable = true, description = "Should imageset.properties be read")
     public boolean readImageSetProps = true;
 
-    // behaviour (suffering refactoring any of these to be image set specific)
-
+    //---toggles
     @Option(names = {"--throw"}, negatable = true, description = "Is window throwing allowed")
     public boolean windowThrowingAllowed = true;
 
@@ -43,8 +39,18 @@ public class ImageSetOptions {
     @Option(names = {"--transform"}, negatable = true, description = "Is switching image sets allowed")
     public boolean transformationAllowed = true;
 
-    // changed this bc it conflicts w the pf sound
+    // changed this to audio bc it conflicts w the pf sound opt
     @Option(names = {"--audio"}, negatable = true, description = "Is audio allowed to play")
     public boolean audioAllowed = true;
 
+    @Option(names = {"--bvt"}, negatable = true, description = "Should behaviour names be translated")
+    public boolean translateBehaviourNames = true;
+
+    //---maybe this will move to imageSet manager one day to make it image set specific
+    @Override public boolean isIEMovementAllowed() { return windowThrowingAllowed; }
+    @Override public boolean isBreedingAllowed() { return breedingAllowed; }
+    @Override public boolean isTransientBreedingAllowed() { return transientsAllowed; }
+    @Override public boolean isTransformationAllowed() { return transformationAllowed; }
+    @Override public boolean isSoundAllowed() { return audioAllowed; }
+    @Override public boolean shouldTranslateBehaviours() { return translateBehaviourNames; }
 }

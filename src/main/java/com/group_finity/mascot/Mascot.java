@@ -230,8 +230,6 @@ public class Mascot implements ScriptableMascot {
     // not part of the API, please don't call/rely on these from scripts, (maybe these should be mangled?)
     // and this is bad- but it really is more of a stepping stone to de-Main-ify this
 
-    // will need an eventual rewrite to make this work with per imageset config and breeding
-
     public static Mascot createBlankFrom(Mascot mascot) {
         return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetStore);
     }
@@ -244,14 +242,14 @@ public class Mascot implements ScriptableMascot {
         return imageSetStore.get(getImageSet());
     }
 
+    public ImageSet getImageSetDependency(String name) {
+        return imageSetStore.getAsDependency(name, getImageSet());
+    }
+
     public boolean isIEMovementAllowed() { return prefProvider.isIEMovementAllowed(getImageSet()); }
     public boolean isBreedingAllowed() { return prefProvider.isBreedingAllowed(getImageSet()); }
     public boolean isTransientBreedingAllowed() { return prefProvider.isTransientBreedingAllowed(getImageSet()); }
     public boolean isTransformationAllowed() { return prefProvider.isTransformationAllowed(getImageSet()); }
     public boolean isSoundAllowed() { return prefProvider.isSoundAllowed(getImageSet()); }
     public boolean shouldTranslateBehaviours() { return prefProvider.shouldTranslateBehaviours(getImageSet()); }
-
-    public ImageSet getImageSetDependency(String name) {
-        return imageSetStore.getAsDependency(name, getImageSet());
-    }
 }

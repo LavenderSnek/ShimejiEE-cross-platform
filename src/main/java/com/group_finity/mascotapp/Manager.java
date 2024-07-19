@@ -7,37 +7,30 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 
 import java.awt.Point;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 
-// maybe this can start deal with image sets too??? im basically moving the nicer parts of main here?
-// making manager kinda worse to fix main ig
 public class Manager implements MascotManager {
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
-
-    private ConcurrentMap<Integer, Mascot> mascots = new ConcurrentSkipListMap<>();
-
     public static final int TICK_INTERVAL_MILLIS = 40;
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ConcurrentLinkedDeque<Runnable> tasks = new ConcurrentLinkedDeque<>();
+
+    private final ConcurrentMap<Integer, Mascot> mascots = new ConcurrentSkipListMap<>();
 
     public ScheduledFuture<?> start() throws ExecutionException, InterruptedException {
         return scheduler.scheduleAtFixedRate(this::tick, 0, TICK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
     }
 
-    public void stop() {
-        scheduler.shutdown();
-    }
-
     private void tick() {
+        // tasks
+        runPendingTasks();
+
         // update environment
         NativeFactory.getInstance().getEnvironment().tick();
-        // update mascot internal state
+
+        // update each mascot's internal state
         mascots.forEach((id, mascot) -> {
             try {
                 mascot.tick();
@@ -45,23 +38,35 @@ public class Manager implements MascotManager {
                 throw new RuntimeException(e);
             }
         });
+
         // render new mascot state
         mascots.forEach((id, mascot) -> mascot.apply());
+
+        // tasks
+        runPendingTasks();
     }
 
-    // i'll deal w any threading issues if/when they happen
-    // the original implementation also deleted while iterating so hopefully its fine??
+    private void runPendingTasks() {
+        while (!tasks.isEmpty()) {
+            tasks.removeFirst().run();
+        }
+    }
+
+    // basically just that linkedHashSet thing from the original Manager
+    void queueTask(Runnable r) {
+        tasks.add(r);
+    }
 
     public void disposeAll() {
-        mascots.values().forEach(Mascot::dispose);
+        queueTask(() -> mascots.values().forEach(Mascot::dispose));
     }
 
     public void disposeIf(Predicate<Mascot> predicate) {
-        mascots.values().stream().filter(predicate).forEach(Mascot::dispose);
+        queueTask(() -> mascots.values().stream().filter(predicate).forEach(Mascot::dispose));
     }
 
     public void trySetBehaviorAll(String name) {
-        mascots.values().forEach(m -> {
+        queueTask(() -> mascots.values().forEach(m -> {
             try {
                 var bv = m.getOwnImageSet().getConfiguration().buildBehavior(name);
                 m.setBehavior(bv);
@@ -69,13 +74,12 @@ public class Manager implements MascotManager {
                 // this removes enforcement of ChaseMouse having to exist
                 // technically a compatibility break for errors
             }
-        });
+        }));
     }
 
-    // remove these later and replace them w proper breed/spawn
     @Override
     public void add(Mascot mascot) {
-        scheduler.submit(() -> {
+        queueTask(() -> {
             mascot.setManager(this);
             mascots.putIfAbsent(mascot.id, mascot);
         });
@@ -83,7 +87,7 @@ public class Manager implements MascotManager {
 
     @Override
     public void remove(Mascot mascot) {
-        scheduler.submit(() -> {
+        queueTask(() -> {
             mascots.remove(mascot.id);
             mascot.setManager(null);
         });
@@ -117,8 +121,8 @@ public class Manager implements MascotManager {
     @Override
     public boolean hasOverlappingMascotsAtPoint(Point anchor) {
         // there no way to fix this without writing an actual collision system
-        // so here's a nice stream to distract from the pain
-        return mascots.values().parallelStream()
+        return mascots.values()
+                .parallelStream()
                 .anyMatch(m -> m.getAnchor().equals(anchor));
     }
 }

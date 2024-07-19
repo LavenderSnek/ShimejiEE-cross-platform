@@ -16,10 +16,14 @@ public abstract class NativeFactory {
 
     private static NativeFactory instance;
 
-    protected static Path LIB_DIR;
+    protected static Path nativeLibDir;
 
-    static void init(String subpkg, Path libDir) {
-        LIB_DIR = libDir;
+    public static void init(String subpkg, Path libDir) {
+        if (instance != null) {
+            instance.shutdown();
+        }
+
+        nativeLibDir = libDir;
 
         try {
             @SuppressWarnings("unchecked")
@@ -32,37 +36,6 @@ public abstract class NativeFactory {
             System.err.println("ERROR: could not load native code package");
             throw new RuntimeException(e);
         }
-    }
-
-    static void init() {
-        //---pick native pkg
-        final String os = System.getProperty("os.name").toLowerCase();
-
-        String subpkg = System.getProperty(NATIVE_PKG);
-        if (subpkg == null) {
-            if (os.startsWith("windows")) {
-                subpkg = "win";
-            } else if (os.startsWith("mac") || os.startsWith("darwin")) {
-                subpkg = "macjni";
-            } else {
-                subpkg = "generic";
-            }
-        }
-
-        //---init lib folder path
-        Path jarDir;
-        try {
-            jarDir = Path.of(NativeFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (Error | Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        //---init
-        init(subpkg, jarDir.resolve("lib"));
-    }
-
-    static {
-        init();
     }
 
     public static NativeFactory getInstance() {

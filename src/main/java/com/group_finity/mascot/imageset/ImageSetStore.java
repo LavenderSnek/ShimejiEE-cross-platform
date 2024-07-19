@@ -4,6 +4,6 @@ public interface ImageSetStore {
 
     ImageSet get(String name);
 
-    default ImageSet getAsDependency(String imageSet, String dependent) { return get(imageSet); }
+    default ImageSet getAsDependency(String name, String dependent) { return get(name); }
 
 }
