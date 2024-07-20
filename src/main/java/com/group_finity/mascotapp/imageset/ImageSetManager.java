@@ -28,7 +28,7 @@ public class ImageSetManager implements ImageSetStore {
         // get list copy first so we're not deleting while iterating
         getLoaded().stream()
                 .filter(s -> !newSelected.contains(s))
-                .forEach(this::removeSelected);
+                .forEach(this::removeImageSet);
 
         for (String s : newSelected) {
             if (!loaded.containsKey(s)) {
@@ -43,8 +43,11 @@ public class ImageSetManager implements ImageSetStore {
         }
     }
 
-    private void removeSelected(String name) {
+    private void removeImageSet(String name) {
         var ims = loaded.get(name);
+        if (ims == null) {
+            return;
+        }
         selectionDelegate.imageSetWillBeRemoved(name, ims);
         selected.remove(name);
         loaded.remove(name);
@@ -92,5 +95,12 @@ public class ImageSetManager implements ImageSetStore {
 
     public Collection<String> getLoaded() {
         return loaded.keySet().stream().toList();
+    }
+
+    public String getRandomSelection() {
+        return selected.stream()
+                .skip(new Random().nextInt(selected.size()))
+                .findFirst()
+                .orElse(null);
     }
 }

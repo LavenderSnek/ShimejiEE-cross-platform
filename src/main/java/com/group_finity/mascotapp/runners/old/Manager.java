@@ -1,4 +1,4 @@
-package com.group_finity.mascotapp.old;
+package com.group_finity.mascotapp.runners.old;
 
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.MascotManager;

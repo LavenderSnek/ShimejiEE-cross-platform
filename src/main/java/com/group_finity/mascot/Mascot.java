@@ -7,9 +7,9 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ImageSetStore;
-import com.group_finity.mascot.ui.debug.DebugUi;
-import com.group_finity.mascot.ui.debug.DebugWindow;
 import com.group_finity.mascot.window.TranslucentWindow;
+// todo: not ok
+import com.group_finity.mascotapp.gui.debug.DebugWindow;
 
 import javax.sound.sampled.Clip;
 import java.awt.Point;
@@ -80,6 +80,7 @@ public class Mascot implements ScriptableMascot {
 
     void startDebugUi() {
         if (debugUi == null) {
+            // todo: maybe make this a factory
             debugUi = new DebugWindow();
         }
         // slightly messy

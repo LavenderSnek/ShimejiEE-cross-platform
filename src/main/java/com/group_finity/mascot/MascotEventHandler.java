@@ -2,9 +2,9 @@ package com.group_finity.mascot;
 
 import com.group_finity.mascot.behavior.Behavior;
 import com.group_finity.mascot.exception.CantBeAliveException;
-import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
-import com.group_finity.mascot.ui.contextmenu.MenuRep;
-import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.contextmenu.MenuItemRep;
+import com.group_finity.mascot.window.contextmenu.MenuRep;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 

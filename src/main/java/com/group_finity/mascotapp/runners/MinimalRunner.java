@@ -1,4 +1,4 @@
-package com.group_finity.mascotapp;
+package com.group_finity.mascotapp.runners;
 
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.NativeFactory;
@@ -12,23 +12,22 @@ import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.sound.SoundLoader;
+import com.group_finity.mascotapp.Constants;
+import com.group_finity.mascotapp.Manager;
 import com.group_finity.mascotapp.imageset.ImageSetLoadingDelegate;
 import com.group_finity.mascotapp.imageset.ImageSetManager;
 import com.group_finity.mascotapp.imageset.ImageSetSelectionDelegate;
-import com.group_finity.mascotapp.options.*;
+import com.group_finity.mascotapp.options.ImageSetOptions;
+import com.group_finity.mascotapp.options.LaunchAppOptions;
+import com.group_finity.mascotapp.options.PersistentAppOptions;
+import com.group_finity.mascotapp.options.ProgramFolderOptions;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.awt.Point;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.LogManager;
 
-import static java.util.Map.*;
 import static picocli.CommandLine.*;
 
 @Command(
@@ -39,7 +38,7 @@ import static picocli.CommandLine.*;
         sortOptions = false,
         sortSynopsis = false
 )
-public class ShimejiRun implements Callable<Integer>, ImageSetLoadingDelegate, ImageSetSelectionDelegate {
+public class MinimalRunner implements Runnable, ImageSetLoadingDelegate, ImageSetSelectionDelegate {
 
     // saved
     @ArgGroup(validate = false, heading = "%nGeneral:%n") PersistentAppOptions genOpts = new PersistentAppOptions();
@@ -49,17 +48,13 @@ public class ShimejiRun implements Callable<Integer>, ImageSetLoadingDelegate, I
     @ArgGroup(validate = false, heading = "%nProgram Folder:%n") ProgramFolderOptions pfOpts = new ProgramFolderOptions();
     @ArgGroup(validate = false, heading = "%nLaunch:%n") LaunchAppOptions launchOpts = new LaunchAppOptions();
 
-    private Manager manager  = new Manager();
-    private ImageSetManager imageSets = new ImageSetManager(this, this);
+    private Manager manager;
+    private ImageSetManager imageSets;
 
     private ShimejiProgramFolder programFolder = null;
 
     @Override
     public ImageSet load(String name) {
-        if (programFolder == null) {
-            programFolder = pfOpts.toProgramFolder(Constants.JAR_DIR);
-        }
-
         try {
             return loadImageSet(programFolder, name, imgOpts);
         } catch (Exception e) {
@@ -88,7 +83,16 @@ public class ShimejiRun implements Callable<Integer>, ImageSetLoadingDelegate, I
 
     @Override
     public void imageSetHasBeenAdded(String name, ImageSet imageSet) {
-        var m = new Mascot(name, imgOpts, imageSets);
+        spawnMascot(name);
+    }
+
+    private void spawnMascot(String imageSetName) {
+        if (imageSets.get(imageSetName) == null) {
+            System.err.println("Invalid spawn, image set not loaded: " + imageSetName);
+            return;
+        }
+
+        var m = new Mascot(imageSetName, imgOpts, imageSets);
 
         m.setAnchor(new Point(-4000, -4000));
         try {
@@ -101,45 +105,34 @@ public class ShimejiRun implements Callable<Integer>, ImageSetLoadingDelegate, I
         }
     }
 
-    @Override
-    public Integer call() throws Exception {
-        // temp until i fix the logging
-        LogManager.getLogManager().reset();
+    public void init() {
+        // setup object w settings
+        programFolder = pfOpts.toProgramFolder(Constants.JAR_DIR);
+        imageSets = new ImageSetManager(this, this);
+        manager = new Manager();
 
         // setup native
         NativeFactory.init(launchOpts.nativePkg, Constants.NATIVE_LIB_DIR);
         NativeFactory.getInstance().getEnvironment().init();
+    }
+
+    @Override
+    public void run() {
+        // temp until i fix the logging
+        LogManager.getLogManager().reset();
+
+        // setup
+        init();
 
         // selection
-        imageSets.setSelected(List.of("dark-shime", "Shimeji"));
+        imageSets.setSelected(genOpts.imageSetSelections);
 
         // start manager
-        var mf = manager.start();
-
-        // start "UI" can be swing and/or console
-        var t = new Thread(() -> {
-            // can't believe im actually using BufferedReader irl
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                System.out.println("ShimejiEE");
-                String str;
-                while (true) {
-                    System.out.print(">>> ");
-                    str = reader.readLine();
-                    if (str == null) {
-                        break;
-                    }
-                    System.out.println(str);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        t.start();
-
-
-        mf.get();
-        return 0;
+        try {
+            manager.start().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static ImageSet loadImageSet(ShimejiProgramFolder pf, String name, ImageSetOptions options) throws Exception {
@@ -168,6 +161,5 @@ public class ShimejiRun implements Callable<Integer>, ImageSetLoadingDelegate, I
 
         return new ShimejiImageSet(config, imgStore, soundStore);
     }
-
 
 }

@@ -12,6 +12,9 @@ import java.util.function.Predicate;
 
 public class Manager implements MascotManager {
 
+    // this could technically go in mascot since it does draw the mascots (maybe as DefaultManager?)
+    // todo: think abt it later
+
     public static final int TICK_INTERVAL_MILLIS = 40;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -53,7 +56,7 @@ public class Manager implements MascotManager {
     }
 
     // basically just that linkedHashSet thing from the original Manager
-    void queueTask(Runnable r) {
+    public void queueTask(Runnable r) {
         tasks.add(r);
     }
 

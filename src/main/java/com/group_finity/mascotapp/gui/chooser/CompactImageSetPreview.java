@@ -1,4 +1,4 @@
-package com.group_finity.mascot.ui.imagesets;
+package com.group_finity.mascotapp.gui.chooser;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;

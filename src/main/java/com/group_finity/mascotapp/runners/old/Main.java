@@ -1,4 +1,4 @@
-package com.group_finity.mascotapp.old;
+package com.group_finity.mascotapp.runners.old;
 
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.MascotPrefProvider;
@@ -14,7 +14,7 @@ import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.sound.SoundLoader;
-import com.group_finity.mascot.ui.imagesets.ImageSetChooserUtils;
+import com.group_finity.mascotapp.gui.chooser.ImageSetChooserUtils;
 import com.group_finity.mascotapp.Constants;
 import org.xml.sax.SAXException;
 
@@ -70,7 +70,7 @@ import java.util.stream.Stream;
  *
  * @author see readme
  */
-public final class Main implements MascotPrefProvider {
+public final class Main implements Runnable, MascotPrefProvider {
     private static final Logger log = Logger.getLogger(Main.class.getName());
 
     // Action that matches the followCursor action
@@ -80,32 +80,26 @@ public final class Main implements MascotPrefProvider {
 
     private static final String USER_BEHAVIORNAMES_FILE = "user-behaviornames.properties";
 
-    public static final Path JAR_PARENT_DIR;
+    private static final Path SETTINGS_PATH;
 
     static {
-
         System.setProperty("java.util.PropertyResourceBundle.encoding", "UTF-8");
 
-        Path folder = null;
-        try {
-            folder = Path.of(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (Exception e) {
-            showError("Unable to find path to jar");
-            System.exit(1);
-        }
-        JAR_PARENT_DIR = folder;
-
-        try (var ins = new FileInputStream(JAR_PARENT_DIR.resolve(Path.of("conf","logging.properties")).toFile())) {
+        final var logPropsPath = Constants.JAR_DIR.resolve(Path.of("conf","logging.properties"));
+        try (var ins = new FileInputStream(logPropsPath.toFile())) {
             LogManager.getLogManager().readConfiguration(ins);
         } catch (final SecurityException | IOException e) {
             e.printStackTrace();
         }
 
+        String settingsPathProp = System.getProperty(SP_PREFIX + "SettingsPath");
+        SETTINGS_PATH = settingsPathProp != null
+                ? Path.of(settingsPathProp)
+                : Constants.JAR_DIR.resolve(Path.of("conf","settings.properties"));
     }
 
     //--------//
-
-    private ShimejiProgramFolder programFolder = ShimejiProgramFolder.fromFolder(JAR_PARENT_DIR);
+    private ShimejiProgramFolder programFolder = ShimejiProgramFolder.fromFolder(Constants.JAR_DIR);
 
     private final ConcurrentMap<String, ImageSet> loadedImageSets = new ConcurrentHashMap<>();
     private final List<String> activeImageSets = new ArrayList<>();
@@ -214,57 +208,54 @@ public final class Main implements MascotPrefProvider {
 
     //-------------------------------------//
 
-    /**
-     * Program entry point
-     */
     public static void main(final String[] args) {
+        getInstance().run();
+    }
+
+    @Override
+    public void run() {
         try {
-            getInstance().run();
+            // init settings
+            loadAllSettings(SETTINGS_PATH);
+            Tr.loadLanguage(locale);
+            Tr.setCustomBehaviorTranslations(loadProperties(
+                    Constants.JAR_DIR.resolve(Path.of("conf", USER_BEHAVIORNAMES_FILE))
+            ));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> writeAllSettings(SETTINGS_PATH)));
+
+            // tray icon (optional)
+            createTrayIcon();
+
+            // init native
+            final String nativeProp = System.getProperty("com.group_finity.mascotnative", Constants.NATIVE_PKG_DEFAULT);
+            NativeFactory.init(nativeProp, Constants.NATIVE_LIB_DIR);
+            NativeFactory.getInstance().getEnvironment().init();
+
+            // set exit to false because the chooser is async
+            boolean isExit = manager.isExitOnLastRemoved();
+            manager.setExitOnLastRemoved(false);
+
+            Set<String> selections = getActiveImageSets();
+
+            // get selections (show chooser if needed)
+            if (selections.isEmpty() || shouldShowChooserAtStart()) {
+                ImageSetChooserUtils.askUserForSelection(c -> {
+                    setActiveImageSets(c);
+                    manager.setExitOnLastRemoved(isExit);
+                }, getActiveImageSets(), programFolder);
+            } else {
+                selections.forEach(this::addActiveImageSet);
+                manager.setExitOnLastRemoved(isExit);
+            }
+
+            // start
+            manager.start();
+
         } catch (Exception | Error error) {
             log.log(Level.SEVERE, error.getMessage(), error);
             Main.showError(error.getMessage());
             System.exit(0);
         }
-    }
-
-    private void run() {
-        String settingsPathProp = System.getProperty(SP_PREFIX + "SettingsPath");
-        final Path SETTINGS_PATH = settingsPathProp != null
-                ? Path.of(settingsPathProp)
-                : JAR_PARENT_DIR.resolve(Path.of("conf","settings.properties"));
-
-        loadAllSettings(SETTINGS_PATH);
-        Tr.loadLanguage(locale);
-        Tr.setCustomBehaviorTranslations(loadProperties(
-                JAR_PARENT_DIR.resolve(Path.of("conf", USER_BEHAVIORNAMES_FILE))
-        ));
-
-        // optional
-        createTrayIcon();
-
-        // init environment
-        NativeFactory.init(Constants.NATIVE_PKG_DEFAULT, Constants.NATIVE_LIB_DIR);
-        NativeFactory.getInstance().getEnvironment().init();
-
-        //because the chooser is async
-        boolean isExit = manager.isExitOnLastRemoved();
-        manager.setExitOnLastRemoved(false);
-
-        Set<String> selections = getActiveImageSets();
-
-        if (selections.isEmpty() || shouldShowChooserAtStart()) {
-            ImageSetChooserUtils.askUserForSelection(c -> {
-                setActiveImageSets(c);
-                manager.setExitOnLastRemoved(isExit);
-            }, getActiveImageSets(), programFolder);
-        } else {
-            selections.forEach(this::addActiveImageSet);
-            manager.setExitOnLastRemoved(isExit);
-        }
-
-        manager.start();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> writeAllSettings(SETTINGS_PATH)));
     }
 
     private static final JFrame frame = new JFrame();

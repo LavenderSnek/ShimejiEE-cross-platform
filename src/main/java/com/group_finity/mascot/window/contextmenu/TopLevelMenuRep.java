@@ -1,4 +1,4 @@
-package com.group_finity.mascot.ui.contextmenu;
+package com.group_finity.mascot.window.contextmenu;
 
 public class TopLevelMenuRep extends MenuRep {
 

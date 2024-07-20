@@ -1,6 +1,4 @@
-package com.group_finity.mascot.ui.debug;
-
-import com.group_finity.mascot.Mascot;
+package com.group_finity.mascot;
 
 public interface DebugUi {
 

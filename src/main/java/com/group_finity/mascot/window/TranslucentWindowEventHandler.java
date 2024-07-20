@@ -1,6 +1,6 @@
 package com.group_finity.mascot.window;
 
-import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 
 public interface TranslucentWindowEventHandler {
 
