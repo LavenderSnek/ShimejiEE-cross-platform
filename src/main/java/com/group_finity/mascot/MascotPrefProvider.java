@@ -12,7 +12,6 @@ public interface MascotPrefProvider {
     default boolean isTransientBreedingAllowed() { return true; }
     default boolean isTransformationAllowed() { return true; }
     default boolean isSoundAllowed() { return true; }
-    default boolean shouldTranslateBehaviours() { return true; }
 
     // option to make these all imageset specific in the future
     default boolean isIEMovementAllowed(String imageSet) { return isIEMovementAllowed(); }
@@ -20,5 +19,4 @@ public interface MascotPrefProvider {
     default boolean isTransientBreedingAllowed(String imageSet) { return isTransientBreedingAllowed(); }
     default boolean isTransformationAllowed(String imageSet) { return isTransformationAllowed(); }
     default boolean isSoundAllowed(String imageSet) { return isSoundAllowed(); }
-    default boolean shouldTranslateBehaviours(String imageSet) { return shouldTranslateBehaviours(); }
 }

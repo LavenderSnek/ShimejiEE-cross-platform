@@ -66,7 +66,6 @@ public class ImageSetManager implements ImageSetStore {
         selectionDelegate.imageSetHasBeenAdded(name, imageSet);
     }
 
-
     @Override
     public ImageSet get(String name) {
         if (name == null) {

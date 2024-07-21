@@ -21,11 +21,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
-            <version>4.7.6</version>
-        </dependency>
-        <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
             <version>5.12.1</version>
@@ -121,15 +116,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>info.picocli</groupId>
-                            <artifactId>picocli-codegen</artifactId>
-                            <version>4.7.6</version>
-                        </path>
-                    </annotationProcessorPaths>
                     <compilerArgs>
-                        <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                         <arg>-h</arg>
                         <arg>${project.headerDir}</arg>
                     </compilerArgs>

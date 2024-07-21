@@ -31,13 +31,16 @@ public class Tr {
     }
 
     /**
-     * Translates a string. Throws an error if the string is not present in the language resource bundle.
+     * Translates a string.
      *
      * @param key property key
      * @return translated string.
      */
     public static String tr(String key) {
-        return languageBundle.getString(key);
+        if (languageBundle.containsKey(key)) {
+            return languageBundle.getString(key);
+        }
+        return key;
     }
 
     /**

@@ -1,7 +1,6 @@
-package com.group_finity.mascotapp;
+package com.group_finity.mascot.manager;
 
 import com.group_finity.mascot.Mascot;
-import com.group_finity.mascot.MascotManager;
 import com.group_finity.mascot.NativeFactory;
 import com.group_finity.mascot.exception.CantBeAliveException;
 
@@ -10,10 +9,7 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
 
-public class Manager implements MascotManager {
-
-    // this could technically go in mascot since it does draw the mascots (maybe as DefaultManager?)
-    // todo: think abt it later
+public class DefaultManager implements MascotManager {
 
     public static final int TICK_INTERVAL_MILLIS = 40;
 

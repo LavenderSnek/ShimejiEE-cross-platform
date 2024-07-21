@@ -1,4 +1,6 @@
-package com.group_finity.mascot;
+package com.group_finity.mascot.manager;
+
+import com.group_finity.mascot.Mascot;
 
 import java.awt.Point;
 import java.lang.ref.WeakReference;

@@ -7,8 +7,10 @@ import com.group_finity.mascot.exception.CantBeAliveException;
 import com.group_finity.mascot.image.MascotImage;
 import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ImageSetStore;
+import com.group_finity.mascot.manager.MascotManager;
 import com.group_finity.mascot.window.TranslucentWindow;
 // todo: not ok
+import com.group_finity.mascot.window.TranslucentWindowEventHandler;
 import com.group_finity.mascotapp.gui.debug.DebugWindow;
 
 import javax.sound.sampled.Clip;
@@ -65,7 +67,7 @@ public class Mascot implements ScriptableMascot {
     private final MascotPrefProvider prefProvider;
     private final ImageSetStore imageSetStore;
 
-    public Mascot(final String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore) {
+    public Mascot(String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore) {
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
@@ -78,7 +80,7 @@ public class Mascot implements ScriptableMascot {
         log.log(Level.INFO, "Created a mascot ({0})", this);
     }
 
-    void startDebugUi() {
+    public void startDebugUi() {
         if (debugUi == null) {
             // todo: maybe make this a factory
             debugUi = new DebugWindow();
@@ -229,7 +231,6 @@ public class Mascot implements ScriptableMascot {
 
     // this is where all the garbage from main went
     // not part of the API, please don't call/rely on these from scripts, (maybe these should be mangled?)
-    // and this is bad- but it really is more of a stepping stone to de-Main-ify this
 
     public static Mascot createBlankFrom(Mascot mascot) {
         return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetStore);
@@ -252,5 +253,4 @@ public class Mascot implements ScriptableMascot {
     public boolean isTransientBreedingAllowed() { return prefProvider.isTransientBreedingAllowed(getImageSet()); }
     public boolean isTransformationAllowed() { return prefProvider.isTransformationAllowed(getImageSet()); }
     public boolean isSoundAllowed() { return prefProvider.isSoundAllowed(getImageSet()); }
-    public boolean shouldTranslateBehaviours() { return prefProvider.shouldTranslateBehaviours(getImageSet()); }
 }
