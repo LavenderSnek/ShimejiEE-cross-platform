@@ -1,7 +1,7 @@
 package com.group_finity.mascotapp;
 
 import com.group_finity.mascot.*;
-import com.group_finity.mascot.config.Configuration;
+import com.group_finity.mascot.config.XmlConfiguration;
 import com.group_finity.mascot.config.DefaultPoseLoader;
 import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.exception.ConfigurationException;
@@ -257,21 +257,16 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
                 .setPixelArtScaling( Boolean.parseBoolean(prefs.getOrDefault("PixelArtScaling", false + "")))
                 .buildForBasePath(pf.imgPath().resolve(name));
 
-        Path actionsPath = pf.getActionConfPath(name);
-        Path behaviorPath = pf.getBehaviorConfPath(name);
-
         SoundLoader soundLoader = new SoundLoader(pf, name);
         soundLoader.setFixRelativeGlobalSound(Boolean.parseBoolean(prefs.getOrDefault("FixRelativeGlobalSound", false + "")));
 
-        DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Entry actionsEntry = new Entry(docBuilder.parse(actionsPath.toFile()).getDocumentElement());
-        Entry behaviorEntry = new Entry(docBuilder.parse(behaviorPath.toFile()).getDocumentElement());
+        Path actionsPath = pf.getActionConfPath(name);
+        Path behaviorPath = pf.getBehaviorConfPath(name);
 
-        Configuration config = new Configuration();
-        config.load(new DefaultPoseLoader(imgLoader, soundLoader), actionsEntry, behaviorEntry);
-        config.validate();
+        var poseLoader = new DefaultPoseLoader(imgLoader, soundLoader);
+        var conf = XmlConfiguration.loadUsing(poseLoader, actionsPath, behaviorPath);
 
-        return new ShimejiImageSet(config, imgLoader, soundLoader);
+        return new ShimejiImageSet(conf, imgLoader, soundLoader);
     }
 
     //----------mascot creation-----------//

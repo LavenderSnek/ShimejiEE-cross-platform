@@ -42,7 +42,7 @@ public class ActionRef implements IActionBuilder {
 
 	@Override
 	public void validate() throws ConfigurationException {
-		if (!getConfiguration().getActionBuilders().containsKey(getName())) {
+		if (!getConfiguration().getActionNames().contains(getName())) {
 			log.log(Level.SEVERE, "There is no corresponding behavior(" + this + ")");
 			throw new ConfigurationException(Tr.tr("NoBehaviourFoundErrorMessage") + "(" + this + ")");
 		}

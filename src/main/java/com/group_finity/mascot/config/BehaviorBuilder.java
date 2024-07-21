@@ -93,7 +93,7 @@ public class BehaviorBuilder {
     }
 
     public void validate() throws ConfigurationException {
-        if (!getConfiguration().getActionBuilders().containsKey(getActionName())) {
+        if (!getConfiguration().getActionNames().contains(getActionName())) {
             log.log(Level.SEVERE, "There is no corresponding action(" + this + ")");
             throw new ConfigurationException(Tr.tr("NoActionFoundErrorMessage") + "(" + this + ")");
         }

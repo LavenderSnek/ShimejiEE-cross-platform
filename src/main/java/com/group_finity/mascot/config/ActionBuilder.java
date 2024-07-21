@@ -12,7 +12,6 @@ import com.group_finity.mascot.script.VariableMap;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ActionBuilder implements IActionBuilder {
