@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.exception.LostGroundException;
@@ -33,10 +32,6 @@ public class ThrowIE extends Animate {
 
     @Override
     public boolean hasNext() throws VariableException {
-        if (!Main.getInstance().isIEMovementAllowed()) {
-			return false;
-		}
-
         final boolean ieVisible = getEnvironment().getActiveIE().isVisible();
         return super.hasNext() && ieVisible;
     }

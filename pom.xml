@@ -14,7 +14,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.main>com.group_finity.mascot.Main</project.main>
+        <project.main>com.group_finity.mascotapp.ShimejiEE</project.main>
         <project.finalShimejiOut>${project.build.directory}/${project.name}</project.finalShimejiOut>
         <project.headerDir>src/main/native/headers</project.headerDir>
     </properties>
@@ -111,7 +111,7 @@
                 <version>3.3.0</version>
             </plugin>
 
-            <!--     Compile with header generation      -->
+            <!--     Compile with header/cli generation      -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>

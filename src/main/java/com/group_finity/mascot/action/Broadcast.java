@@ -6,18 +6,30 @@ import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Broadcast extends Animate {
 
-    private static final Logger log = Logger.getLogger(Broadcast.class.getName());
+    static class Delegate {
+        private final ActionBase base;
 
-    /**
-     * @custom.shimeji.param
-     * @see Broadcast#getAffordance()
-     * */
-    public static final String PARAMETER_AFFORDANCE = "Affordance";
-    private static final String DEFAULT_AFFORDANCE = "";
+        public static final String PARAMETER_AFFORDANCE = "Affordance";
+        private static final String DEFAULT_AFFORDANCE = "";
+
+        Delegate(ActionBase base) {
+            this.base = base;
+        }
+
+        void updateAffordance() throws VariableException {
+            base.getMascot().getAffordances().add(getAffordance());
+        }
+
+        private String getAffordance() throws VariableException {
+            return base.eval(base.getSchema().getString(PARAMETER_AFFORDANCE), String.class, DEFAULT_AFFORDANCE);
+        }
+    }
+
+
+    private final Delegate del = new Delegate(this);
 
     public Broadcast(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
@@ -26,11 +38,7 @@ public class Broadcast extends Animate {
     @Override
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
-        getMascot().getAffordances().add(getAffordance());
-    }
-
-    private String getAffordance() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_AFFORDANCE), String.class, DEFAULT_AFFORDANCE);
+        del.updateAffordance();
     }
 
 }

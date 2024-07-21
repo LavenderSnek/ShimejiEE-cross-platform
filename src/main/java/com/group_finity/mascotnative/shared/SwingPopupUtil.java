@@ -1,8 +1,8 @@
 package com.group_finity.mascotnative.shared;
 
-import com.group_finity.mascot.ui.contextmenu.MenuItemRep;
-import com.group_finity.mascot.ui.contextmenu.MenuRep;
-import com.group_finity.mascot.ui.contextmenu.TopLevelMenuRep;
+import com.group_finity.mascot.window.contextmenu.MenuItemRep;
+import com.group_finity.mascot.window.contextmenu.MenuRep;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;

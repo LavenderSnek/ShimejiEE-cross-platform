@@ -1,14 +1,15 @@
-package com.group_finity.mascot.ui.imagesets;
+package com.group_finity.mascotapp.gui.chooser;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.Tr;
-import com.group_finity.mascot.ui.Theme;
+import com.group_finity.mascot.imageset.ShimejiProgramFolder;
+import com.group_finity.mascotapp.gui.Theme;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -37,10 +38,12 @@ class CompactChooser {
 
     private JList<CompactImageSetPreview> imageSetJlist;
 
+    private final ShimejiProgramFolder programFolder;
     private final Consumer<Collection<String>> onSelection;
     private final Collection<String> currentlySelected;
 
-    CompactChooser(Consumer<Collection<String>> onSelection, Collection<String> currentlySelected) {
+    CompactChooser(Consumer<Collection<String>> onSelection, Collection<String> currentlySelected, ShimejiProgramFolder programFolder) {
+        this.programFolder = programFolder;
         this.onSelection = onSelection;
         this.currentlySelected = currentlySelected;
     }
@@ -51,10 +54,14 @@ class CompactChooser {
     public void createGui() {
         SwingUtilities.invokeLater(() -> {
             //Set up data and selections
-            addDataToUI();
+            try {
+                CompactChooser.this.addDataToUI();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
             //Set up the content pane.
-            addContentToPane(frame.getContentPane());
+            CompactChooser.this.addContentToPane(frame.getContentPane());
 
             frame.setResizable(true);
 
@@ -71,17 +78,14 @@ class CompactChooser {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private void addDataToUI() {
+    private void addDataToUI() throws IOException {
         DefaultListModel<CompactImageSetPreview> listModel = new DefaultListModel<>();
 
         String[] allImageSets;
         try {
-            allImageSets = Main.getInstance().getProgramFolder().getImageSetNames().toArray(new String[0]);
+            allImageSets = programFolder.getImageSetNames().toArray(new String[0]);
         } catch (IOException e) {
-            e.printStackTrace();
-            Main.showError("Unable to load imageSets");
-            frame.dispose();
-            return;
+            throw new IOException("Unable to load imageSets", e);
         }
 
         if (allImageSets.length == 0) {
@@ -93,7 +97,7 @@ class CompactChooser {
 
         Collection<CompactImageSetPreview> data = new ArrayList<>(allImageSets.length);
         for (String imgSet : allImageSets) {
-            data.add(new CompactImageSetPreview(imgSet));
+            data.add(new CompactImageSetPreview(imgSet, programFolder.getIconPathForImageSet(imgSet)));
         }
         listModel.addAll(data);
 
@@ -156,5 +160,4 @@ class CompactChooser {
 
         pane.add(btnsPanel, constraints);
     }
-
 }

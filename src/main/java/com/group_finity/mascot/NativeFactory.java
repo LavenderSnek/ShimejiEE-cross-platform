@@ -3,34 +3,27 @@ package com.group_finity.mascot;
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
-import com.sun.jna.Platform;
 
 import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 
 /**
  * Picks the appropriate package of native code based on the operating system
  */
 public abstract class NativeFactory {
 
-    private static final NativeFactory instance;
-
     private static final String NATIVE_PKG = "com.group_finity.mascotnative";
 
-    static {
-        String chosenSubpkg = System.getProperty(NATIVE_PKG);
+    private static NativeFactory instance;
 
-        String subpkg = "generic";
+    protected static Path nativeLibDir;
 
-        if (chosenSubpkg != null) {
-            subpkg = chosenSubpkg;
-        } else {
-            if (Platform.isWindows()) {
-                subpkg = "win";
-            } else if (Platform.isMac()) {
-                subpkg = "macjni";
-            }
+    public static void init(String subpkg, Path libDir) {
+        if (instance != null) {
+            instance.shutdown();
         }
+
+        nativeLibDir = libDir;
 
         try {
             @SuppressWarnings("unchecked")
@@ -39,7 +32,7 @@ public abstract class NativeFactory {
 
             instance = impl.getDeclaredConstructor().newInstance();
 
-        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (Error | Exception e) {
             System.err.println("ERROR: could not load native code package");
             throw new RuntimeException(e);
         }
@@ -54,5 +47,7 @@ public abstract class NativeFactory {
     public abstract NativeImage newNativeImage(BufferedImage src);
 
     public abstract TranslucentWindow newTransparentWindow();
+
+    protected void shutdown() {}
 
 }

@@ -1,5 +1,7 @@
 package com.group_finity.mascot.image;
 
+import com.group_finity.mascot.NativeFactory;
+import com.group_finity.mascotapp.Constants;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -16,15 +18,12 @@ class ImagePairLoaderTest {
     private static final String IMG_NAME = "/red-blue.png";
     private static final String IMG_RIGHT_NAME = "/red-blue-r.png"; // half the height of left image
 
-    static {
-        System.setProperty("com.group_finity.mascotnative", "generic"); // speeds it up
-    }
-
     @TempDir
     static Path BASE;
 
     @BeforeAll
     static void setUpDir() throws IOException {
+        NativeFactory.init("generic", Constants.NATIVE_LIB_DIR);
         Files.copy(Path.of("src/test/resources", IMG_NAME), Path.of(BASE.toString(), IMG_NAME));
         Files.copy(Path.of("src/test/resources", IMG_RIGHT_NAME), Path.of(BASE.toString(), IMG_RIGHT_NAME));
     }

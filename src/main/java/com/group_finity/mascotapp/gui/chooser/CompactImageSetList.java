@@ -1,6 +1,6 @@
-package com.group_finity.mascot.ui.imagesets;
+package com.group_finity.mascotapp.gui.chooser;
 
-import com.group_finity.mascot.ui.Theme;
+import com.group_finity.mascotapp.gui.Theme;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;

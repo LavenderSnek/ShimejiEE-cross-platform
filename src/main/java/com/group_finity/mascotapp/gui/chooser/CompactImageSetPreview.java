@@ -1,6 +1,4 @@
-package com.group_finity.mascot.ui.imagesets;
-
-import com.group_finity.mascot.Main;
+package com.group_finity.mascotapp.gui.chooser;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -27,9 +25,11 @@ public class CompactImageSetPreview {
     private static final int PANEL_H = 70;
     private static final int PANEL_W = 400;
     private static final BufferedImage DEFAULT_IMG = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+    private Path iconPath;
 
-    CompactImageSetPreview(String imageSet) {
+    CompactImageSetPreview(String imageSet, Path iconPath) {
         this.name = imageSet;
+        this.iconPath = iconPath;
     }
 
     @Override
@@ -39,18 +39,16 @@ public class CompactImageSetPreview {
 
     JPanel getPanel() {
         if (panel == null) {
-            this.panel = createJpanel(name);
+            this.panel = createJpanel(name, iconPath);
         }
         return panel;
     }
 
-    private static JPanel createJpanel(String imageSet) {
+    private static JPanel createJpanel(String name, Path iconPath) {
         var component = new JPanel();
         component.setPreferredSize(new Dimension(CompactImageSetPreview.PANEL_W, CompactImageSetPreview.PANEL_H));
         component.setLayout(new BoxLayout(component, BoxLayout.LINE_AXIS));
 
-        // get icon
-        Path iconPath = Main.getInstance().getProgramFolder().getIconPathForImageSet(imageSet);
         BufferedImage icon = null;
         if (iconPath != null) {
             try {
@@ -71,8 +69,8 @@ public class CompactImageSetPreview {
 
         //trims name
         String trimmedImageSet =
-                imageSet.length() > CompactImageSetPreview.nameTrim ?
-                        imageSet.substring(0, CompactImageSetPreview.nameTrim - 3) + "..." : imageSet;
+                name.length() > CompactImageSetPreview.nameTrim ?
+                        name.substring(0, CompactImageSetPreview.nameTrim - 3) + "..." : name;
 
         JLabel label = new JLabel(trimmedImageSet);
         component.add(label);

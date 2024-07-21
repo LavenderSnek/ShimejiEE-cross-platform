@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.exception.LostGroundException;
@@ -35,15 +34,6 @@ public class WalkWithIE extends Move {
 
     public WalkWithIE(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap params) {
         super(schema, animations, params);
-    }
-
-    @Override
-    public boolean hasNext() throws VariableException {
-        if (!Main.getInstance().isIEMovementAllowed()) {
-			return false;
-		}
-
-        return super.hasNext();
     }
 
     @Override

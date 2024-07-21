@@ -1,53 +1,46 @@
 package com.group_finity.mascot;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class Tr {
 
     private Tr() {}
 
-    private static final String USER_BEHAVIORNAMES_FILE = "user-behaviornames.properties";
     private static final String LANGUAGE_RB = "language";
     private static final String BEHAVIORNAMES_RB = "behaviornames";
 
-    private static final Properties userBehaviorNames = new Properties();
+    private static final Map<String, String> userBehaviorNames = new HashMap<>();
     private static ResourceBundle languageBundle;
     private static ResourceBundle behaviorNamesBundle;
 
     static {
-        Path userBehaviorNamesFp = Main.getInstance().getProgramFolder().confPath().resolve(USER_BEHAVIORNAMES_FILE);
-        if (Files.isRegularFile(userBehaviorNamesFp)) {
-            try (var ins = new InputStreamReader(new FileInputStream(userBehaviorNamesFp.toString()), StandardCharsets.UTF_8)) {
-                userBehaviorNames.load(ins);
-            } catch (IOException ignored) {
-            }
-        }
+        loadLanguage(Locale.getDefault());
     }
 
-    public static synchronized void loadLanguage() {
-        try {
-            languageBundle = ResourceBundle.getBundle(LANGUAGE_RB, Main.getInstance().getLocale());
-            behaviorNamesBundle = ResourceBundle.getBundle(BEHAVIORNAMES_RB, Main.getInstance().getLocale());
-        } catch (Exception ex) {
-            Main.showError("The language files could not be loaded. Make sure java is set up properly");
-        }
+    public static synchronized void setCustomBehaviorTranslations(Map<String, String> translations) {
+        userBehaviorNames.clear();
+        userBehaviorNames.putAll(translations);
+    }
+
+    public static synchronized void loadLanguage(Locale locale) {
+        languageBundle = ResourceBundle.getBundle(LANGUAGE_RB, locale);
+        behaviorNamesBundle = ResourceBundle.getBundle(BEHAVIORNAMES_RB, locale);
     }
 
     /**
-     * Translates a string. Throws an error if the string is not present in the language resource bundle.
+     * Translates a string.
      *
      * @param key property key
      * @return translated string.
      */
     public static String tr(String key) {
-        return languageBundle.getString(key);
+        if (languageBundle.containsKey(key)) {
+            return languageBundle.getString(key);
+        }
+        return key;
     }
 
     /**
@@ -58,7 +51,7 @@ public class Tr {
      */
     public static String trBv(String behaviorName) {
         if (userBehaviorNames.containsKey(behaviorName)) {
-            return userBehaviorNames.getProperty(behaviorName);
+            return userBehaviorNames.get(behaviorName);
         }
         if (behaviorNamesBundle.containsKey(behaviorName)) {
             return behaviorNamesBundle.getString(behaviorName);

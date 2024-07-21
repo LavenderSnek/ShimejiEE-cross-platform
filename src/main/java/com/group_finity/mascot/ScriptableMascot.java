@@ -2,6 +2,7 @@ package com.group_finity.mascot;
 
 import com.group_finity.mascot.animation.Hotspot;
 import com.group_finity.mascot.environment.MascotEnvironment;
+import com.group_finity.mascot.manager.ScriptableManager;
 
 import java.awt.Point;
 import java.awt.Rectangle;

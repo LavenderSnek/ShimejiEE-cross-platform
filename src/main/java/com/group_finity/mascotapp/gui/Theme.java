@@ -1,4 +1,4 @@
-package com.group_finity.mascot.ui;
+package com.group_finity.mascotapp.gui;
 
 import java.awt.Color;
 

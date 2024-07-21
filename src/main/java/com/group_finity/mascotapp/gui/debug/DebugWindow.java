@@ -1,5 +1,6 @@
-package com.group_finity.mascot.ui.debug;
+package com.group_finity.mascotapp.gui.debug;
 
+import com.group_finity.mascot.DebugUi;
 import com.group_finity.mascot.Mascot;
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.environment.Area;

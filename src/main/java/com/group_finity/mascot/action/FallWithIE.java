@@ -1,6 +1,5 @@
 package com.group_finity.mascot.action;
 
-import com.group_finity.mascot.Main;
 import com.group_finity.mascot.animation.Animation;
 import com.group_finity.mascot.environment.Area;
 import com.group_finity.mascot.exception.LostGroundException;
@@ -35,14 +34,6 @@ public class FallWithIE extends Fall {
 
     public FallWithIE(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
-    }
-
-    @Override
-    public boolean hasNext() throws VariableException {
-        if (!Main.getInstance().isIEMovementAllowed()) {
-            return false;
-        }
-        return super.hasNext();
     }
 
     @Override
