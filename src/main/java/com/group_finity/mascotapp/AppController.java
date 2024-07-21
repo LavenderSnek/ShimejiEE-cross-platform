@@ -11,17 +11,22 @@ import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.manager.DefaultManager;
 import com.group_finity.mascot.sound.SoundLoader;
+import com.group_finity.mascot.window.contextmenu.MenuItemRep;
+import com.group_finity.mascot.window.contextmenu.MenuRep;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascotapp.gui.chooser.ImageSetChooserUtils;
-import com.group_finity.mascotapp.imageset.ImageSetManager;
-import com.group_finity.mascotapp.imageset.ImageSetSelectionDelegate;
+import com.group_finity.mascotapp.gui.debug.DebugWindow;
+import com.group_finity.mascot.imageset.ImageSetManager;
+import com.group_finity.mascot.imageset.ImageSetSelectionDelegate;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Image;
 import java.awt.Menu;
@@ -34,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,8 +58,6 @@ import static java.util.Map.entry;
 /**
  * The main app instance,
  * manages/responds to user actions such as changing settings
- *
- * @author see readme
  */
 public final class AppController implements Runnable, MascotPrefProvider, ImageSetSelectionDelegate {
     private static final Logger log = Logger.getLogger(AppController.class.getName());
@@ -127,6 +131,8 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
 
     private boolean shouldIgnoreImagesetProperties() {return userSwitches.getOrDefault("IgnoreImagesetProperties", false);}
     private void setShouldIgnoreImagesetProperties(boolean b) {userSwitches.put("IgnoreImagesetProperties", b);}
+
+    //----
 
     private double getScaling() {return Double.parseDouble(imageSetDefaults.getOrDefault("Scaling", "1"));}
     private void setScaling(double scaling) {
@@ -289,7 +295,17 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
      */
     private void createMascot(String imageSet) {
         // Create one mascot
-        final Mascot mascot = new Mascot(imageSet, this, imageSets);
+        final Mascot mascot = new Mascot(imageSet, this, imageSets, new MascotUiFactory() {
+            @Override
+            public DebugUi createDebugUiFor(Mascot mascot) {
+                return new DebugWindow();
+            }
+
+            @Override
+            public TopLevelMenuRep createContextMenuFor(Mascot mascot) {
+                return createCtxMenuFor(mascot);
+            }
+        });
 
         // Create it outside the bounds of the screen
         mascot.setAnchor(new Point(-4000, -4000));
@@ -344,6 +360,7 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
         Map<String, String> props = new HashMap<>();
 
         userSwitches.forEach((k,v) -> props.put(k, v + ""));
+        props.putAll(imageSetDefaults);
 
         if (getScaling() != 1.0) {
             props.put("Scaling", getScaling() + "");
@@ -363,7 +380,7 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
     private final Map<String, Runnable> mainMenuActions = Map.ofEntries(
             entry("CallShimeji", this::createMascot),
             entry("FollowCursor", () -> manager.trySetBehaviorAll(BEHAVIOR_GATHER)),
-            entry("ReduceToOne", () -> manager.disposeIf(m -> manager.getCount() >= 2)),
+            entry("ReduceToOne", manager::reduceToOne),
             entry("RestoreWindows", () -> NativeFactory.getInstance().getEnvironment().restoreIE()),
             entry("ChooseShimeji", this::showImageSetChooser),
             entry("ReloadMascots", this::reloadImageSets),
@@ -379,21 +396,92 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
             entry("DismissAllOthers", m -> manager.disposeIf(mascot -> mascot.id != m.id))
     );
 
-    //----------Tray Icon------------//
+    //----------Menus------------//
 
-    private MenuItem mkActionBtn(String title, String action) {
+    //---Console Menu
+
+    private MenuItemRep repActionBtn(String title, String action, Mascot m) {
+        if (mascotActions.containsKey(action)) {
+            return new MenuItemRep(title, () -> mascotActions.get(action).accept(m));
+        }
+        if (mainMenuActions.containsKey(action)) {
+            return new MenuItemRep(title, mainMenuActions.get(action));
+        }
+        return new MenuItemRep(title, null, false);
+    }
+
+    private List<MenuItemRep> createBehaviourMenuItemsFor(Mascot m) {
+        var conf = m.getOwnImageSet().getConfiguration();
+
+        List<MenuItemRep> bvItems = new ArrayList<>();
+
+        for (String bvName : conf.getBehaviorNames()) {
+            String title = shouldTranslateBehaviours() ? Tr.trBv(bvName) : bvName;
+            try {
+                var bv = conf.buildBehavior(bvName);
+                if (bv.isHidden()) {
+                    continue;
+                }
+                bvItems.add(new MenuItemRep(title, () -> {
+                    try {
+                        m.setBehavior(conf.buildBehavior(bvName));
+                    } catch (Exception err) {
+                        showError(Tr.tr("CouldNotSetBehaviourErrorMessage")
+                                  + "\n" + err.getMessage());
+                    }
+                }));
+            } catch (Exception e) {
+                bvItems.add(new MenuItemRep(title, null, false));
+                log.log(Level.WARNING, "Failed to create Behaviour menu button for: " + bvName, e);
+            }
+        }
+
+        return bvItems;
+    }
+
+    private TopLevelMenuRep createCtxMenuFor(Mascot m) {
+        var rep = new TopLevelMenuRep("mascot",
+                repActionBtn(Tr.tr("CallAnother"), "CallAnother", m),
+                repActionBtn(Tr.tr("FollowCursor"), "FollowCursor", m),
+                repActionBtn(Tr.tr("RestoreWindows"), "RestoreWindows", m),
+                repActionBtn(Tr.tr("RevealStatistics"), "RevealStatistics", m),
+                MenuItemRep.SEPARATOR,
+                new MenuRep(Tr.tr("SetBehaviour"), createBehaviourMenuItemsFor(m).toArray(new MenuItemRep[0])),
+                MenuItemRep.SEPARATOR,
+                repActionBtn(Tr.tr("Dismiss"), "Dismiss", m),
+                repActionBtn(Tr.tr("DismissOthers"), "DismissOthers", m),
+                repActionBtn(Tr.tr("DismissAllOthers"), "DismissAllOthers", m),
+                repActionBtn(Tr.tr("DismissAll"), "DismissAll", m)
+        );
+
+        rep.setOnOpenAction(() -> m.setAnimating(false));
+        rep.setOnCloseAction(() -> m.setAnimating(true));
+
+        return rep;
+    }
+
+    //---Tray Menu
+
+    private MenuItem awtActionBtn(String title, String action) {
         final MenuItem btn = new MenuItem(title);
         btn.addActionListener(e -> mainMenuActions.get(action).run());
         return btn;
     }
 
-    private CheckboxMenuItem mkToggle(String text, BooleanSupplier getter, Consumer<Boolean> setter) {
+    private CheckboxMenuItem awtToggle(String text, BooleanSupplier getter, Consumer<Boolean> setter) {
         final var toggleBtn = new CheckboxMenuItem(text, getter.getAsBoolean());
         toggleBtn.addItemListener(e -> {
             setter.accept(!getter.getAsBoolean());
             toggleBtn.setState(getter.getAsBoolean());
         });
         return toggleBtn;
+    }
+
+    private CheckboxMenuItem awtImgToggle(String text, String key, boolean dflt) {
+        return awtToggle(text,
+                () -> Boolean.parseBoolean(imageSetDefaults.getOrDefault(key, dflt + "")),
+                (b) -> imageSetDefaults.put(key, b + "")
+        );
     }
 
     private void createTrayIcon() {
@@ -435,39 +523,54 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
         }
 
         //--behaviour toggles submenu
-        final Menu togglesMenu = new Menu(Tr.tr("AllowedBehaviours"));
+        final Menu bvTogglesMenu = new Menu(Tr.tr("AllowedBehaviours"));
 
-        togglesMenu.add(mkToggle(Tr.tr("BreedingCloning"), this::isBreedingAllowed, this::setBreedingAllowed));
-        togglesMenu.add(mkToggle(Tr.tr("BreedingTransient"), this::isTransientBreedingAllowed, this::setTransientBreedingAllowed));
-        togglesMenu.add(mkToggle(Tr.tr("Transformation"), this::isTransformationAllowed, this::setTransformationAllowed));
-        togglesMenu.add(mkToggle(Tr.tr("ThrowingWindows"), this::isIEMovementAllowed, this::setIEMovementAllowed));
-        togglesMenu.add(mkToggle(Tr.tr("SoundEffects"), this::isSoundAllowed, this::setSoundAllowed));
-        togglesMenu.add(mkToggle(Tr.tr("TranslateBehaviorNames"), this::shouldTranslateBehaviours, this::setShouldTranslateBehaviors));
-        togglesMenu.add(mkToggle(Tr.tr("AlwaysShowShimejiChooser"), this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart));
-        togglesMenu.add(mkToggle(Tr.tr("IgnoreImagesetProperties"), this::shouldIgnoreImagesetProperties, this::setShouldIgnoreImagesetProperties));
+        bvTogglesMenu.add(awtToggle(Tr.tr("BreedingCloning"), this::isBreedingAllowed, this::setBreedingAllowed));
+        bvTogglesMenu.add(awtToggle(Tr.tr("BreedingTransient"), this::isTransientBreedingAllowed, this::setTransientBreedingAllowed));
+        bvTogglesMenu.add(awtToggle(Tr.tr("Transformation"), this::isTransformationAllowed, this::setTransformationAllowed));
+        bvTogglesMenu.add(awtToggle(Tr.tr("ThrowingWindows"), this::isIEMovementAllowed, this::setIEMovementAllowed));
+        bvTogglesMenu.add(awtToggle(Tr.tr("SoundEffects"), this::isSoundAllowed, this::setSoundAllowed));
+        bvTogglesMenu.add(awtToggle(Tr.tr("TranslateBehaviorNames"), this::shouldTranslateBehaviours, this::setShouldTranslateBehaviors));
+        bvTogglesMenu.add(awtToggle(Tr.tr("AlwaysShowShimejiChooser"), this::shouldShowChooserAtStart, this::setShouldShowChooserAtStart));
+        bvTogglesMenu.add(awtToggle(Tr.tr("IgnoreImagesetProperties"), this::shouldIgnoreImagesetProperties, this::setShouldIgnoreImagesetProperties));
+
+        //--image set toggles
+        final Menu imgTogglesMenu = new Menu(Tr.tr("ImageSet"));
+
+        var rl = new MenuItem(Tr.tr("NeedsReload"));
+        rl.setEnabled(false);
+        imgTogglesMenu.add(rl);
+
+        imgTogglesMenu.add("-");
+
+        imgTogglesMenu.add(awtImgToggle(Tr.tr("LogicalAnchors"),"LogicalAnchors", false));
+        imgTogglesMenu.add(awtImgToggle(Tr.tr("AsymmetryNameScheme"),"AsymmetryNameScheme", false));
+        imgTogglesMenu.add(awtImgToggle(Tr.tr("PixelArtScaling"),"PixelArtScaling", false));
+        imgTogglesMenu.add(awtImgToggle(Tr.tr("FixRelativeGlobalSound"),"FixRelativeGlobalSound", false));
 
         //----------------------//
 
         //----Create pop-up menu-----//
         final PopupMenu trayPopup = new PopupMenu();
 
-        trayPopup.add(mkActionBtn(Tr.tr("CallShimeji"), "CallShimeji"));
-        trayPopup.add(mkActionBtn(Tr.tr("FollowCursor"), "FollowCursor"));
-        trayPopup.add(mkActionBtn(Tr.tr("ReduceToOne"), "ReduceToOne"));
-        trayPopup.add(mkActionBtn(Tr.tr("RestoreWindows"), "RestoreWindows"));
+        trayPopup.add(awtActionBtn(Tr.tr("CallShimeji"), "CallShimeji"));
+        trayPopup.add(awtActionBtn(Tr.tr("FollowCursor"), "FollowCursor"));
+        trayPopup.add(awtActionBtn(Tr.tr("ReduceToOne"), "ReduceToOne"));
+        trayPopup.add(awtActionBtn(Tr.tr("RestoreWindows"), "RestoreWindows"));
 
-        trayPopup.add(new MenuItem("-"));
+        trayPopup.add("-");
 
         trayPopup.add(languageMenu);
         trayPopup.add(scalingMenu);
-        trayPopup.add(togglesMenu);
+        trayPopup.add(bvTogglesMenu);
+        trayPopup.add(imgTogglesMenu);
 
-        trayPopup.add(new MenuItem("-"));
+        trayPopup.add("-");
 
-        trayPopup.add(mkActionBtn(Tr.tr("ChooseShimeji"), "ChooseShimeji"));
-        trayPopup.add(mkActionBtn(Tr.tr("ReloadMascots"), "ReloadMascots"));
-        trayPopup.add(mkActionBtn(Tr.tr("DismissAll"), "DismissAll"));
-        trayPopup.add(mkActionBtn(Tr.tr("Quit"), "Quit"));
+        trayPopup.add(awtActionBtn(Tr.tr("ChooseShimeji"), "ChooseShimeji"));
+        trayPopup.add(awtActionBtn(Tr.tr("ReloadMascots"), "ReloadMascots"));
+        trayPopup.add(awtActionBtn(Tr.tr("DismissAll"), "DismissAll"));
+        trayPopup.add(awtActionBtn(Tr.tr("Quit"), "Quit"));
 
         try {
             //adding the tray icon
@@ -493,7 +596,7 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
             // show tray icon
             SystemTray.getSystemTray().add(trayIcon);
 
-        } catch (final AWTException e) {
+        } catch (Exception e) {
             log.log(Level.SEVERE, "Failed to create tray menu", e);
             System.exit(1);
         }

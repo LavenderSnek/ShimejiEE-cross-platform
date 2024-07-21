@@ -1,9 +1,11 @@
-package com.group_finity.mascotapp.imageset;
+package com.group_finity.mascot.imageset;
 
-import com.group_finity.mascot.imageset.ImageSet;
-import com.group_finity.mascot.imageset.ImageSetStore;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class ImageSetManager implements ImageSetStore {
 

@@ -9,9 +9,9 @@ import com.group_finity.mascot.imageset.ImageSet;
 import com.group_finity.mascot.imageset.ImageSetStore;
 import com.group_finity.mascot.manager.MascotManager;
 import com.group_finity.mascot.window.TranslucentWindow;
-// todo: not ok
+import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
-import com.group_finity.mascotapp.gui.debug.DebugWindow;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 
 import javax.sound.sampled.Clip;
 import java.awt.Point;
@@ -66,15 +66,52 @@ public class Mascot implements ScriptableMascot {
 
     private final MascotPrefProvider prefProvider;
     private final ImageSetStore imageSetStore;
+    private final MascotUiFactory uiFactory;
 
-    public Mascot(String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore) {
+    private record EventHandler(Mascot mascot) implements TranslucentWindowEventHandler {
+
+        @Override
+        public void onDragBegin(TranslucentWindowEvent event) {
+            if (mascot.getBehavior() != null) {
+                try {
+                    mascot.getBehavior().mousePressed(event);
+                } catch (final CantBeAliveException e) {
+                    mascot.dispose();
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        @Override
+        public void onDragEnd(TranslucentWindowEvent event) {
+            if (mascot.getBehavior() != null) {
+                try {
+                    mascot.getBehavior().mouseReleased(event);
+                } catch (final CantBeAliveException e) {
+                    mascot.dispose();
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        @Override
+        public TopLevelMenuRep getContextMenuRep() {
+            return mascot.uiFactory.createContextMenuFor(mascot);
+        }
+
+    }
+
+    // might need to make this a builder
+
+    public Mascot(String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore, MascotUiFactory uiFactory) {
+        this.uiFactory = uiFactory;
         this.id = lastId.incrementAndGet();
         this.imageSet = imageSet;
 
         this.prefProvider = prefProvider;
         this.imageSetStore = imageSetStore;
 
-        MascotEventHandler eventHandler = new MascotEventHandler(this);
+        EventHandler eventHandler = new EventHandler(this);
         getWindow().setEventHandler(eventHandler);
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
@@ -82,8 +119,10 @@ public class Mascot implements ScriptableMascot {
 
     public void startDebugUi() {
         if (debugUi == null) {
-            // todo: maybe make this a factory
-            debugUi = new DebugWindow();
+            debugUi = uiFactory.createDebugUiFor(this);
+        }
+        if (debugUi == null) {
+            return;
         }
         // slightly messy
         debugUi.setAfterDisposeAction(() -> debugUi = null);
@@ -233,7 +272,7 @@ public class Mascot implements ScriptableMascot {
     // not part of the API, please don't call/rely on these from scripts, (maybe these should be mangled?)
 
     public static Mascot createBlankFrom(Mascot mascot) {
-        return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetStore);
+        return new Mascot(mascot.imageSet, mascot.prefProvider, mascot.imageSetStore, mascot.uiFactory);
     }
 
     public double getScaling() {
@@ -253,4 +292,5 @@ public class Mascot implements ScriptableMascot {
     public boolean isTransientBreedingAllowed() { return prefProvider.isTransientBreedingAllowed(getImageSet()); }
     public boolean isTransformationAllowed() { return prefProvider.isTransformationAllowed(getImageSet()); }
     public boolean isSoundAllowed() { return prefProvider.isSoundAllowed(getImageSet()); }
+
 }

@@ -1,6 +1,4 @@
-package com.group_finity.mascotapp.imageset;
-
-import com.group_finity.mascot.imageset.ImageSet;
+package com.group_finity.mascot.imageset;
 
 public interface ImageSetSelectionDelegate {
 

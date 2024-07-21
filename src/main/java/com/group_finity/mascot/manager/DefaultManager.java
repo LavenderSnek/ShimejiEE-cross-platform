@@ -64,6 +64,12 @@ public class DefaultManager implements MascotManager {
         queueTask(() -> mascots.values().stream().filter(predicate).forEach(Mascot::dispose));
     }
 
+    public void reduceToOne() {
+        mascots.values().stream().findAny().ifPresent(target -> {
+            disposeIf(m -> m.id != target.id);
+        });
+    }
+
     public void trySetBehaviorAll(String name) {
         queueTask(() -> mascots.values().forEach(m -> {
             try {
