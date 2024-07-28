@@ -42,6 +42,9 @@ public class Breed extends Animate {
         public static final String PARAMETER_BORNINTERVAL = "BornInterval";
         private static final int DEFAULT_BORNINTERVAL = 1;
 
+        public static final String PARAMETER_BORNCOUNT = "BornCount";
+        private static final int DEFAULT_BORNCOUNT = 1;
+
         private final ActionBase base;
 
         Delegate(ActionBase base) {
@@ -63,6 +66,12 @@ public class Breed extends Animate {
         }
 
         void breed() throws VariableException {
+            for (int i = 0; i < getBornCount(); i++) {
+                breedOnce();
+            }
+        }
+
+        void breedOnce() throws VariableException {
             String childType = base.getMascot().getImageSetDependency(getBornMascot()) != null
                     ? getBornMascot()
                     : base.getMascot().getImageSet();
@@ -142,10 +151,31 @@ public class Breed extends Animate {
         /**
          * The number of ticks between each spawn.
          * <p>
-         * Does not affect plain breeding, only used by BreedMove and BreedJump
+         * Does not affect plain breeding, only used by BreedMove and BreedJump. Needs to be greater than 0
          */
         int getBornInterval() throws VariableException {
             return base.eval(base.getSchema().getString(PARAMETER_BORNINTERVAL), Number.class, DEFAULT_BORNINTERVAL).intValue();
+        }
+
+        void validateBornInterval() throws VariableException {
+            if (getBornInterval() < 1) {
+                throw new VariableException(PARAMETER_BORNINTERVAL + ": Error, must be > 0");
+            }
+        }
+
+        /**
+         * Multiplier for number of mascots spawned
+         * <p>
+         * Needs to be greater than 0
+         */
+        int getBornCount() throws VariableException {
+            return base.eval(base.getSchema().getString(PARAMETER_BORNCOUNT), Number.class, DEFAULT_BORNCOUNT).intValue();
+        }
+
+        void validateBornCount() throws VariableException {
+            if (getBornCount() < 1) {
+                throw new VariableException(PARAMETER_BORNCOUNT + ": Error, must be > 0");
+            }
         }
     }
 
@@ -153,6 +183,13 @@ public class Breed extends Animate {
 
     public Breed(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
+    }
+
+    @Override
+    public void init(Mascot mascot) throws VariableException {
+        super.init(mascot);
+
+        del.validateBornCount();
     }
 
     @Override

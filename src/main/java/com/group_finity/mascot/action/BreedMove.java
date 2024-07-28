@@ -21,9 +21,8 @@ public class BreedMove extends Move {
     public void init(final Mascot mascot) throws VariableException {
         super.init(mascot);
 
-        if (breedDel.getBornInterval() < 1) {
-            throw new VariableException("BornInterval must be greater than 0");
-        }
+        breedDel.validateBornCount();
+        breedDel.validateBornInterval();
     }
 
     @Override
