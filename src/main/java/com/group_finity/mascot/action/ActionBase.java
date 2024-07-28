@@ -20,33 +20,20 @@ public abstract class ActionBase implements Action {
 
     private static final Logger log = Logger.getLogger(ActionBase.class.getName());
 
-    /**
-     * @custom.shimeji.param
-     * @see ActionBase#isEffective()
-     */
     public static final String PARAMETER_CONDITION = "Condition";
     private static final boolean DEFAULT_CONDITION = true;
 
-    /**
-     * @custom.shimeji.param
-     * @see ActionBase#getDuration()
-     */
     public static final String PARAMETER_DURATION = "Duration";
     private static final int DEFAULT_DURATION = Integer.MAX_VALUE;
 
-    /**
-     * @custom.shimeji.param
-     * @see ActionBase#isDraggable()
-     */
     public static final String PARAMETER_DRAGGABLE = "Draggable";
     private static final boolean DEFAULT_DRAGGABLE = true;
 
-    /**
-     * @custom.shimeji.param
-     * @see ActionBase#getName()
-     */
     public static final String PARAMETER_NAME = "Name";
     private static final String DEFAULT_NAME = null;
+
+    public static final String PARAMETER_AFFORDANCE = "Affordance";
+    private static final String DEFAULT_AFFORDANCE = "";
 
     private Mascot mascot;
 
@@ -103,9 +90,15 @@ public abstract class ActionBase implements Action {
     @Override
     public void next() throws LostGroundException, VariableException {
         initFrame();
-        refreshHotspots();
+
         getMascot().getAffordances().clear();
+        refreshHotspots();
+
         tick();
+
+        if (!getAffordance().isBlank()) {
+            getMascot().getAffordances().add(getAffordance());
+        }
     }
 
     protected void refreshHotspots() {
@@ -177,6 +170,13 @@ public abstract class ActionBase implements Action {
      */
     public Boolean isDraggable() throws VariableException {
         return eval(schema.getString(PARAMETER_DRAGGABLE), Boolean.class, DEFAULT_DRAGGABLE);
+    }
+
+    /**
+     * Affordance to be added to the mascot
+     */
+    private String getAffordance() throws VariableException {
+        return eval(schema.getString(PARAMETER_AFFORDANCE), String.class, DEFAULT_AFFORDANCE);
     }
 
     /**

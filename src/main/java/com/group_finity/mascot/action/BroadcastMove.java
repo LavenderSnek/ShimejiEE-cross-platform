@@ -7,18 +7,9 @@ import com.group_finity.mascot.script.VariableMap;
 
 import java.util.List;
 
+@Deprecated
 public class BroadcastMove extends Move {
-
-    private final Broadcast.Delegate broadcastDel = new Broadcast.Delegate(this);
-
     public BroadcastMove(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
     }
-
-    @Override
-    protected void tick() throws LostGroundException, VariableException {
-        super.tick();
-        broadcastDel.updateAffordance();
-    }
-
 }
