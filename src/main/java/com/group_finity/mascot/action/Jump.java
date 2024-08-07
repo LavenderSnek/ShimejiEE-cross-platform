@@ -23,6 +23,10 @@ public class Jump extends ActionBase {
     public static final String PARAMETER_VELOCITY = "VelocityParam";
     private static final double DEFAULT_VELOCITY = 20.0;
 
+    public static final String VARIABLE_VELOCITYX = "VelocityX";
+
+    public static final String VARIABLE_VELOCITYY = "VelocityY";
+
     public Jump(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap context) {
         super(schema, animations, context);
     }
@@ -57,6 +61,9 @@ public class Jump extends ActionBase {
         if (distance != 0) {
             final int velocityX = (int) (velocity * distanceX / distance);
             final int velocityY = (int) (velocity * distanceY / distance);
+
+            putVariable(getSchema().getString(VARIABLE_VELOCITYX), velocityX);
+            putVariable(getSchema().getString(VARIABLE_VELOCITYY), velocityY);
 
             getMascot().getAnchor().translate(velocityX, velocityY);
 
