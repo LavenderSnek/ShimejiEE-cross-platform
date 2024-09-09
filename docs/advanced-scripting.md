@@ -66,11 +66,11 @@ The kind of variable is determined by how it's declared
 ```xml
 <!-- numConstant = 500 -->
 <ActionReference Name="Lorem" numConstant="500"/>
-
-        <!-- repeatScript = updated with the mascot's X coordinate each frame after it is first used -->
+        
+<!-- repeatScript = updated with the mascot's X coordinate each frame after it is first used -->
 <ActionReference Name="Lorem" repeatScript="#{mascot.anchor.x}"/>
 
-        <!-- storedScript = the mascot's X coordinate when the variable is first used -->
+<!-- storedScript = the mascot's X coordinate when the variable is first used -->
 <ActionReference Name="Lorem" storedScript="${mascot.anchor.x}"/>
 ```
 
@@ -233,12 +233,12 @@ mascot/shimeji. It uses `shime28.png` as the image otherwise.
     <ActionReference Name="Fall"/>
 </Action>
 
-        <!--
-        The Sine wave is completely inaccurate to the parameters.
-        It looks good enough so ¯\_(ツ)_/¯, ignore the parameter names and just mess w them until it looks right
-        
-        params: SinA, SinB, Speed
-        -->
+<!--
+The Sine wave is completely inaccurate to the parameters.
+It looks good enough so ¯\_(ツ)_/¯, ignore the parameter names and just mess w them until it looks right
+
+params: SinA, SinB, Speed
+-->
 <Action Name="def_SineHover" Type="Move" count="${0}">
 <Animation Condition="#{
         var roundedSpeed = Speed >= 0 ? Math.ceil(Speed) : Math.floor(Speed);
