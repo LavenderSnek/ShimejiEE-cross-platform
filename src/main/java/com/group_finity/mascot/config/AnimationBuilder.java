@@ -24,10 +24,16 @@ public class AnimationBuilder {
 
     private final List<Hotspot> hotspots = new ArrayList<>();
 
+    private final boolean isTurn;
+
     public AnimationBuilder(ResourceBundle schema, Entry animationNode, PoseLoader poseLoader) throws IOException {
         this.condition = animationNode.getAttribute(schema.getString("Condition")) == null
                 ? "true"
                 : animationNode.getAttribute(schema.getString("Condition"));
+
+        this.isTurn = animationNode.getAttribute(schema.getString( "IsTurn" )) == null
+                ? false
+                : Boolean.parseBoolean(animationNode.getAttribute(schema.getString("IsTurn")));
 
         for (Entry poseNode : animationNode.selectChildren(schema.getString("Pose"))) {
             Pose pose;
@@ -52,13 +58,13 @@ public class AnimationBuilder {
 
     public Animation buildAnimation() throws AnimationInstantiationException {
         try {
-            return new Animation(Variable.parse(getCondition()), getPoses().toArray(new Pose[0]), getHotspots().toArray(new Hotspot[0]));
+            return new Animation(Variable.parse(getConditionTxt()), getPoses(), getHotspots(), isTurn());
         } catch (final VariableException e) {
             throw new AnimationInstantiationException(Tr.tr("FailedConditionEvaluationErrorMessage"), e);
         }
     }
 
-    private String getCondition() {
+    private String getConditionTxt() {
         return condition;
     }
 
@@ -68,6 +74,10 @@ public class AnimationBuilder {
 
     private List<Hotspot> getHotspots() {
         return hotspots;
+    }
+
+    private boolean isTurn() {
+        return isTurn;
     }
 
     private static Hotspot loadHotspot(ResourceBundle schema, double scaling, Entry hotspotNode) throws IOException {

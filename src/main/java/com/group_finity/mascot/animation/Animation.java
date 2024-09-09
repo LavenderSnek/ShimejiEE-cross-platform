@@ -5,34 +5,39 @@ import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.Variable;
 import com.group_finity.mascot.script.VariableMap;
 
+import java.util.Collection;
+
 public class Animation {
 
     private final Variable condition;
 
-    private final Pose[] poses;
+    private final Collection<Pose> poses;
 
-    private final Hotspot[] hotspots;
+    private final Collection<Hotspot> hotspots;
 
-    public Animation(Variable condition, Pose[] poses, Hotspot[] hotspots) {
-        if (poses.length == 0) {
-            throw new IllegalArgumentException("poses.length == 0");
+    private final boolean isTurn;
+
+    public Animation(Variable condition, Collection<Pose> poses, Collection<Hotspot> hotspots, boolean isTurn) {
+        if (poses.isEmpty()) {
+            throw new IllegalArgumentException("Pose list is empty");
         }
 
         this.condition = condition;
         this.poses = poses;
         this.hotspots = hotspots;
+        this.isTurn = isTurn;
     }
 
     public boolean isEffective(final VariableMap variables) throws VariableException {
-        return (Boolean) getCondition().get(variables);
+        return (Boolean) getConditionVar().get(variables);
     }
 
     public void init() {
-        getCondition().init();
+        getConditionVar().init();
     }
 
     public void initFrame() {
-        getCondition().initFrame();
+        getConditionVar().initFrame();
     }
 
     public void next(final Mascot mascot, final int time) {
@@ -61,16 +66,19 @@ public class Animation {
         return duration;
     }
 
-    private Variable getCondition() {
+    private Variable getConditionVar() {
         return this.condition;
     }
 
-    private Pose[] getPoses() {
+    private Collection<Pose> getPoses() {
         return this.poses;
     }
 
-    public Hotspot[] getHotspots() {
+    public Collection<Hotspot> getHotspots() {
         return hotspots;
     }
 
+    public boolean isTurn() {
+        return isTurn;
+    }
 }
