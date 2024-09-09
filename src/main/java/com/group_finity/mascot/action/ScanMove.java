@@ -9,9 +9,10 @@ import com.group_finity.mascot.exception.LostGroundException;
 import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
-import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,19 +20,71 @@ public class ScanMove extends BorderedAction {
 
     private static final Logger log = Logger.getLogger(ScanMove.class.getName());
 
-    private static final String PARAMETER_AFFORDANCE = "Affordance";
-    private static final String DEFAULT_AFFORDANCE = "";
+    record ScanDelegate(ActionBase base) {
 
-    public static final String PARAMETER_BEHAVIOUR = "Behaviour";
-    private static final String DEFAULT_BEHAVIOUR = "";
+        public static final String PARAMETER_BEHAVIOUR = "Behaviour";
+        private static final String DEFAULT_BEHAVIOUR = "";
 
-    public static final String PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour";
-    private static final String DEFAULT_TARGETBEHAVIOUR = "";
+        public static final String PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour";
+        private static final String DEFAULT_TARGETBEHAVIOUR = "";
+
+        public static final String PARAMETER_TARGETLOOK = "TargetLook";
+        private static final boolean DEFAULT_TARGETLOOK = false;
+
+        void setMascotFinalStates(Mascot target) throws VariableException {
+            try {
+                base.getMascot().setBehavior(base.getMascot().getOwnImageSet().getConfiguration().buildBehavior(getBehavior()));
+                target.setBehavior(target.getOwnImageSet().getConfiguration().buildBehavior(getTargetBehavior()));
+
+                if (getTargetLook() && target.isLookRight() == base.getMascot().isLookRight()) {
+                    target.setLookRight(!base.getMascot().isLookRight());
+                }
+
+            } catch (final NullPointerException | BehaviorInstantiationException | CantBeAliveException e) {
+                log.log(Level.SEVERE, "Fatal Exception", e);
+                throw new VariableException(Tr.tr("FailedSetBehaviourErrorMessage"), e);
+            }
+        }
+
+        String getBehavior() throws VariableException {
+            return base.eval(base.getSchema().getString(PARAMETER_BEHAVIOUR), String.class, DEFAULT_BEHAVIOUR);
+        }
+
+        String getTargetBehavior() throws VariableException {
+            return base.eval(base.getSchema().getString(PARAMETER_TARGETBEHAVIOUR), String.class, DEFAULT_TARGETBEHAVIOUR);
+        }
+
+        boolean getTargetLook() throws VariableException {
+            return base.eval(base.getSchema().getString(PARAMETER_TARGETLOOK), Boolean.class, DEFAULT_TARGETLOOK);
+        }
+
+    }
+
+    private final Move.MoveDelegate moveDel = new Move.MoveDelegate(this);
+    private final ScanDelegate scanDel = new ScanDelegate(this);
+
+    private boolean hasTurnAnimation = false;
+    private boolean turning = false;
 
     private WeakReference<Mascot> target;
 
-    public ScanMove(java.util.ResourceBundle schema, final List<Animation> animations, final VariableMap params) {
+    public ScanMove(ResourceBundle schema, List<Animation> animations, VariableMap params) {
         super(schema, animations, params);
+    }
+
+    @Override
+    public void init(Mascot mascot) throws VariableException {
+        super.init(mascot);
+
+        getMascot().getAffordances().clear();
+
+        if (getMascot().getManager() != null) {
+            target = getMascot().getManager().getMascotWithAffordance(getAffordance());
+        }
+
+        putVariable("target", target != null ? target.get() : null);
+
+        hasTurnAnimation = getAnimations().stream().anyMatch(Animation::isTurn);
     }
 
     @Override
@@ -44,79 +97,57 @@ public class ScanMove extends BorderedAction {
             target = getMascot().getManager().getMascotWithAffordance(getAffordance());
         }
 
-        return super.hasNext()
-                && target != null
-                && target.get() != null
-                && target.get().getAffordances().contains(getAffordance());
+        var effective = super.hasNext();
+
+        var validTarget = target != null
+                          && target.get() != null
+                          && target.get().getAffordances().contains(getAffordance());
+
+        return effective && validTarget;
     }
 
     @Override
     protected void tick() throws LostGroundException, VariableException {
         super.tick();
 
-        if ((getBorder() != null) && !getBorder().isOn(getMascot().getAnchor())) {
-            log.log(Level.INFO, "Lost Ground ({0},{1})", new Object[]{getMascot(), this});
-            throw new LostGroundException();
+        checkForLostGround();
+
+        getMascot().getAffordances().clear();
+
+        var targetRef = Objects.requireNonNull(target.get());
+
+        int targetX = targetRef.getAnchor().x;
+        int targetY = targetRef.getAnchor().y;
+
+        if (moveDel.shouldMascotTurnAround(targetX)) {
+            getMascot().setLookRight(!getMascot().isLookRight()); // toggle turn
+            turning = true;
         }
 
-        int targetX = target.get().getAnchor().x;
-        int targetY = target.get().getAnchor().y;
-
-        boolean down = false;
-
-        if (getMascot().getAnchor().x != targetX) {
-            getMascot().setLookRight(getMascot().getAnchor().x < targetX);
+        // check if turning animation has finished
+        if (isTurning() && (getTime() >= getAnimation().getDuration())) {
+            turning = false;
         }
 
-        down = getMascot().getAnchor().y < targetY;
+        moveDel.updateLocation(targetX, targetY);
 
-        getAnimation().next(getMascot(), getTime());
+        //----
 
-        if ((getMascot().isLookRight() && (getMascot().getAnchor().x >= targetX))
-                || (!getMascot().isLookRight() && (getMascot().getAnchor().x <= targetX)))
-        {
-            getMascot().setAnchor(new Point(targetX, getMascot().getAnchor().y));
-        }
-
-        if ((down && (getMascot().getAnchor().y >= targetY))
-                || (!down && (getMascot().getAnchor().y <= targetY)))
-        {
-            getMascot().setAnchor(new Point(getMascot().getAnchor().x, targetY));
-        }
-
-        boolean noMoveX = false;
-        boolean noMoveY = false;
-
-        if (getMascot().getAnchor().x == targetX) {
-            noMoveX = true;
-        }
-
-        if (getMascot().getAnchor().y == targetY) {
-            noMoveY = true;
-        }
-
-        if (noMoveX && noMoveY) {
-            try {
-                getMascot().setBehavior(getMascot().getOwnImageSet().getConfiguration().buildBehavior(getBehavior()));
-                target.get().setBehavior(target.get().getOwnImageSet().getConfiguration().buildBehavior(getTargetBehavior()));
-
-            } catch (final NullPointerException | BehaviorInstantiationException | CantBeAliveException e) {
-                log.log(Level.SEVERE, "Fatal Exception", e);
-                throw new VariableException(Tr.tr("FailedSetBehaviourErrorMessage"), e);
-            }
+        if (!isTurning() && moveDel.hasReachedX(targetX) && moveDel.hasReachedY(targetY)) {
+            scanDel.setMascotFinalStates(targetRef);
         }
     }
 
-    private String getAffordance() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_AFFORDANCE), String.class, DEFAULT_AFFORDANCE);
+    @Override
+    protected Animation getAnimation() throws VariableException {
+        if (hasTurnAnimation && isTurning()) {
+            return moveDel.getNextEffectiveTurnAnimation();
+        }
+        return super.getAnimation();
     }
 
-    private String getBehavior() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_BEHAVIOUR), String.class, DEFAULT_BEHAVIOUR);
-    }
-
-    private String getTargetBehavior() throws VariableException {
-        return eval(getSchema().getString(PARAMETER_TARGETBEHAVIOUR), String.class, DEFAULT_TARGETBEHAVIOUR);
+    protected final boolean isTurning() {
+        return turning;
     }
 
 }

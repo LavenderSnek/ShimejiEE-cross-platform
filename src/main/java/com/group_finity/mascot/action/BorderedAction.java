@@ -8,6 +8,7 @@ import com.group_finity.mascot.exception.VariableException;
 import com.group_finity.mascot.script.VariableMap;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -76,6 +77,13 @@ public abstract class BorderedAction extends ActionBase {
 
     private void setBorder(final Border border) {
         this.border = border;
+    }
+
+    protected void checkForLostGround() throws LostGroundException {
+        if ((getBorder() != null) && !getBorder().isOn(getMascot().getAnchor())) {
+            log.log(Level.INFO, "Lost Ground ({0},{1})", new Object[]{getMascot(), this});
+            throw new LostGroundException();
+        }
     }
 
 }

@@ -175,7 +175,7 @@ public abstract class ActionBase implements Action {
     /**
      * Affordance to be added to the mascot
      */
-    private String getAffordance() throws VariableException {
+    protected String getAffordance() throws VariableException {
         return eval(schema.getString(PARAMETER_AFFORDANCE), String.class, DEFAULT_AFFORDANCE);
     }
 
