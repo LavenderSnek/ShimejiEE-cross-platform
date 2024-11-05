@@ -81,12 +81,12 @@ public class ImageSetManager implements ImageSetStore {
         if (name == null) {
             return null;
         }
-        // not using putIfAbsent here since that wouldn't handle failure properly
-        ImageSet ims = null;
-        if (!loaded.containsKey(name)) {
-            ims = loader.loadAsDependency(name, dependent);
+
+        if (loaded.containsKey(name)) {
+            return loaded.get(name);
         }
 
+        var ims = loader.loadAsDependency(name, dependent);
         return ims == null ? null : loaded.put(name, ims);
     }
 

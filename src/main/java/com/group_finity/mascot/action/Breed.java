@@ -77,7 +77,7 @@ public class Breed extends Animate {
                     : base.getMascot().getImageSet();
 
             final Mascot newMascot = Mascot.createBlankFrom(base.getMascot());
-            base.getMascot().setImageSet(childType);
+            newMascot.setImageSet(childType);
 
             log.log(Level.INFO, "Breed Mascot ({0},{1},{2})", new Object[]{base.getMascot(), this, newMascot});
 
