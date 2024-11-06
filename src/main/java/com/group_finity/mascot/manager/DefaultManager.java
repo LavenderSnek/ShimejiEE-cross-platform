@@ -8,8 +8,12 @@ import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DefaultManager implements MascotManager {
+
+    private static final Logger log = Logger.getLogger(DefaultManager.class.getName());
 
     public static final int TICK_INTERVAL_MILLIS = 40;
 
@@ -72,12 +76,20 @@ public class DefaultManager implements MascotManager {
 
     public void trySetBehaviorAll(String name) {
         queueTask(() -> mascots.values().forEach(m -> {
+            var conf  = m.getOwnImageSet().getConfiguration();
+            var bvName = name;
             try {
-                var bv = m.getOwnImageSet().getConfiguration().buildBehavior(name);
+                // janky as hell but ChaseMouse is special (and this lets it work w japanese) so it's fine
+                if (!conf.getBehaviorNames().contains(name) && conf.getSchema().containsKey(name)) {
+                    bvName = conf.getSchema().getString(name);
+                }
+
+                var bv = m.getOwnImageSet().getConfiguration().buildBehavior(bvName);
                 m.setBehavior(bv);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
                 // this removes enforcement of ChaseMouse having to exist
                 // technically a compatibility break for errors
+                log.log(Level.WARNING, e.getMessage(), e);
             }
         }));
     }

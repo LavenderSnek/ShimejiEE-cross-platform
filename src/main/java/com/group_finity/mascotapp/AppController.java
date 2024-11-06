@@ -3,7 +3,6 @@ package com.group_finity.mascotapp;
 import com.group_finity.mascot.*;
 import com.group_finity.mascot.config.XmlConfiguration;
 import com.group_finity.mascot.config.DefaultPoseLoader;
-import com.group_finity.mascot.config.Entry;
 import com.group_finity.mascot.exception.ConfigurationException;
 import com.group_finity.mascot.image.ImagePairLoaderBuilder;
 import com.group_finity.mascot.imageset.ImageSet;
@@ -24,8 +23,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Image;
@@ -386,6 +383,14 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
     private final Map<String, Consumer<Mascot>> mascotActions = Map.ofEntries(
             entry("CallAnother", m -> createMascot(m.getImageSet())),
             entry("RevealStatistics", Mascot::startDebugUi),
+            entry("FollowCursor", m -> {
+                try {
+                    var conf = m.getOwnImageSet().getConfiguration();
+                    m.setBehavior(conf.buildBehavior(conf.getSchema().getString(BEHAVIOR_GATHER)));
+                } catch (Exception ignored) {
+                    // again, we're ignoring ChaseMouse not existing
+                }
+            }),
             entry("Dismiss", Mascot::dispose),
             entry("DismissOthers", m -> manager.disposeIf(mascot -> mascot.id != m.id && mascot.getImageSet().equals(m.getImageSet()))),
             entry("DismissAllOthers", m -> manager.disposeIf(mascot -> mascot.id != m.id))
