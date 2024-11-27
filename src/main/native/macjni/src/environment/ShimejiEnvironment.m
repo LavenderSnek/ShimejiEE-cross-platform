@@ -89,8 +89,8 @@ jmethodID JMIDConstructor_ScreenRep;
 - (jobject)getUpdatedIeRep {
     
     NSRunningApplication* fmApp = NSWorkspace.sharedWorkspace.frontmostApplication;
-                        //vv Stops it from interacting with shimeji since it doesn't have a bundle
-    if (fmApp != nil && fmApp.bundleURL != nil) {
+
+    if (fmApp != nil && ![fmApp.localizedName isEqual: @"ShimejiEE"]) {
         currentFrontmostApp = fmApp;
     }
     
