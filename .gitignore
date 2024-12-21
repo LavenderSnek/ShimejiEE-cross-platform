@@ -26,6 +26,7 @@ nb-configuration.xml
 # native
 *.xcodeproj/
 src/main/native/headers/
+src/main/java/com/group_finity/mascotnative/panama/bindings/
 
 # Windows
 Thumbs.db

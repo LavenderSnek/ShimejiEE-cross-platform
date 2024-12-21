@@ -46,6 +46,10 @@ public abstract class NativeFactory {
 
     public abstract NativeImage newNativeImage(BufferedImage src);
 
+    public NativeImage newNativeImage(Path path, double scaling, boolean flipped, boolean antialiasing) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
     public abstract TranslucentWindow newTransparentWindow();
 
     protected void shutdown() {}

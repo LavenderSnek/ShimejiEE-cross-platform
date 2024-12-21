@@ -1,6 +1,7 @@
 package com.group_finity.mascot.image;
 
 import com.group_finity.mascot.NativeFactory;
+import com.group_finity.mascotnative.panama.PanamaImage;
 
 import javax.imageio.ImageIO;
 import java.awt.Dimension;
@@ -83,10 +84,10 @@ public class ImagePairLoader implements ImagePairStore {
     }
 
     protected ImagePair createImagePair(Path leftImgPath, Path rightImgPath, Point rawAnchor, double scaling) throws IOException {
-        BufferedImage leftImg = transform(ImageIO.read(leftImgPath.toFile()), scaling, false);
-        BufferedImage rightImg = rightImgPath == null
-                ? transform(leftImg, 1, true)
-                : transform(ImageIO.read(rightImgPath.toFile()), scaling, false);
+        var leftImg = NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, false, false);
+        var rightImg = rightImgPath == null
+                ? NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, true, false)
+                : NativeFactory.getInstance().newNativeImage(rightImgPath, scaling, false, false);
 
         final Point scaledAnchor = new Point(
                 (int) Math.round(rawAnchor.x * scaling),
@@ -94,15 +95,15 @@ public class ImagePairLoader implements ImagePairStore {
         );
 
         MascotImage lMascot = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(leftImg),
+                leftImg,
                 scaledAnchor,
-                new Dimension(leftImg.getWidth(), leftImg.getHeight())
+                new Dimension(((PanamaImage)leftImg).w, ((PanamaImage)leftImg).h)
         );
 
         MascotImage rMascot = new MascotImage(
-                NativeFactory.getInstance().newNativeImage(rightImg),
-                new Point(rightImg.getWidth() - scaledAnchor.x, scaledAnchor.y),
-                new Dimension(rightImg.getWidth(), rightImg.getHeight())
+                rightImg,
+                new Point(((PanamaImage)rightImg).w - scaledAnchor.x, scaledAnchor.y),
+                new Dimension(((PanamaImage)rightImg).w, ((PanamaImage)rightImg).h)
         );
 
         return new ImagePair(lMascot, rMascot);
