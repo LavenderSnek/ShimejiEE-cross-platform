@@ -6,7 +6,6 @@ import com.group_finity.mascot.environment.BaseNativeEnvironment;
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
-import com.group_finity.mascotnative.macclassic.MacEnvironment;
 
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -26,8 +25,7 @@ public class NativeFactoryImpl extends NativeFactory {
             throw new RuntimeException(
                     "Unable to load library for macjni."
                     + "\nMake sure " + LIB_FILENAME + " is in the lib folder of the jar file's parent directory."
-                    + "\nIf you would like to use the swing implementation instead, "
-                    + "run java with this argument: -Dcom.group_finity.mascotnative=\"macclassic\""
+                    + "\nSet com.group_finity.mascotnative to use a different native implementation."
             );
         }
     }
@@ -43,8 +41,6 @@ public class NativeFactoryImpl extends NativeFactory {
                     ieToUpdate.setVisible(false);
                 }
             };
-        } else if (envProp.equalsIgnoreCase("classic")) {
-            environment = new MacEnvironment();
         } else {
             environment = new MacJniEnvironment();
         }
