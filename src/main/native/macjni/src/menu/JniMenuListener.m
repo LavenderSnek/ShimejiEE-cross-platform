@@ -18,12 +18,12 @@ jmethodID JMID_MacJniMenu_onClose;
     }
 }
 
-- (instancetype)initWithJavaRep:(jobject)javaRep {
+- (instancetype)initWithJavaRep:(jobject)jvr {
 
     self = [super init];
 
     if (self) {
-        self->javaRep = javaRep;
+        self->javaRep = jvr;
     }
 
     return self;

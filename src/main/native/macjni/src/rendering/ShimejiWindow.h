@@ -5,9 +5,9 @@
 @interface ShimejiWindow : NSWindow
 
 /**
- @param javaRep A strong global ref to an instance of MacJniShimejiWindow.
+ @param jvr A strong global ref to an instance of MacJniShimejiWindow.
  */
--(instancetype)initWithJavaRep:(jobject)javaRep;
+-(instancetype)initWithJavaRep:(jobject)jvr;
 
 -(void)setImage:(NSImage *)image;
 

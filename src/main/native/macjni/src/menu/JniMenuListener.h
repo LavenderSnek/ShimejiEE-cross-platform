@@ -5,8 +5,8 @@
 @interface JniMenuListener : NSObject<NSMenuDelegate>
 
 /**
- @param javaRep A strong global ref to an instance of MacJniMenu.
+ @param jvr A strong global ref to an instance of MacJniMenu.
  */
-- (instancetype)initWithJavaRep:(jobject)javaRep;
+- (instancetype)initWithJavaRep:(jobject)jvr;
 
 @end

@@ -20,12 +20,12 @@ jmethodID JMID_MacJniMenuItem_onClick;
 
 }
 
-- (instancetype)initWithTitle:(NSString*)title javaRep:(jobject)javaRep {
+- (instancetype)initWithTitle:(NSString*)title javaRep:(jobject)jvr {
     
     self = [super initWithTitle:title action:@selector(onClickAction) keyEquivalent:@""];
     
     if (self) {
-        self->javaRep = javaRep;
+        self->javaRep = jvr;
         [self setTarget:self];
     }
     

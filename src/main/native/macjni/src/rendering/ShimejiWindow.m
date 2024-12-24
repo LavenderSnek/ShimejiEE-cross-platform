@@ -4,7 +4,7 @@
 
 @interface ShimejiImageView : NSView
 
--(void)setImage:(NSImage *)image;
+-(void)setImage:(NSImage *)img;
 
 @end
 
@@ -21,9 +21,9 @@
     return self;
 }
 
-- (void)setImage:(NSImage *)image {
-    if (self->image != image) {
-        self->image = image;
+- (void)setImage:(NSImage *)img {
+    if (self->image != img) {
+        self->image = img;
         [self setNeedsDisplay:YES];
     }
 }
@@ -63,7 +63,7 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
     }
 }
 
--(instancetype)initWithJavaRep:(jobject)javaRep {
+-(instancetype)initWithJavaRep:(jobject)jvr {
     self = [super initWithContentRect:NSMakeRect(0, 0, 120, 120)
                             styleMask:NSWindowStyleMaskBorderless
                               backing:NSBackingStoreBuffered
@@ -74,7 +74,7 @@ jmethodID JMID_MacJniShimejiWindow_getNSMenuPtrForPopup;
         [self setBackgroundColor:NSColor.clearColor];
         [self setLevel:NSStatusWindowLevel];
         [self setCollectionBehavior:NSWindowCollectionBehaviorStationary | NSWindowCollectionBehaviorMoveToActiveSpace | NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorFullScreenAuxiliary];
-        self->javaRep = javaRep;
+        self->javaRep = jvr;
     }
     return self;
 }
