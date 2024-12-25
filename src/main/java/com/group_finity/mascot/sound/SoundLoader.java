@@ -116,4 +116,10 @@ public class SoundLoader implements SoundStore {
         return clip;
     }
 
+    @Override
+    public void disposeAll() {
+        sounds.values().forEach(Clip::close);
+        sounds.clear();
+        fileNameMap.clear();
+    }
 }

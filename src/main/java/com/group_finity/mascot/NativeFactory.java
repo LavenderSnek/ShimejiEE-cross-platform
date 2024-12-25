@@ -4,7 +4,7 @@ import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
 
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -44,11 +44,7 @@ public abstract class NativeFactory {
 
     public abstract NativeEnvironment getEnvironment();
 
-    public abstract NativeImage newNativeImage(BufferedImage src);
-
-    public NativeImage newNativeImage(Path path, double scaling, boolean flipped, boolean antialiasing) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+    public abstract NativeImage newNativeImage(Path path, double scaling, boolean flipped, boolean antialiasing) throws IOException;
 
     public abstract TranslucentWindow newTransparentWindow();
 

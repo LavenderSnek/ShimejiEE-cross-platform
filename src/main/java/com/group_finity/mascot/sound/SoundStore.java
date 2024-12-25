@@ -29,4 +29,10 @@ public interface SoundStore {
      */
     List<Clip> getIgnoringVolume(String name);
 
+
+    /**
+     * Clears store and releases resources used by all sounds
+     */
+    void disposeAll() throws Exception;
+
 }

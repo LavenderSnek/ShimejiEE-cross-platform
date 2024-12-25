@@ -232,12 +232,10 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
 
     @Override
     public void imageSetHasBeenRemoved(String name, ImageSet imageSet) {
-        if (imageSet instanceof AutoCloseable ims) {
-            try {
-                ims.close();
-            } catch (Exception e) {
-                log.log(Level.WARNING, "Unable to dispose of image set", e);
-            }
+        try {
+            imageSet.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

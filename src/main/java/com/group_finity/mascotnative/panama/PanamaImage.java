@@ -9,7 +9,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.file.Path;
 
-public class PanamaImage implements NativeImage, AutoCloseable {
+public class PanamaImage implements NativeImage {
     final Arena arena;
     final MemorySegment image;
     public final int w;
@@ -38,7 +38,17 @@ public class PanamaImage implements NativeImage, AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public int getWidth() {
+        return w;
+    }
+
+    @Override
+    public int getHeight() {
+        return h;
+    }
+
+    @Override
+    public void dispose() {
         NativeRenderer_h.image_dispose(image);
         arena.close();
     }

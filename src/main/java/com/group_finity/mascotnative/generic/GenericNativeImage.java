@@ -25,4 +25,14 @@ class GenericNativeImage implements NativeImage {
         return this.icon;
     }
 
+    @Override
+    public int getWidth() {
+        return managedImage.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return managedImage.getHeight();
+    }
+
 }

@@ -1,6 +1,10 @@
 #pragma once
 #import <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //--- Image
 struct Image {
     void* data;
@@ -36,6 +40,9 @@ void menu_add_disabled(struct Menu menu, char* title);
 void menu_add_separator(struct Menu menu);
 
 //---Renderer
+
+void renderer_init_event_loop(void);
+
 struct Renderer {
     void* data;
 };
@@ -52,3 +59,7 @@ struct RendererCallbacks {
 struct Renderer renderer_create(struct RendererCallbacks callbacks);
 void renderer_dispose(struct Renderer renderer);
 void renderer_update(bool visible, struct Renderer renderer, struct Image image, int x, int y);
+
+#ifdef __cplusplus
+}
+#endif

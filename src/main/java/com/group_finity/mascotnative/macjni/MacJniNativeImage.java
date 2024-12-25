@@ -10,10 +10,12 @@ class MacJniNativeImage implements NativeImage {
     private static native void disposeNsImage(long nsImagePtr);
 
     private final long ptr;
+    private final int w;
+    private final int h;
 
     MacJniNativeImage(BufferedImage image) {
-        int w = image.getWidth();
-        int h = image.getHeight();
+        w = image.getWidth();
+        h = image.getHeight();
         int[] rgb = image.getRGB(0,0, w, h, null, 0, w);
         this.ptr = createNSImageFromArray(rgb, w, h);
     }
@@ -22,15 +24,19 @@ class MacJniNativeImage implements NativeImage {
         return ptr;
     }
 
-    void dispose() {
-        disposeNsImage(ptr);
+    @Override
+    public int getWidth() {
+        return w;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    protected final void finalize() throws Throwable {
-        super.finalize();
-        dispose();
+    public int getHeight() {
+        return h;
+    }
+
+    @Override
+    public void dispose() {
+        disposeNsImage(ptr);
     }
 
 }

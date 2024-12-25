@@ -6,10 +6,12 @@ import com.group_finity.mascot.environment.BaseNativeEnvironment;
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
+import com.group_finity.mascotnative.shared.ImageUtil;
 
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Path;
 
 @SuppressWarnings("unused")
 public class NativeFactoryImpl extends NativeFactory {
@@ -52,8 +54,8 @@ public class NativeFactoryImpl extends NativeFactory {
     }
 
     @Override
-    public NativeImage newNativeImage(BufferedImage src) {
-        return new MacJniNativeImage(src);
+    public NativeImage newNativeImage(Path path, double scaling, boolean flipped, boolean antialiasing) throws IOException {
+        return new MacJniNativeImage(ImageUtil.newBufferedImage(path, scaling, flipped, antialiasing));
     }
 
     @Override

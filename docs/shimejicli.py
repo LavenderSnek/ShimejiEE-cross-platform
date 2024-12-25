@@ -32,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--select', '-s', required=False, help='Select image set', action='extend', nargs='*')
 
     parser.add_argument('--native', required=False, help='Native implementation package name')
+    parser.add_argument('--panama-impl', required=False, help='Panama backend')
 
     parser.add_argument('--scale', type=float, default=1.0, help='Global scaling')
     parser.add_argument('--lanc', default=False, action='store_true', help='Logical anchors: images with same name can have copies with multiple anchors')
@@ -57,6 +58,9 @@ if __name__ == "__main__":
 
     if args.native is not None:
         javaCmd.append(f"-Dcom.group_finity.mascotnative={args.native}")
+
+    if args.panama_impl is not None:
+        javaCmd.append(f"-Dcom.group_finity.mascotnative.panama={args.panama_impl}")
 
     if args.select is not None and len(args.select) != 0:
         import urllib.parse

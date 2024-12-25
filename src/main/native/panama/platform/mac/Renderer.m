@@ -106,6 +106,8 @@
 
 @end
 
+void renderer_init_event_loop() {}
+
 struct Renderer renderer_create(struct RendererCallbacks callbacks) {
     __block struct Renderer renderer;
 

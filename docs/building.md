@@ -2,64 +2,26 @@
 Building
 ========
 
-This doc covers building through command line. 
-IDE setup should be relatively straightforward, though I have had occasional issues with setting `JAVA_HOME` properly for cmake.
+TLDR: run `build.py` using python3 and hope for the best.
 
-Common TLDR Guide
------------------
-Try this before wasting your time reading the rest of this docs.
+## Install Deps
 
-- Make sure `JAVA_HOME` is JDK 17
-- Run `mvn clean package` 
-- Fix anything it complains about (i.e. missing tools)
-- Try again
+### Core:
+- Python 3.13+ (might work with a lower version, but this is what I use)
+- Maven
+- JDK 23
 
-The final shimeji folder will be in `target/ShimejiEE`
+### Native:
+- CMake
+- [Ninja Build](https://ninja-build.org/)
+- [Jextract](https://jdk.java.net/jextract/)
+  - You don't _need_ to add this to PATH. `build.py` has a `--jextract` argument you can use to specify the binary instead
+- A C/C++ Compiler
+- `glfw` and anything else the native might need (run the build and see what breaks)
+  - TODO: Look into building from source and/or using binaries
 
-To skip native build, disable the `cmake` profile in maven
+## Run Build
 
-macOS
------
-
-This guide uses [Homebrew](https://brew.sh/) to install dependencies.
-
-### Install Dependencies
-
-```shell
-# java
-brew install maven
-brew install openjdk@17
-
-# symlink java (see https://formulae.brew.sh/formula/openjdk@17)
-sudo ln -sfn $HOMEBREW_PREFIX/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
-
-# native (if you'll be building the JNI libs)
-brew install cmake
-brew install ninja
-```
-
-### Setup Java
-
-Make sure that `JAVA_HOME` is set to the correct version. 
-If you symlinked java in the previous step here's a nice shortcut ([more info](https://stackoverflow.com/questions/21964709/)).
-
-```shell
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-```
-
-### Build
-
-The following command cleans any build files and builds ShimejiEE along with the native libraries for macOS. 
-```shell
-mvn clean package
-```
-
-If you want to skip building native libs, use this command.
-```shell
-mvn clean package -P '!cmake'
-```
-
-### Run
-```shell
-java -jar target/ShimejiEE/ShimejiEE.jar
-```
+- Make sure JAVA_HOME is set to the JDK 23 Install
+- Run `build.py`
+- use `--no-panama` (and `--no-macjni` on macOS) if you just want to build java code

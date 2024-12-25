@@ -1,23 +1,21 @@
 package com.group_finity.mascot.image;
 
 import com.group_finity.mascot.NativeFactory;
-import com.group_finity.mascotnative.panama.PanamaImage;
 
-import javax.imageio.ImageIO;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ImagePairLoader implements ImagePairStore {
 
     private final Map<String, ImagePair> imagePairs = new ConcurrentHashMap<>(64, 0.75f, 2);
+    private final List<NativeImage> loadedImageRefs = new ArrayList<>();
 
     private final double scaling;
     private final boolean logicalAnchors;
@@ -74,6 +72,14 @@ public class ImagePairLoader implements ImagePairStore {
     }
 
     @Override
+    public void disposeAll() {
+        imagePairs.clear();
+
+        loadedImageRefs.forEach(NativeImage::dispose);
+        loadedImageRefs.clear();
+    }
+
+    @Override
     public ImagePair get(String key) {
         return key == null ? null : imagePairs.get(key);
     }
@@ -84,10 +90,10 @@ public class ImagePairLoader implements ImagePairStore {
     }
 
     protected ImagePair createImagePair(Path leftImgPath, Path rightImgPath, Point rawAnchor, double scaling) throws IOException {
-        var leftImg = NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, false, false);
+        var leftImg = NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, false, !pixelArtScaling);
         var rightImg = rightImgPath == null
-                ? NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, true, false)
-                : NativeFactory.getInstance().newNativeImage(rightImgPath, scaling, false, false);
+                ? NativeFactory.getInstance().newNativeImage(leftImgPath, scaling, true, !pixelArtScaling)
+                : NativeFactory.getInstance().newNativeImage(rightImgPath, scaling, false, !pixelArtScaling);
 
         final Point scaledAnchor = new Point(
                 (int) Math.round(rawAnchor.x * scaling),
@@ -97,34 +103,16 @@ public class ImagePairLoader implements ImagePairStore {
         MascotImage lMascot = new MascotImage(
                 leftImg,
                 scaledAnchor,
-                new Dimension(((PanamaImage)leftImg).w, ((PanamaImage)leftImg).h)
+                new Dimension(leftImg.getWidth(), leftImg.getHeight())
         );
 
         MascotImage rMascot = new MascotImage(
                 rightImg,
-                new Point(((PanamaImage)rightImg).w - scaledAnchor.x, scaledAnchor.y),
-                new Dimension(((PanamaImage)rightImg).w, ((PanamaImage)rightImg).h)
+                new Point(rightImg.getWidth() - scaledAnchor.x, scaledAnchor.y),
+                new Dimension(rightImg.getWidth(), rightImg.getHeight())
         );
 
         return new ImagePair(lMascot, rMascot);
-    }
-
-    protected BufferedImage transform(BufferedImage src, double scaleFactor, boolean flip) {
-        final int fWidth = (int) Math.round(src.getWidth() * scaleFactor);
-        final int fHeight = (int) Math.round(src.getHeight() * scaleFactor);
-
-        final BufferedImage copy = new BufferedImage(fWidth, fHeight, BufferedImage.TYPE_INT_ARGB_PRE);
-
-        Graphics2D g2d = copy.createGraphics();
-        var renderHint = pixelArtScaling
-                ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
-                : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, renderHint);
-        g2d.drawImage(src, (flip ? fWidth : 0), 0, (flip ? -fWidth : fWidth), fHeight, null);
-        g2d.dispose();
-
-        return copy;
     }
 
 }
