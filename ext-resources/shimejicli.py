@@ -9,19 +9,8 @@ P_PREFS = "com.group_finity.mascot.prefs"
 
 if __name__ == "__main__":
     # path to shimejiEE jar
-    SHIME_JAR = os.path.join(os.path.dirname(sys.argv[0]), "../target/ShimejiEE/ShimejiEE.jar")
+    SHIME_JAR = os.path.join(os.path.dirname(sys.argv[0]), "ShimejiEE.jar")
     SHIME_JAR = os.path.abspath(SHIME_JAR)
-
-    # could be placed later to allow --help, but this feels like a better alert
-    if not os.path.isfile(SHIME_JAR):
-        print(f"jar path does not exist (edit cli script to change): {SHIME_JAR}\n", file=sys.stderr)
-        exit()
-
-    print(f"jar path (edit cli script to change): {SHIME_JAR}\n", file=sys.stderr)
-
-    javaCmd = [ "java",
-        "-Dsun.java2d.metal=true"
-    ]
 
     parser = argparse.ArgumentParser(description='Runs shimeji with the given settings. Its not really stable, but good enough for quick run configs.')
 
@@ -32,7 +21,7 @@ if __name__ == "__main__":
     parser.add_argument('--select', '-s', required=False, help='Select image set', action='extend', nargs='*')
 
     parser.add_argument('--native', required=False, help='Native implementation package name')
-    parser.add_argument('--panama-impl', required=False, help='Panama backend')
+    parser.add_argument('--panama-impl', required=False, help='Panama backend (ignored if panama is not being used)')
 
     parser.add_argument('--scale', type=float, default=1.0, help='Global scaling')
     parser.add_argument('--lanc', default=False, action='store_true', help='Logical anchors: images with same name can have copies with multiple anchors')
@@ -50,7 +39,16 @@ if __name__ == "__main__":
     parser.add_argument('--chooser', default=False, action='store_true', help='Show image set chooser on startup')
     parser.add_argument('--ignore-imp', default=False, action='store_true', help='Ignore imageset.properties in inner conf folder')
 
+    parser.add_argument('--jar-path', default=SHIME_JAR, help='Path to ShimejiEE.jar')
+    parser.add_argument('--java-bin', default='java', help='Path to java executable')
+
     args = parser.parse_args()
+
+    if not os.path.isfile(args.jar_path):
+        print(f"jar path does not exist (use --jar-path to set): {SHIME_JAR}\n", file=sys.stderr)
+        exit(1)
+
+    javaCmd = [args.java_bin]
 
     pfOrImg = 'ProgramFolder' if args.dirType == 'pf' else 'ProgramFolder.img'
     javaCmd.append(f"-D{P_PREFS}.{pfOrImg}={args.dirPath}")
@@ -84,6 +82,6 @@ if __name__ == "__main__":
     javaCmd.append(f"-D{P_PREFS}.AlwaysShowShimejiChooser={args.chooser}")
     javaCmd.append(f"-D{P_PREFS}.IgnoreImagesetProperties={args.ignore_imp}")
 
-    javaCmd.extend(["-jar", SHIME_JAR])
+    javaCmd.extend(["-jar", args.jar_path])
 
     subprocess.call(javaCmd)
