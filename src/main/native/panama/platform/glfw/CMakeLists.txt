@@ -26,4 +26,7 @@ if (APPLE)
     find_library(IOKIT_LIBRARY IOKit)
 
     target_link_libraries(shimejinative_glfw PRIVATE glfw ${COCOA_LIBRARY} ${OPENGL_LIBRARY} ${IOKIT_LIBRARY})
+else ()
+    find_package(glfw3 REQUIRED)
+    target_link_libraries(shimejinative_glfw PRIVATE glfw)
 endif ()
