@@ -1,5 +1,6 @@
 package com.group_finity.mascot;
 
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 
 public interface MascotUiFactory {
@@ -8,4 +9,5 @@ public interface MascotUiFactory {
 
     TopLevelMenuRep createContextMenuFor(Mascot mascot);
 
+    TranslucentWindow createWindowFor(Mascot mascot);
 }

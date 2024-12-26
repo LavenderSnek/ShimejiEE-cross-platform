@@ -10,6 +10,7 @@ import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.manager.DefaultManager;
 import com.group_finity.mascot.sound.SoundLoader;
+import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.window.contextmenu.MenuItemRep;
 import com.group_finity.mascot.window.contextmenu.MenuRep;
 import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
@@ -295,6 +296,11 @@ public final class AppController implements Runnable, MascotPrefProvider, ImageS
             @Override
             public TopLevelMenuRep createContextMenuFor(Mascot mascot) {
                 return createCtxMenuFor(mascot);
+            }
+
+            @Override
+            public TranslucentWindow createWindowFor(Mascot mascot) {
+                return NativeFactory.getInstance().newTransparentWindow();
             }
         });
 

@@ -93,6 +93,8 @@ void render_loop() {
     glfwTerminate();
 }
 
+
+
 void renderer_init_event_loop() {
     auto nt = new std::thread(render_loop);
 }

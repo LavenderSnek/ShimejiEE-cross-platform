@@ -40,7 +40,7 @@ public class Mascot implements ScriptableMascot {
 
     public final int id;
 
-    private final TranslucentWindow window = NativeFactory.getInstance().newTransparentWindow();
+    private final TranslucentWindow window;
 
     private int time = 0;
     private boolean animating = true;
@@ -103,13 +103,19 @@ public class Mascot implements ScriptableMascot {
 
     // might need to make this a builder
 
-    public Mascot(String imageSet, MascotPrefProvider prefProvider, ImageSetStore imageSetStore, MascotUiFactory uiFactory) {
-        this.uiFactory = uiFactory;
+    public Mascot(
+            String imageSet,
+            MascotPrefProvider prefProvider,
+            ImageSetStore imageSetStore,
+            MascotUiFactory uiFactory
+    ) {
         this.id = lastId.incrementAndGet();
-        this.imageSet = imageSet;
 
+        this.imageSet = imageSet;
         this.prefProvider = prefProvider;
         this.imageSetStore = imageSetStore;
+        this.uiFactory = uiFactory;
+        this.window = uiFactory.createWindowFor(this);
 
         EventHandler eventHandler = new EventHandler(this);
         getWindow().setEventHandler(eventHandler);
