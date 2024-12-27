@@ -17,8 +17,7 @@ public class NativeFactoryImpl extends NativeFactory {
     private final NativeEnvironment environment = new PanamaEnvironment();
 
     static {
-        // Native code crashes if the toolkit hasn't been loaded first
-        Toolkit.getDefaultToolkit();
+        // Native code crashes if the toolkit hasn't been loaded firstå
         try {
             var backend = System.getProperty("com.group_finity.mascotnative.panama", "glfw");
             System.load(nativeLibDir.resolve(System.mapLibraryName(LIBRARY_PREFIX + "_" + backend)).toAbsolutePath().toString());
