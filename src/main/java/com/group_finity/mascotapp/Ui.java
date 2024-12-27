@@ -4,12 +4,11 @@ import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascotapp.prefs.MutablePrefs;
 
 import java.util.Collection;
-import java.util.Locale;
 
 public interface Ui {
     void showError(String message);
 
-    void start(MutablePrefs prefs);
+    void start(MutablePrefs prefs, Runnable onFinish);
 
     void reload();
 

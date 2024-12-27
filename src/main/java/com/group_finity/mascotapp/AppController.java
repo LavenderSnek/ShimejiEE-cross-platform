@@ -95,18 +95,14 @@ public final class AppController implements Runnable, ImageSetSelectionDelegate,
             Tr.setCustomBehaviorTranslations(Prefs.readProps(Constants.JAR_DIR.resolve(Path.of("conf", USER_BEHAVIORNAMES_FILE))));
             Runtime.getRuntime().addShutdownHook(new Thread(() -> writeAllSettings(SETTINGS_PATH)));
 
-            // tray icon (optional)
-            ui.start(prefs);
+            manager.start();
 
-            Collection<String> selections = imageSets.getSelected();
-
-            // get selections (show chooser if needed)
-            if (selections.isEmpty() || prefs.AlwaysShowShimejiChooser) {
-                ui.requestImageSetChooser(imageSets.getSelected(), programFolder);
-            }
-
-            // start
-            manager.start().get();
+            ui.start(prefs, () -> {
+                // get selections (show chooser if needed)
+                if (imageSets.getSelected().isEmpty() || prefs.AlwaysShowShimejiChooser) {
+                    ui.requestImageSetChooser(imageSets.getSelected(), programFolder);
+                }
+            });
 
         } catch (Exception | Error error) {
             error.printStackTrace();

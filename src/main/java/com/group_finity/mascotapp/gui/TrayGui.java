@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
@@ -31,9 +32,14 @@ public class TrayGui implements Ui {
     private MutablePrefs prefs;
 
     @Override
-    public void start(MutablePrefs prefs) {
+    public void start(MutablePrefs prefs, Runnable onFinish) {
         this.prefs = prefs;
-        SwingUtilities.invokeLater(this::createTrayIcon);
+        try {
+            SwingUtilities.invokeAndWait(this::createTrayIcon);
+            onFinish.run();
+        } catch (InterruptedException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
