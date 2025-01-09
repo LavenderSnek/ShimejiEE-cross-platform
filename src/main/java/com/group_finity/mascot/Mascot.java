@@ -40,8 +40,6 @@ public class Mascot implements ScriptableMascot {
 
     public final int id;
 
-    private final TranslucentWindow window;
-
     private int time = 0;
     private boolean animating = true;
 
@@ -115,10 +113,8 @@ public class Mascot implements ScriptableMascot {
         this.prefProvider = prefProvider;
         this.imageSetStore = imageSetStore;
         this.uiFactory = uiFactory;
-        this.window = uiFactory.createWindowFor(this);
 
-        EventHandler eventHandler = new EventHandler(this);
-        getWindow().setEventHandler(eventHandler);
+        NativeFactory.getInstance().getRenderer().createWindow(id, new EventHandler(this));
 
         log.log(Level.INFO, "Created a mascot ({0})", this);
     }
@@ -168,21 +164,12 @@ public class Mascot implements ScriptableMascot {
             return;
         }
 
-        if (getImage() != null) {
-            // update
-            getWindow().setBounds(getBounds());
-            getWindow().setImage(getImage().getImage());
-
-            if (!getWindow().isVisible()) {
-                getWindow().setVisible(true);
-            }
-
-            // repaint
-            getWindow().updateImage();
-
-        } else if (getWindow().isVisible()) {
-            getWindow().setVisible(false);
-        }
+        NativeFactory.getInstance().getRenderer().updateWindow(
+                id,
+                getImage() != null,
+                getImage() == null ? null : getImage().getImage(),
+                getBounds()
+        );
 
         // play sound if requested
         if (getSound() != null && isSoundAllowed()) {
@@ -202,7 +189,7 @@ public class Mascot implements ScriptableMascot {
 
         stopDebugUi();
         setAnimating(false);
-        getWindow().dispose();
+        NativeFactory.getInstance().getRenderer().disposeWindow(id);
 
         if (getManager() != null) {
             getManager().remove(Mascot.this);
@@ -213,15 +200,13 @@ public class Mascot implements ScriptableMascot {
     public Rectangle getBounds() {
         // as we have no image let's return what we were last frame
         if (getImage() == null) {
-            return getWindow().getBounds();
+            return new Rectangle();
         }
         // calculate bounds
         final int top = getAnchor().y - getImage().getCenter().y;
         final int left = getAnchor().x - getImage().getCenter().x;
         return new Rectangle(left, top, getImage().getSize().width, getImage().getSize().height);
     }
-
-    private TranslucentWindow getWindow() { return this.window; }
 
     @Override public int getTime() { return this.time; }
     private void setTime(int time) { this.time = time; }
