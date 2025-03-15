@@ -1,6 +1,6 @@
-package com.group_finity.mascotapp.gui.chooser;
+package com.group_finity.mascotnative.shared.swingui.chooser;
 
-import com.group_finity.mascotapp.gui.Theme;
+import com.group_finity.mascotnative.shared.swingui.Theme;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;

@@ -1,5 +1,10 @@
 #pragma once
+
 #import <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void init_native_environment();
 void update_native_environment();
@@ -24,3 +29,6 @@ struct NativeRect get_active_ie_bounds();
 void move_ie_window(int x, int y);
 void restore_ie();
 
+#ifdef __cplusplus
+}
+#endif

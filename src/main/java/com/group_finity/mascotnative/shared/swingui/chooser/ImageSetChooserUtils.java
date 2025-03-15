@@ -1,4 +1,4 @@
-package com.group_finity.mascotapp.gui.chooser;
+package com.group_finity.mascotnative.shared.swingui.chooser;
 
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 

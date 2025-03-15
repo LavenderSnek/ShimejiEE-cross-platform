@@ -10,12 +10,12 @@ import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascot.imageset.ShimejiImageSet;
 import com.group_finity.mascot.manager.DefaultManager;
 import com.group_finity.mascot.sound.SoundLoader;
+import com.group_finity.mascot.ui.NativeUi;
 import com.group_finity.mascot.window.contextmenu.MenuItemRep;
 import com.group_finity.mascot.window.contextmenu.MenuRep;
 import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascot.imageset.ImageSetManager;
 import com.group_finity.mascot.imageset.ImageSetSelectionDelegate;
-import com.group_finity.mascotapp.gui.TrayGui;
 import com.group_finity.mascotapp.prefs.ComplexPrefs;
 import com.group_finity.mascotapp.prefs.MutablePrefs;
 import com.group_finity.mascotapp.prefs.Prefs;
@@ -77,7 +77,7 @@ public final class AppController implements Runnable, ImageSetSelectionDelegate,
 
     private final DefaultManager manager = new DefaultManager();
     private final ImageSetManager imageSets = new ImageSetManager(this::loadImageSet, this);
-    private final Ui ui = new TrayGui(this);
+    private NativeUi ui;
 
     //-------------------------------------//
     @Override
@@ -87,6 +87,7 @@ public final class AppController implements Runnable, ImageSetSelectionDelegate,
             final String nativeProp = System.getProperty("com.group_finity.mascotnative", Constants.NATIVE_PKG_DEFAULT);
             NativeFactory.init(nativeProp, Constants.NATIVE_LIB_DIR);
             NativeFactory.getInstance().getEnvironment().init();
+            ui = NativeFactory.getInstance().createUi(this);
 
             // init settings
             loadAllSettings(SETTINGS_PATH);

@@ -78,18 +78,6 @@
                 <version>3.3.0</version>
             </plugin>
 
-            <!--     Compile with header/cli generation      -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <compilerArgs>
-                        <arg>-h</arg>
-                        <arg>${project.headerDir}</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-
             <!--     create shaded jar       -->
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>

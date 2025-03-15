@@ -2,9 +2,12 @@ package com.group_finity.mascot;
 
 import com.group_finity.mascot.environment.NativeEnvironment;
 import com.group_finity.mascot.image.NativeImage;
+import com.group_finity.mascot.ui.NativeUi;
 import com.group_finity.mascot.window.NativeRenderer;
 import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
+import com.group_finity.mascotapp.Controller;
+import com.group_finity.mascotnative.shared.swingui.TrayGui;
 
 import java.awt.*;
 import java.io.IOException;
@@ -30,12 +33,16 @@ public abstract class NativeFactory {
 
         nativeLibDir = libDir;
 
+        System.out.println(nativeLibDir);
+
         try {
             @SuppressWarnings("unchecked")
             final Class<? extends NativeFactory> impl = (Class<? extends NativeFactory>) Class
                     .forName(NATIVE_PKG + "." + subpkg + ".NativeFactoryImpl");
 
             instance = impl.getDeclaredConstructor().newInstance();
+
+            System.out.println(instance);
 
         } catch (Error | Exception e) {
             System.err.println("ERROR: could not load native code package");
@@ -93,6 +100,10 @@ public abstract class NativeFactory {
 
     public NativeRenderer getRenderer() {
         return DfltRenderer.getInstance();
+    }
+    
+    public NativeUi createUi(Controller controller) {
+        return new TrayGui(controller);
     }
 
     protected TranslucentWindow newTransparentWindow() {

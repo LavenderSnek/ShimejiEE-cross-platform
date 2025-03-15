@@ -1,11 +1,11 @@
-package com.group_finity.mascotapp.gui;
+package com.group_finity.mascotnative.shared.swingui;
 
 import com.group_finity.mascot.Tr;
 import com.group_finity.mascot.imageset.ShimejiProgramFolder;
 import com.group_finity.mascotapp.Constants;
 import com.group_finity.mascotapp.Controller;
-import com.group_finity.mascotapp.Ui;
-import com.group_finity.mascotapp.gui.chooser.ImageSetChooserUtils;
+import com.group_finity.mascot.ui.NativeUi;
+import com.group_finity.mascotnative.shared.swingui.chooser.ImageSetChooserUtils;
 import com.group_finity.mascotapp.prefs.MutablePrefs;
 
 import javax.imageio.ImageIO;
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TrayGui implements Ui {
+public class TrayGui implements NativeUi {
     private static final Logger log = Logger.getLogger(TrayGui.class.getName());
 
     public TrayGui(Controller controller) {

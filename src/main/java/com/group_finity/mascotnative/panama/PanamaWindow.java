@@ -4,6 +4,7 @@ import com.group_finity.mascot.image.NativeImage;
 import com.group_finity.mascot.window.TranslucentWindow;
 import com.group_finity.mascot.window.TranslucentWindowEvent;
 import com.group_finity.mascot.window.TranslucentWindowEventHandler;
+import com.group_finity.mascot.window.contextmenu.TopLevelMenuRep;
 import com.group_finity.mascotnative.panama.bindings.render.Menu;
 import com.group_finity.mascotnative.panama.bindings.render.MenuProducer;
 import com.group_finity.mascotnative.panama.bindings.render.MouseHandler;
@@ -23,6 +24,11 @@ class PanamaWindow implements TranslucentWindow {
     private NativeImage image = null;
     private Rectangle bounds = new Rectangle();
     private boolean visible = false;
+
+
+    private static void menuFrom(TopLevelMenuRep menuRep) {
+
+    }
 
     PanamaWindow() {
         var down = MouseHandler.allocate((rel_x, rel_y) -> eventHandler.onDragBegin(new TranslucentWindowEvent(new Point(rel_x, rel_y))), arena);

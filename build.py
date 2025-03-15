@@ -78,10 +78,6 @@ def gen_panama_bindings(jextract_bin: str = 'jextract'):
     jextract(f'{bind_pkg}.render', interface_base / 'NativeRenderer.h', jextract_bin=jextract_bin)
     jextract(f'{bind_pkg}.environment', interface_base / 'NativeEnvironment.h', jextract_bin=jextract_bin)
 
-def build_macjni(config: BuildConfig):
-    cmake_generate(Path('src/main/native/macjni'), NATIVE_BUILD_DIR / 'build-macjni', NATIVE_LIB_DIR)
-    cmake_build(NATIVE_BUILD_DIR / 'build-macjni', config)
-
 def build_panama(config: BuildConfig):
     cmake_generate(Path('src/main/native/panama'), NATIVE_BUILD_DIR / 'build-panama', NATIVE_LIB_DIR)
     cmake_build(NATIVE_BUILD_DIR / 'build-panama', config)
@@ -97,8 +93,6 @@ def full_clean():
 def _main():
     import argparse
 
-    is_mac = platform.system() == 'Darwin'
-
     parser = argparse.ArgumentParser(description='Builds shimeji with native directories')
 
     parser.add_argument('--clean', default=False, action='store_true', help='Delete everything an run a fresh build')
@@ -107,9 +101,6 @@ def _main():
     parser.add_argument('--skip-tests', default=False, action='store_true', help='Skip running tests')
     parser.add_argument('--no-panama', default=False, action='store_true', help='Dont build panama backends')
     parser.add_argument('--jextract', required=False, help='Jextract binary path')
-
-    if is_mac:
-        parser.add_argument('--no-macjni', default=False, action='store_true', help='Dont build macjni native lib')
 
     args = parser.parse_args()
 
@@ -135,10 +126,6 @@ def _main():
 
     print(PRFX + '\n[Building Java]')
     build_java(args.no_panama, args.skip_tests) # before jni build (header generation)
-
-    if is_mac and not args.no_macjni:
-        print(PRFX + '\n[Buildings Mac JNI Libraries]')
-        build_macjni(config)
 
     print(PRFX + '\n[Creating Install Dir]')
     copy_ext_to_install(NATIVE_LIB_DIR / config, BUILD_DIR / PROJECT_NAME)
