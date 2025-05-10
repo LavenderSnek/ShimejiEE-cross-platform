@@ -4,7 +4,7 @@ import com.group_finity.mascot.config.Configuration;
 import com.group_finity.mascot.image.ImagePairStore;
 import com.group_finity.mascot.sound.SoundStore;
 
-public interface ImageSet {
+public interface ImageSet extends AutoCloseable {
 
     Configuration getConfiguration();
 
@@ -12,4 +12,9 @@ public interface ImageSet {
 
     SoundStore getSounds();
 
+    @Override
+    default void close() throws Exception {
+        getImagePairs().disposeAll();
+        getSounds().disposeAll();
+    }
 }

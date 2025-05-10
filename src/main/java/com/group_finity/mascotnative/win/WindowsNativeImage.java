@@ -20,8 +20,12 @@ import static com.sun.jna.platform.win32.WinGDI.DIB_RGB_COLORS;
 class WindowsNativeImage implements NativeImage {
 
     private final HBITMAP bmpHandle;
+    private final int w;
+    private final int h;
 
     public WindowsNativeImage(BufferedImage src, int scaling) {
+        w = src.getWidth() * scaling;
+        h = src.getHeight() * scaling;
         bmpHandle = createBitmap(src, scaling);
     }
 
@@ -29,16 +33,20 @@ class WindowsNativeImage implements NativeImage {
         return bmpHandle;
     }
 
-    public void dispose() {
-        GDI32.INSTANCE.DeleteObject(getBmpHandle());
+    @Override
+    public int getWidth() {
+        return w;
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        dispose();
+    public int getHeight() {
+        return h;
     }
 
+    @Override
+    public void dispose() {
+        GDI32.INSTANCE.DeleteObject(getBmpHandle());
+    }
 
     //=== Util
 

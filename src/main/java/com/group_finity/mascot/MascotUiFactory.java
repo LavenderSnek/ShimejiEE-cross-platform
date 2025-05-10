@@ -7,5 +7,4 @@ public interface MascotUiFactory {
     DebugUi createDebugUiFor(Mascot mascot);
 
     TopLevelMenuRep createContextMenuFor(Mascot mascot);
-
 }

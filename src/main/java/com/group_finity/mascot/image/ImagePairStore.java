@@ -14,6 +14,7 @@ public interface ImagePairStore {
      */
     String load(String imageText, String imageRightText, Point anchor) throws IOException;
 
+
     /**
      * Gets the image pair corresponding to the key.
      *
@@ -29,4 +30,8 @@ public interface ImagePairStore {
         return 1;
     }
 
+    /**
+     * Deletes all images associated with the given store (and disposes native images)
+     */
+    void disposeAll();
 }

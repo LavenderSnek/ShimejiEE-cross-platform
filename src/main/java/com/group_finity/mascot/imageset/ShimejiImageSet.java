@@ -27,4 +27,5 @@ implements ImageSet {
     public SoundStore getSounds() {
         return sounds;
     }
+
 }

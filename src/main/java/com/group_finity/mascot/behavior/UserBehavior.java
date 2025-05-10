@@ -80,9 +80,9 @@ public class UserBehavior implements Behavior {
     public synchronized void mousePressed(TranslucentWindowEvent event) throws CantBeAliveException {
 
         for (Hotspot hotspot : getMascot().getHotspots()) {
-            if (hotspot.contains(getMascot(), event.getRelativeLocation())) {
+            if (hotspot.contains(getMascot(), event.relativeLocation())) {
                 try {
-                    getMascot().setCursorPosition(event.getRelativeLocation());
+                    getMascot().setCursorPosition(event.relativeLocation());
                     getMascot().setBehavior(configuration.buildBehavior(hotspot.getBehaviour()));
                     return; // return early if hotspot found
                 } catch (final BehaviorInstantiationException e) {
