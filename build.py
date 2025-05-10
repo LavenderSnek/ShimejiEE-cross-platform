@@ -7,11 +7,10 @@ from pathlib import Path
 import subprocess
 import shutil
 from typing import Literal
-import platform
 
 BuildConfig = Literal['Debug', 'Release', 'RelWithDebInfo']
 
-def cmake_generate(src_dir: Path, build_dir: Path, lib_output_dir: Path, extra_args: None | list[str] = None):
+def cmake_generate(src_dir: Path, build_dir: Path, lib_output_dir: Path, extra_args = None):
     cmd = [
         'cmake',
         '-G', 'Ninja Multi-Config',
@@ -24,7 +23,7 @@ def cmake_generate(src_dir: Path, build_dir: Path, lib_output_dir: Path, extra_a
     subprocess.run(cmd, check=True)
 
 
-def cmake_build(build_dir: Path, config: BuildConfig, extra_args: None | list[str] = None):
+def cmake_build(build_dir: Path, config: BuildConfig, extra_args = None):
     cmd = ['cmake', '--build', f'{build_dir}', '--config', config]
 
     cmd += [] if extra_args is None else extra_args

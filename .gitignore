@@ -13,6 +13,7 @@ cmake-build-*/
 *.out
 *.log.lck
 tmp/
+.venv/
 
 # Netbeans
 nbproject/

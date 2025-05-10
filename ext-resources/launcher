@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd "${0%/*}" || exit
+
+ARCH=$(uname -m)
+
+if [ "$ARCH" = "arm64" ]; then
+    nohup jre/silicon/Contents/Home/bin/java -jar ShimejiEE.jar > nohup.out &
+else
+    nohup jre/intel/Contents/Home/bin/java -jar ShimejiEE.jar > nohup.out &
+fi
