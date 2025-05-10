@@ -43,10 +43,10 @@ class PanamaEnvironment extends BaseNativeEnvironment {
 
         // get safe bounds
         var sr = getScreen().toRectangle();
-        sr.x += 60;
-        sr.y += 60;
-        sr.width -= 60;
-        sr.height -= 60;
+        sr.x += 100;
+        sr.y += 100;
+        sr.width -= 100;
+        sr.height -= 100;
 
         var ie = getActiveIE().toRectangle();
 
