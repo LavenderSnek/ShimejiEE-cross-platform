@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#import <objc/runtime.h>
 
 @interface CbMenuDelegate : NSObject <NSMenuDelegate> {
     struct MenuCallbacks _callbacks;
@@ -37,15 +38,18 @@
 
 @implementation CbMenuItem
 - (instancetype)initWithTitle:(NSString *)title callback:(MenuCallback)callback {
-    self = [super initWithTitle:title action:@selector(onClickAction) keyEquivalent:@""];
+    self = [super initWithTitle:title action:@selector(onClickAction:) keyEquivalent:@""];
     if (self) {
         _onClick = callback; // Store the callback in the instance variable
+        [self setTarget:self];
     }
     return self;
 }
 
-- (void)onClickAction {
-    _onClick();
+- (void)onClickAction:(id)sender {
+    if (_onClick) {
+        _onClick();
+    }
 }
 @end
 
@@ -58,9 +62,10 @@ struct Menu menu_create(char *title, struct MenuCallbacks callbacks) {
         [Util runOnMainSync:^{
             NSMenu* m = [[NSMenu alloc] initWithTitle:nst];
 
-            id <NSMenuDelegate> delegate = [[[CbMenuDelegate alloc] initWithCallbacks:callbacks] autorelease];
+            id <NSMenuDelegate> delegate = [[CbMenuDelegate alloc] initWithCallbacks:callbacks];
             [m setDelegate:delegate];
 
+            objc_setAssociatedObject(m, "menu_delegate", delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             menu.data = m;
         }];
     }

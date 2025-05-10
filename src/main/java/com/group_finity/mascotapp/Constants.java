@@ -79,7 +79,7 @@ public class Constants {
         if (os.startsWith("windows")) {
             NATIVE_PKG_DEFAULT = "win";
         } else if (os.startsWith("mac") || os.startsWith("darwin")) {
-            NATIVE_PKG_DEFAULT = "macjni";
+            NATIVE_PKG_DEFAULT = "panama";
         } else {
             NATIVE_PKG_DEFAULT = "generic";
         }

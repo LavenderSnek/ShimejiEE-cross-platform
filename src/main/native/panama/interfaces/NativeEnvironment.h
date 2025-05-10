@@ -21,13 +21,9 @@ struct NativePoint {
     int y;
 };
 
-int get_display_count();
-struct NativeRect* get_display_bounds_list();
-struct NativePoint get_cursor_pos();
-
-struct NativeRect get_active_ie_bounds();
+struct NativeRect get_active_ie_bounds(void);
 void move_ie_window(int x, int y);
-void restore_ie();
+void restore_ie(void);
 
 #ifdef __cplusplus
 }

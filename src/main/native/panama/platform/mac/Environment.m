@@ -10,30 +10,6 @@ void update_native_environment() {
 
 }
 
-// macos just uses the java display + cursor so these are placeholder
-
-int get_display_count() {
-    return 1;
-}
-
-struct NativeRect* get_display_bounds_list() {
-    struct NativeRect* rects = (struct NativeRect*)malloc(sizeof(struct NativeRect));
-
-    rects[0].x = 0;
-    rects[0].y = 0;
-    rects[0].w = 1440;
-    rects[0].h = 900;
-
-    return NULL;
-}
-
-struct NativePoint get_cursor_pos() {
-    struct NativePoint pt;
-    pt.x = 0;
-    pt.y = 0;
-    return pt;
-}
-
 //---
 
 static AXUIElementRef copyAXFocusedWindowOf(AXUIElementRef target) {
@@ -133,7 +109,21 @@ struct NativeRect get_active_ie_bounds() {
 }
 
 void move_ie_window(int x, int y) {
+    if (currentFrontmostApp == nil || currentFrontmostApp.terminated || currentFrontmostApp.hidden) {
+        return;
+    }
 
+    AXUIElementRef appRef = AXUIElementCreateApplication(currentFrontmostApp.processIdentifier);
+
+    if (appRef != NULL) {
+        AXUIElementRef windowRef = copyAXFocusedWindowOf(appRef);
+        CFRelease(appRef);
+
+        if (windowRef != NULL) {
+            setAXPositionOf(windowRef, CGPointMake(x, y));
+            CFRelease(windowRef);
+        }
+    }
 }
 
 void restore_ie() {

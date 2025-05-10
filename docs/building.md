@@ -17,11 +17,9 @@ TLDR: run `build.py` using python3 and hope for the best.
 - [Jextract](https://jdk.java.net/jextract/)
   - You don't _need_ to add this to PATH. `build.py` has a `--jextract` argument you can use to specify the binary instead
 - A C/C++ Compiler
-- `glfw` and anything else the native might need (run the build and see what breaks)
-  - TODO: Look into building from source and/or using binaries
 
 ## Run Build
 
 - Make sure JAVA_HOME is set to the JDK 23 Install
 - Run `build.py`
-- use `--no-panama` (and `--no-macjni` on macOS) if you just want to build java code
+- use `--no-panama` if you just want to build java code

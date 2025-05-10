@@ -8,11 +8,6 @@ cmake_minimum_required(VERSION 3.24)
 
 project(ShimejiPanama)
 
-option(SHIMEJI_GLFW_PLATFORM_BUILD "Build glfw backend" ON)
-if (SHIMEJI_GLFW_PLATFORM_BUILD)
-    add_subdirectory(platform/glfw)
-endif ()
-
 # MacOS only
 if (APPLE)
     option(SHIMEJI_MAC_PLATFORM_BUILD "Build macOS (cocoa) backend" ON)
