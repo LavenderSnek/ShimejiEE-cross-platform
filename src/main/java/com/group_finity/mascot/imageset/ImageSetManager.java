@@ -87,7 +87,12 @@ public class ImageSetManager implements ImageSetStore {
         }
 
         var ims = loader.loadAsDependency(name, dependent);
-        return ims == null ? null : loaded.put(name, ims);
+        if (ims == null) {
+            return null;
+        }
+
+        loaded.put(name, ims);
+        return ims;
     }
 
     public Collection<String> getSelected() {

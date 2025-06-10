@@ -72,9 +72,14 @@ public class Breed extends Animate {
         }
 
         void breedOnce() throws VariableException {
-            String childType = base.getMascot().getImageSetDependency(getBornMascot()) != null
+            var childType = getBornMascot() != null
                     ? getBornMascot()
                     : base.getMascot().getImageSet();
+
+            if (base.getMascot().getImageSetDependency(childType) == null) {
+                log.log(Level.WARNING, "Could not load mascot: {0}", childType);
+                return;
+            }
 
             final Mascot newMascot = Mascot.createBlankFrom(base.getMascot());
             newMascot.setImageSet(childType);

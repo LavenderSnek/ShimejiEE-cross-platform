@@ -36,7 +36,14 @@ public class Transform extends Animate {
     }
 
     private void transform() throws VariableException {
-        String childType = getMascot().getImageSetDependency(getTransformMascot()) != null ? getTransformMascot() : getMascot().getImageSet();
+        var childType =  getTransformMascot() != null
+                ? getTransformMascot()
+                : getMascot().getImageSet();
+
+        if (getMascot().getImageSetDependency(childType) == null) {
+            log.log(Level.WARNING, "Could not load mascot: {0}", childType);
+            return;
+        }
 
         try {
             getMascot().setImageSet(childType);
